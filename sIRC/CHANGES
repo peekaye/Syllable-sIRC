@@ -1,0 +1,18 @@
+Version 0.04 (April 6 2021)
+	- codetidy: move class declarations into header file (sIRC.h)
+	- codetidy: move namespace declaration into source file (sIRC32.cpp)
+	- codetidy: remove excess white space
+	- codetidy: remove excess rem comments
+	- codetidy: remove go & gowrite variables
+	- codetidy: remove more unused variables
+	- codetidy: add missing HandleMessage() braces
+	- codetidy: group MainView functions together
+	- codetidy: group MainWindow functions together
+	- codetidy: group MyApplication functions together
+	- codetidy: declare MAXDATASIZE = 50000
+	- codetidy: rename msg1 labels to msg
+	- codetidy: remove excessive print messages to the terminal (aterm)
+	- codetidy: run sindent.sh over the source code
+
+Version 0.03 (Apr 12 2006)
+	- First Release. sIRC.tar
