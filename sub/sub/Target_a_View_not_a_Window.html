@@ -1,0 +1,92 @@
+<html><head>
+
+<title>Syllable User Bible - Target a View not a Window</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Target a View not a Window</div>
+</div>
+<div id="pageStats">
+<table border="0">
+<tbody><tr><td valign="top">Written by:</td><td>Vanders</td></tr>
+<tr><td valign="top">Last Updated:</td><td>Apr 11, 2007</td></tr>
+</tbody></table>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+
+<p>Let's say you're creating a new control that's just a View with a
+bunch of controls on it,a nd you want to re-direct the messages sent by
+the controls on the View to the View itself, rather than the parent
+Window.</p>
+
+<p>You could try doing something like this, <strong>but it will not work</strong>:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> MyNewViewControl::MyNewViewControl<font color="#4444ff">(</font> ... <font color="#4444ff">)</font> : View <font color="#4444ff">(</font> ... <font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    AddChild<font color="#4444ff">(</font> new control1 <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 4</span>    control1-&gt;SetTarget<font color="#4444ff">(</font>this<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span>    AddChild<font color="#4444ff">(</font> new control2 <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 6</span>    control2-&gt;SetTarget<font color="#4444ff">(</font>this<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 7</span>    AddChild<font color="#4444ff">(</font> new control3 <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 8</span>    control3-&gt;SetTarget<font color="#4444ff">(</font>this<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 9</span> <font color="#4444ff">}</font>
+<br><span id="codenumber">10</span> 
+<br><span id="codenumber">11</span> void MyNewViewControl::HandleMessage<font color="#4444ff">(</font> ... <font color="#4444ff">)</font>
+<br><span id="codenumber">12</span> <font color="#4444ff">{</font>
+<br><span id="codenumber">13</span>    ... message handling code, which never gets called ...
+<br><span id="codenumber">14</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p>The quirk here is that, when the View is attached to the Window, the <code>AttachedToWindow()</code> method is called, and the target for all its controls is set to the parent Window.  This overrides the <code>SetTarget()</code> call made earlier in the constructor.</p>
+
+<p>The solution is to override the <code>AttachedToWindow()</code> function in your view, like this:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> void MyNewViewControl::AttachedToWindow<font color="#4444ff">(</font><font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    View::AttachedToWindow<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 4</span>    control1-&gt;SetTarget<font color="#4444ff">(</font>this<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span>    control2-&gt;SetTarget<font color="#4444ff">(</font>this<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 6</span>    control3-&gt;SetTarget<font color="#4444ff">(</font>this<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 7</span> <font color="#4444ff">}</font>
+<br></div>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+</div>
+ </div>
+</div>
+
+<br><br>
+
+</body></html

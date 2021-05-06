@@ -1,0 +1,285 @@
+<html><head>
+
+<title>Syllable User Bible - Localization</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Localization</div>
+</div>
+<div id="pageStats">
+<table border="0">
+<tbody><tr><td valign="top">Last Updated:</td><td>Apr 11, 2007</td></tr>
+</tbody></table>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+
+<h3>Writing translatable software</h3>
+
+<p>This article will show you how to write native Syllable applications
+that are translatable. It will also explain how the translations are
+dealt with by the operating system.</p>
+
+<h3>Catalogues and Strings</h3>
+
+<p>In order to make your programme translatable, you have to separate
+the text strings from your code. You do this by creating a catalogue
+file, that contains labels for your strings as well as the strings
+themselves.
+The catalogue file itself is in a binary format, but there is also a
+human readable representation, a kind of source file, that I will use
+to illustrate the catalogue:</p>
+
+<div id="filetext">
+MSG_MAINWND_MENU_FILE=100	File<br>
+MSG_MAINWND_MENU_FILE_OPEN	_Open<br>
+MSG_MAINWND_MENU_FILE_SAVE	_Save<br>
+MSG_MAINWND_MENU_FILE_EXIT	E_xit<br>
+</div>
+
+<p>This file can be compiled to binary format using CatComp (available
+from Syllable CVS). Please note that it is also possible to create,
+edit and translate binary catalogues, using CatFish.</p>
+
+<p>As you see in the code listing above, this particular catalogue
+contains four strings, identified by four labels. The first line
+contains a number as well. This number tells the catalogue compiler
+that the first string should have ID 100. The second string will be
+101, the third 102, and so on. The numbers are used by the compiled
+code to indentify the strings inside the catalogue file, but in your
+code you'll refer to the strings by their labels. You can leave the
+numbering entirely up to CatComp if you want to, but there are some
+issues with
+numbering that CatComp cannot handle itself. We'll return to this topic
+later on.</p>
+
+<p>The catalogue file is normally named "<application>.catalog", where <application>
+is the name of your application. The catalogue files can be stored
+either in the application directory or inside the application
+executable.</application></application></p>
+
+<h3>Localised Resources</h3>
+
+<p>So, how will my programme find the catalogues?</p>
+<p>There are currently two ways in which resources (ie. files) can be
+stored, in such a way that they can be selectively retrieved based on
+the user's preferred language(s):</p>
+<ul>
+<li>Embedded in the executable.
+</li><li>In the application's directory, in a sub directory named "resources".
+</li></ul>
+<p>Both of these methods rely on a directory hierarchy to convey the
+language information. For instance, the application HelloWorld might
+have been translated to Hungarian, English, Finnish and Czech. One of
+these languages would have to be the "default" language, that is, a
+language that is assumed unless the user chooses another. In this case,
+we'll choose English. Now we wind up with the following files:</p>
+<ul>
+<li>HelloWorld.catalog - English.
+</li><li>cs/HelloWorld.catalog - Czech.
+</li><li>fi/HelloWorld.catalog - Finnish.
+</li><li>hu/HelloWorld.catalog - Hungarian.
+</li></ul>
+<p>The programmer may now choose to embed these files into the
+executable. She or he may also chose to store some of the files in the
+"resources" directory, but in any event, the default catalogue should
+be embedded, or you may be unable to even produce sensible error
+messages if the user has lost some files. Now, for the sake of this
+example, let's say that this programmer embeds all of the files and
+releases the application as a single executable file.</p>
+<p>Now, somebody in Germany finds this file, says "Warum gibt es keine
+deutsche Übersetzung?", which is German for "What day comes after
+thursday?". Ok, just kidding. ;-) Anyway, he wants to translate this
+essential piece of software to his language. What he would do then, is
+that he would extract one of the catalogues from the executable and
+load it into CatFish. Then it's just a matter of translating the
+strings, and saving the file. Now he has the choice of embedding the
+German file, or storing it in the above mentioned directory. He's a
+lazy guy, so he chooses the latter:</p>
+<ul>
+<li>resources/de/HelloWorld.catalog - German.
+</li></ul>
+<p>And voilà, now it speaks German! He can now send the translation back to the programmer, or distribute the file himself.</p>
+<p>Other resources, such as pictures that contain words or certain
+symbols and sounds that contain speech, can be treated in a similar
+fashion. Remember that all symbols aren't international. For instance,
+on the BBC quiz "The Weakest Link", a red checkmark means "correct" and
+a green cross means "wrong". That's the opposite of what those
+symbols mean to a Swede, whose culture and language isn't all that
+different from a Briton's.</p>
+
+<h3>Hello World!</h3>
+
+<p>Let's have a look at the international Hello World programme.</p>
+
+<p><b>Step 1.</b> Create a directory named "resources" where you keep the source code
+to your application.</p>
+
+<p><b>Step 2.</b> Create a text file in that directory, named HelloWorld.cd. This file
+should contain "mnemonics" and default strings. Example:</p>
+
+<div id="filetext">
+MSG_HELLO_WORLD		Hello World!<br>
+MSG_HELLO_AGAIN		Hello Again!
+</div>
+
+<p><b>Step 3.</b> Run "catcomp -c HelloWorld.cd". This will create two new files,
+HelloWorld.h and HelloWorld.catalog.</p>
+
+<p><b>Step 4.</b> Add these includes to your code:</p>
+
+<div id="filetext">
+#include &lt;util/catalog.h&gt;
+#include "resources/HelloWorld.h"
+</div>
+
+<p>And this should go in your Application constructor (eg. MyApp::MyApp()),
+before you create windows or anything that may require anything from a
+catalog:</p>
+
+<div id="filetext">
+SetCatalog( "HelloWorld.catalog" );
+</div>
+
+<p><b>Step 5.</b> Use the MSG_* mnemonics where you would normally type in a text
+string, eg:</p>
+
+<div id="filetext">
+m_pcHello = new Button( Rect(), "m_pcHello", MSG_HELLO_WORLD, ... );
+</div>
+
+<p><b>Step 6.</b> Add HelloWorld.catalog as a resource to your application executable:</p>
+
+<div id="filetext">
+rescopy -r HelloWorld resources/HelloWorld.catalog
+</div>
+
+<h3>Translating the application - Ahoj Sv&#283;t!</h3>
+
+<p>This section shows how to translate an application to Swedish using the original
+HelloWorld.cd file, and the catcomp tool. Please note that you can also use the GUI
+tool CatFish to translate any program without access to the .cd file.</p>
+
+<p><b>Step 1.</b> Create a directory named "sv" in the resources
+directory. The name is the two-letter ISO code for the language. If
+there is no two-letter for your language, use the three-letter code.</p>
+
+<p><b>Step 2.</b> Copy the HelloWorld.cd file to the new directory./p&gt;
+
+</p><p><b>Step 3.</b> Translate the words in the copied HelloWorld.cd file:</p>
+
+<div id="filetext">
+MSG_HELLO_WORLD		Hej Världen!<br>
+MSG_HELLO_AGAIN		Hej Igen!<br>
+</div>
+
+<p><b>Step 4.</b> Compile the catalog:</p>
+
+<div id="terminal">
+catcomp -t HelloWorld.cd
+</div>
+
+<p><b>Step 5.</b> Add the compiled catalog file as a resource, including the path
+component "sv":</p>
+
+<div id="terminal">
+rescopy -r HelloWorld resources/sv/HelloWorld.catalog=sv/HelloWorld.catalog
+</div>
+
+<h3>Hello World 2.0 - Adding new strings</h3>
+
+<p>Now it's time to release the new and upgraded Hello World. The
+release needs a new string. Let's see what issues are involved with
+this, and how the localisation system will deal with them.</p>
+<p>When you add a new string to you application, you will of course
+have to get all the translators to translate it. This will take a lot
+of time, and it may never be translated to all languages. If it's a
+small change, the programme may be useful to international users, even
+if not all strings are translated. Thus, you may want to use an old
+catalogue with a new programme. In order to make this possible, there's
+one important thing to keep in mind:</p>
+<box>When adding a string, you must ensure that the old string ID's aren't changed.</box>
+<p>This simply means that you add new strings to the end of the file.
+However, in big applications, you may want to keep a logical structure
+in the catalogue file. In that case, you'll want to take control over
+the assignment of ID's. Let's say you have a catalogue like this one:</p>
+<div id="filetext">
+MSG_MAINWND_MENU_FILE=100	File<br>
+MSG_MAINWND_MENU_FILE_OPEN	_Open<br>
+MSG_MAINWND_MENU_FILE_SAVE	_Save<br>
+MSG_MAINWND_MENU_FILE_EXIT	E_xit<br>
+MSG_MAINWND_MENU_EDIT=200	Edit<br>
+MSG_MAINWND_MENU_EDIT_CUT	C_ut<br>
+MSG_MAINWND_MENU_FILE_COPY	_Copy<br>
+MSG_MAINWND_MENU_FILE_PASTE	_Pase
+</div>
+<p>Notice the "=200" ID assignment for MSG_MAINWND_MENU_EDIT.</p>
+<p>Now you can add a new item to the "File" menu:</p>
+<div id="filetext">
+MSG_MAINWND_MENU_FILE=100	File<br>
+MSG_MAINWND_MENU_FILE_OPEN	_Open<br>
+MSG_MAINWND_MENU_FILE_SAVE	_Save<br>
+MSG_MAINWND_MENU_FILE_EXIT	E_xit<br>
+MSG_MAINWND_MENU_FILE_PRINT	_Print<br>
+MSG_MAINWND_MENU_EDIT=200	Edit<br>
+MSG_MAINWND_MENU_EDIT_CUT	C_ut<br>
+MSG_MAINWND_MENU_FILE_COPY	_Copy<br>
+MSG_MAINWND_MENU_FILE_PASTE	_Pase
+</div>
+<p>The string Print will now have a unique ID (in this case, 104). Edit stays at ID 200.
+
+</p><h3>The importance of labels</h3>
+
+<p>So, why all these horribly long string labels?! Why not just write</p>
+<div id="filetext">
+FILE=100	File<br>
+OPEN	_Open<br>
+SAVE	_Save<br>
+EXIT	E_xit<br>
+PRINT	_Print<br>
+...
+</div>
+<p>The string itself ("File", "Open", and so on) is often not enough
+for a translator to be able to make a 100 per cent correct translation.
+Just think about the word "Open". It can mean many things. The
+translator needs to know the context.</p>
+<box>Choose string labels that:
+</box><ul>
+<li>Describe the context of the word. If it's in a menu named "File" in the main window, make sure the label says that.</li>
+<li>Are synonymic, if possible. E.g. if the text says "Open", use LOAD in the label.</li>
+</ul>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+</div>
+ </div>
+</div>
+
+<br><br>
+
+</body></html

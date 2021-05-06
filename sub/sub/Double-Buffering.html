@@ -1,0 +1,168 @@
+<html><head>
+
+<title>Syllable User Bible - Double-Buffering</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Double-Buffering</div>
+</div>
+<div id="pageStats">
+<table border="0">
+<tbody><tr><td valign="top">Written by:</td><td>William Hoggarth</td></tr>
+<tr><td valign="top">Last Updated:</td><td>Apr 11, 2007</td></tr>
+<tr><td valign="top">Version:</td><td>0.5.2 to 0.5.3</td></tr>
+</tbody></table>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+<h2>Introduction</h2>
+
+<p>Any application that makes use of graphics will probably want to implement <b>double buffering</b>. This tutorial will explain what double buffering is and how to implement it in an application.</p>
+
+<p>The simplest method for drawing graphics is to use a View directly.
+However, when updating the View it is likely that some kind of
+flickering will occur. This is because for a fraction of a second the
+View is displayed when only part way through the drawing process. The
+way to eliminate this is to do the drawing in an off screen buffer.
+That way all the drawing can be done in the buffer and, once finished,
+can be copied all in one go to the View.
+</p><p>This system is perfectly good if the application has complete
+control over when the screen is redrawn. Unfortunately, this is not the
+case; because Syllable uses a window system the View may need to be
+redrawn due to the user moving windows around. To eliminate this
+problem a second buffer is introduced. Drawing is done in this second
+buffer. When the drawing is complete it is copied to the first buffer.
+This means the first buffer <i>always</i> has a completely drawn image
+in it. Now it doesn't matter when the graphics are being drawn or when
+repaint requests come in, the first buffer can be directly copied to
+the View.
+</p><p>The above explanation is a little hard to follow, hopefully the
+following C++ code will help make it clearer, as well as showing how
+double buffering can be done in practice.
+</p><h2>Coding Double Buffering</h2>
+
+<h3>Custom View class definition</h3>
+
+<p>In the definition of the application's custom View class add the following three data members:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> class CustomView : public View
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    ...
+<br><span id="codenumber"> 4</span> 
+<br><span id="codenumber"> 5</span>    View* m_pcDrawView;
+<br><span id="codenumber"> 6</span>    Bitmap* m_pcDrawBitmap;
+<br><span id="codenumber"> 7</span>    Bitmap* m_pcBufferBitmap;
+<br><span id="codenumber"> 8</span> 
+<br><span id="codenumber"> 9</span>    ...
+<br><span id="codenumber">10</span> <font color="#4444ff">}</font>;
+<br></div>
+
+<ul>
+<li> <b>m_pcDrawView</b> will be used to do off screen drawing.</li>
+<li> <b>m_pcDrawBitmap</b> is the Bitmap where the off screen drawing will occur.</li>
+<li> <b>m_pcBufferBitmap</b> is the Bitmap which will be the buffer used to redraw the View.</li>
+</ul>
+
+<h3>Custom View class constructor</h3>
+
+<p>The three objects defined above need to be created in the constructor like so:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> CustomView::CustomView<font color="#4444ff">(</font>Rect&amp; cRect, ... <font color="#4444ff">)</font> : View <font color="#4444ff">(</font>cRect, ... <font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    ...
+<br><span id="codenumber"> 4</span> 
+<br><span id="codenumber"> 5</span>    m_pcDrawView = new View<font color="#4444ff">(</font>Rect<font color="#4444ff">(</font>0, 0, cRect.Width<font color="#4444ff">(</font><font color="#4444ff">)</font>, cRect.Height<font color="#4444ff">(</font><font color="#4444ff">)</font><font color="#4444ff">)</font>, "DrawView"<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 6</span>    m_pcDrawBitmap = new Bitmap<font color="#4444ff">(</font>cRect.Width<font color="#4444ff">(</font><font color="#4444ff">)</font> + 1, cRect.Height<font color="#4444ff">(</font><font color="#4444ff">)</font> + 1, CS_RGB32, Bitmap::ACCEPT_VIEWS | Bitmap::SHARE_FRAMEBUFFER<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 7</span>    m_pcDrawBitmap-&gt;AddChild<font color="#4444ff">(</font>m_pcDrawView<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 8</span>    m_pcBufferBitmap = new Bitmap<font color="#4444ff">(</font>cRect.Width<font color="#4444ff">(</font><font color="#4444ff">)</font> + 1, cRect.Height<font color="#4444ff">(</font><font color="#4444ff">)</font> + 1, CS_RGB32<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 9</span> 
+<br><span id="codenumber">10</span>    ...
+<br><span id="codenumber">11</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p>Logically, all three items are created the same size as the custom
+View. In the example the Bitmaps use a 32 bit colourspace but you may
+change this if you wish, but both must be the same. <b>m_pcDrawBitmap</b>
+has an extra parameter which sets two flags: ACCEPT_VIEWS and
+SHARE_FRAMEBUFFER. The ACCEPT_VIEWS allows a View to be attached to the
+Bitmap for drawing purposes. SHARE_FRAMEBUFFER allows the application
+to access the Bitmap's raw data, this is the default setting and so
+applies to <b>m_pcBufferBitmap</b> also. <b>m_pcDrawView</b> is attached to <b>m_pcDrawBitmap</b> so that it can be drawn to.</p>
+
+<h3>Custom View Paint method</h3>
+
+<p>This is the easiest part. To repaint any part of the View the appropriate part of the buffer is drawn:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> void CustomView::Paint<font color="#4444ff">(</font>const Rect&amp; cUpdateRect<font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    DrawBitmap<font color="#4444ff">(</font>m_pcBufferBitmap, cUpdateRect, cUpdateRect<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 4</span> <font color="#4444ff">}</font>
+<br></div>
+
+<h3>Drawing</h3>
+
+<p>Drawing to the View is done by first drawing to the second buffer (<b>m_pcDrawBitmap</b>), then when the drawing is complete copying it across to the first buffer (<b>m_pcBufferBitmap</b>). Again this is copied to the View. All subsequent repaints will draw this new image. The code to do this is below:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> void CustomView::SomeMethod<font color="#4444ff">(</font><font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    //drawing code using m_pcDrawView e.g.
+<br><span id="codenumber"> 4</span>    //m_pcDrawView-&gt;DrawLine<font color="#4444ff">(</font>Point<font color="#4444ff">(</font>0, 0<font color="#4444ff">)</font>, Point<font color="#4444ff">(</font>100, 100<font color="#4444ff">)</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span> 
+<br><span id="codenumber"> 6</span>    ...
+<br><span id="codenumber"> 7</span> 
+<br><span id="codenumber"> 8</span>    m_pcDrawView-&gt;Sync<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 9</span>    memcpy<font color="#4444ff">(</font>m_pcBufferBitmap-&gt;LockRaster<font color="#4444ff">(</font><font color="#4444ff">)</font>,
+<br><span id="codenumber">10</span>          m_pcDrawBitmap-&gt;LockRaster<font color="#4444ff">(</font><font color="#4444ff">)</font>,
+<br><span id="codenumber">11</span>          m_pcBufferBitmap-&gt;GetBytesPerRow<font color="#4444ff">(</font><font color="#4444ff">)</font> *
+<br><span id="codenumber">12</span>          <font color="#4444ff">(</font><font color="#4444ff">(</font>int<font color="#4444ff">)</font>m_pcBufferBitmap-&gt;GetBounds.Height<font color="#4444ff">(</font><font color="#4444ff">)</font> + 1<font color="#4444ff">)</font><font color="#4444ff">)</font>;
+<br><span id="codenumber">13</span> 
+<br><span id="codenumber">14</span>    Invalidate<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber">15</span>    Sync<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber">16</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p>All the drawing is done with <b>m_pcDrawView</b> which is attached to <b>m_pcDrawBitmap</b>.
+The call to m_pcDrawView-&gt;Sync() ensures this is complete. The
+Bitmap data is then directly copied across to the buffer Bitmap. The
+call to Invalidate() and Sync() gets the View to update itself from the
+buffer.</p>
+
+<p>Once all of the above has been implemented the View will be double-buffered!</p>
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+</div>
+ </div>
+</div>
+
+<br><br>
+
+</body></html

@@ -1,0 +1,108 @@
+<html><head>
+
+<title>Syllable User Bible - Using the FileRequester</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Using the FileRequester</div>
+</div>
+<div id="pageStats">
+<table border="0">
+<tbody><tr><td valign="top">Written by:</td><td>Brent P. Newhall</td></tr>
+<tr><td valign="top">Last Updated:</td><td>Apr 11, 2007</td></tr>
+<tr><td valign="top">Version:</td><td>0.3.4 to 0.5.3</td></tr>
+</tbody></table>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+
+<p>This tutorial covers the creation and use of a FileRequester, which
+is a standard GUI file chooser window. In fact, here's one now!</p>
+
+<center><img src="../files/FileRequester.png" alt="[A File Requester]" align="middle"></center>
+
+<p>To display a FileRequester, you have to create one. Find the spot in
+your code where you want the FileRequester to be launched, and insert
+something like this:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> FileRequester *fileRequester;
+<br><span id="codenumber"> 2</span> fileRequester = new FileRequester<font color="#4444ff">(</font> FileRequester::LOAD_REQ, 
+<br><span id="codenumber"> 3</span>                                                    new Messenger<font color="#4444ff">(</font> this <font color="#4444ff">)</font>, 
+<br><span id="codenumber"> 4</span>                                                    "/",  /* Starting directory */ 
+<br><span id="codenumber"> 5</span>                                                    FileRequester::NODE_FILE, 
+<br><span id="codenumber"> 6</span>                                                    false, NULL, NULL, false, true, 
+<br><span id="codenumber"> 7</span>                                                    "OK", "Cancel" <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 8</span> fileRequester-&gt;Show<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br></div>
+
+<p>This will create a standard FileRequester.  <code>FileRequester::LOAD_REQ</code> tells the FileRequester to open the window as a Load window (as opposed to a Save window, in which case you'd use <code>FileRequester::SAVE_REQ</code>).  <code>FileRequester::NODE_FILE</code> tells the FileRequester to look for files, as opposed to <code>FileRequester::NODE_DIR</code>
+which would tell the FileRequester to look for directories. You can
+also specify a whole bunch of other options, like whether the
+FileRequester allows multiple selections, but we won't get into that.</p>
+
+<p>The final two strings in that constructor contain the names of the OK and Cancel button, respectively.</p>
+
+<p>You'll also need to include the appropriate include file, at the top of the file that contains the above code:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> #include &lt;gui/filerequester.h&gt;
+<br></div>
+
+<p>This will launch a standard GUI file chooser window. When the user
+has selected a file and clicked the "OK" button, the Window that
+launched the FileRequester will get a new Message with the code set as <code>M_LOAD_REQUESTED</code>.  This Message will contain a string named "file/path"; extract it using <code>FindString()</code>, and that'll contain the full filename (including path) of the file chosen by the user.</p>
+
+<p>Here's an example of the code needed to handle an <code>M_LOAD_REQUESTED</code> message:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> void MyWindow :: HandleMessage<font color="#4444ff">(</font> Message *pcMessage <font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    switch<font color="#4444ff">(</font> pcMessage-&gt;GetCode<font color="#4444ff">(</font><font color="#4444ff">)</font> <font color="#4444ff">)</font>
+<br><span id="codenumber"> 4</span>    <font color="#4444ff">{</font>
+<br><span id="codenumber"> 5</span>       case M_LOAD_REQUESTED:
+<br><span id="codenumber"> 6</span>          <font color="#4444ff">{</font>
+<br><span id="codenumber"> 7</span>             const char *fileNameString;
+<br><span id="codenumber"> 8</span>             pcMessage-&gt;FindString<font color="#4444ff">(</font> "file/path", &amp;fileNameString <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 9</span>             /* Do what you want to with fileNameString */
+<br><span id="codenumber">10</span>          <font color="#4444ff">}</font>
+<br><span id="codenumber">11</span>    <font color="#4444ff">}</font>
+<br><span id="codenumber">12</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p>That's it!</p>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+</div>
+ </div>
+</div>
+
+<br><br>
+
+</body></html

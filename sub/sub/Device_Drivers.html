@@ -1,0 +1,275 @@
+<html><head>
+
+<title>Syllable User Bible - Device Drivers</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Device Drivers</div>
+</div>
+<div id="pageStats">
+<table border="0">
+<tbody><tr><td valign="top">Last Updated:</td><td>Apr 11, 2007</td></tr>
+</tbody></table>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+<div id="sectiontext">Introduction to Various Driver Types</div>
+
+<p>If we speak about writing drivers, we have to divide our attention
+between kernel drivers and appserver drivers. Kernel drivers are used
+for hardware like sound cards, network cards, and file system add-ons.
+Graphics drivers and the high-level part of input drivers are handled
+by the appserver. While kernel drivers are written in C, appserver
+addons are written in C++. Common to both is that they are simple ELF
+modules, which are loaded if necessary. Unlike some UNIX systems,
+Syllable has a defined interface between the drivers and the
+kernel/appserver, which is not changed very often.</p>
+<p>Please note that you have to be careful when writing drivers,
+because a bug in a driver can cause the system to lock up and make it
+completely unusable. If you can, you should have a second Syllable
+installation, which you can use to remove invalid drivers, or <a href="Booting_from_the_Install_CD.html">boot from the install CD</a>.</p>
+
+<div id="sectiontext">Basic description</div>
+
+<p>Device drivers in Syllable are abstracted through the filesystem in
+much the same way as in UNIX. All device drivers export their
+functionality through special files in the /dev/ directory, or in a
+sub-directory of /dev/. Unlike in traditional UNIXes, the /dev/
+directory in Syllable is hierarchial, and is very dynamic in that
+device drivers can add and remove nodes at runtime if, for example, the
+driver controls a removable device that might be added or removed after
+the driver is initialized.</p>
+
+<div id="sectiontext">Driver initialization</div>
+
+<p>A driver is just an ELF binary built in much the same way as a
+regular DLL. When a driver is loaded by the kernel it will search for a
+exported symbol named "device_init" and call it to allow the driver to
+initialize itself. The <code>device_init()</code> function is passed a
+unique device ID that is dynamically assigned to each driver when
+loaded and used by the kernel to identify the driver later.</p>
+
+<p>Just before the driver is unloaded, the kernel will look for a global function named <code>device_uninit()</code> and, if found, it will be called to allow the driver to clean up.</p>
+
+<p><code>device_init()</code> and <code>device_uninit()</code> are the
+only functions that will be called directly by the kernel. For the
+driver to do any usefull work, it must export one or more device-nodes
+through the Syllable Device FS. This is a logical file system that is
+mounted at <span id="filename">/dev/</span> and controll all devices. Each device is present as a magic file located in <span id="filename">/dev/</span> or a sub-directory of <span id="filename">/dev/</span>. Initially <span id="filename">/dev/</span> only contain <span id="filename">/dev/null</span> and <span id="filename">/dev/zero</span> which is controlled by the Syllable VFS itself. All other directory and device-nodes are created by device drivers.</p>
+
+<p>A device driver can create a device-node with <code>create_device_node()</code> and remove it with <code>delete_device_node()</code>.
+When creating a device node, the driver must provide a function pointer
+table with entry points to the driver's functionality. The functions in
+the table will be called by the Syllable VFS to control the device. The
+most important functions are <code>read()</code>, <code>write()</code>, and <code>ioctl()</code>, but there are also functions to open/close the device, as well as functions called by <code>select()</code> to make it possible for one thread to wait for IO on multiple devices.</p>
+
+<p>A typical device driver will create one node in <code>device_init()</code> and delete it again in <code>device_uninit()</code>.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> int g_nMyDeviceNode = -1;
+<br><span id="codenumber"> 2</span> 
+<br><span id="codenumber"> 3</span> status_t device_init<font color="#4444ff">(</font> int nDeviceID <font color="#4444ff">)</font>
+<br><span id="codenumber"> 4</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 5</span>    struct MyDeviceNode sNode;
+<br><span id="codenumber"> 6</span>    g_nMyDeviceNode = create_device_node<font color="#4444ff">(</font> nDeviceID, -1, "misc/mydevice", &amp;g_sOperations, &amp;sNode <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 7</span>    if <font color="#4444ff">(</font> g_nMyDeviceNode &lt; 0 <font color="#4444ff">)</font>
+<br><span id="codenumber"> 8</span>    <font color="#4444ff">{</font>
+<br><span id="codenumber"> 9</span>       return<font color="#4444ff">(</font> g_nMyDeviceNode <font color="#4444ff">)</font>;
+<br><span id="codenumber">10</span>    <font color="#4444ff">}</font>
+<br><span id="codenumber">11</span>    else
+<br><span id="codenumber">12</span>    <font color="#4444ff">{</font>
+<br><span id="codenumber">13</span>       return<font color="#4444ff">(</font> EOK <font color="#4444ff">)</font>;
+<br><span id="codenumber">14</span>    <font color="#4444ff">}</font>
+<br><span id="codenumber">15</span> <font color="#4444ff">}</font>
+<br><span id="codenumber">16</span> 
+<br><span id="codenumber">17</span> status_t device_uninit<font color="#4444ff">(</font> int nDeviceID <font color="#4444ff">)</font>
+<br><span id="codenumber">18</span> <font color="#4444ff">{</font>
+<br><span id="codenumber">19</span>    delete_device_node<font color="#4444ff">(</font> g_nMyDeviceNode <font color="#4444ff">)</font>;
+<br><span id="codenumber">20</span>    return<font color="#4444ff">(</font> EOK <font color="#4444ff">)</font>;
+<br><span id="codenumber">21</span> <font color="#4444ff">}</font>
+<br></div>
+
+<div id="sectiontext">How a driver is located</div>
+
+<p>Since the nodes inside <code>/dev/</code> are created by the device
+drivers themself and not by the kernel, it is not directly obvious what
+driver should be loaded if an application tries to open, for example, <span id="filename">/dev/video/cpia</span>.</p>
+<p>If this is the first time someone attempts to open the CPiA device, the driver is not loaded and <span id="filename">/dev/video/cpia</span> does not exist. If this is the first time anything inside <span id="filename">/dev/</span> is touched, the <span id="filename">/dev/video</span> directory doesn't exist either.</p>
+<p>To make it possible for the kernel to search for drivers in a
+efficient way, the driver binaries are located in a directory tree
+similar to the resulting tree inside <span id="filename">/dev/</span>. For example, the CPiA driver from the above example whould be located in <span id="filename">/system/drivers/dev/video/cpia</span>.</p>
+<p>If the kernel is asked to open <span id="filename">/dev/video/cpia</span>, it would start by opening the <span id="filename">/dev</span> directory, which would cause the <span id="filename">/system/drivers/dev</span>
+directory to be iterated. During the iteration, all drivers found will
+attempt to load and initiate, and all directories will be replicated
+inside <span id="filename">/dev/</span>. Since <span id="filename">/system/drivers/dev</span> contains a directory named <span id="filename">video</span>, this will cause <span id="filename">/dev/video</span> to be created. When <span id="filename">/dev/</span> is successfully opened, it will attempt to open <span id="filename">/dev/video</span>, which should now exist. Opening <span id="filename">/dev/video</span> will cause the <span id="filename">/system/drivers/dev/video</span> directory to be iterated and the <span id="filename">cpia</span> binary to be loaded. The CPiA driver will then probe for a CPiA device and, if found, will create a device node named <span id="filename">/dev/video/cpia</span>, which will then be found and opened when the kernel descends into the <span id="filename">/dev/video</span> directory.</p>
+<p>In the trivial example above, there was direct match between the name of the driver and the name of the device inside <span id="filename">/dev</span>.
+Since one driver might export more than one device, this is not always
+the case. For example, an IDE disk driver would export one device for
+each disk connected to the bus and one device for each partition found
+on those disks. The device-tree exported by an IDE driver might look
+something like this:</p>
+
+<pre>/dev/disk/hda/raw
+/dev/disk/hda/0
+/dev/disk/hda/1
+/dev/disk/hdb/raw
+/dev/disk/hdc/raw
+/dev/disk/hdc/0
+</pre>
+
+<p>In this case, the IDE driver should be located in <span id="filename">/system/drivers/dev/disk/ide</span>. If someone attempts to open the first partition on the master disk connected to the first controller, it would have to open <span id="filename">/dev/disk/ide/hda/0</span>.</p>
+
+<p>When descending the path, the kernel will first create the <span id="filename">/dev/disk</span> and <span id="filename">/dev/disk/ide</span>
+directories. Then it will load the ide-driver which will detect that
+there are 3 disks connected to the two controllers before decoding the
+partition tables and add all the nodes listed above. At this point, <span id="filename">/dev/disk/ide/hda/0 already exists and no other drivers need to be loaded to fulfill the request.</span></p>
+
+<div id="sectiontext">Using busmanagers</div>
+
+<p>To keep the kernel small and avoid recompiling when adding support
+for new hardware technology, the management code for busses like PCI
+and USB lives in kernel modules called busmanagers. These busmanagers
+are loaded by the bootmanager if they are necessary for loading the
+system (e.g., the PCI busmanager is necessary for the IDE driver) or
+later after the root disk is mounted. Using busmanagers from drivers is
+really easy: You just have to ask the kernel to give you access to a
+busmanager with a specific name and the API version you support. If you
+would like to access the PCI bus, maybe to scan for supported devices,
+you would do something like this:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> PCI_bus_s* psBus = get_busmanager<font color="#4444ff">(</font> PCI_BUS_NAME, PCI_BUS_VERSION <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 2</span> if<font color="#4444ff">(</font> psBus == NULL <font color="#4444ff">)</font>
+<br><span id="codenumber"> 3</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 4</span>         // handle error
+<br><span id="codenumber"> 5</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p>You would now have a pointer to a <code>PCI_bus_s</code> structure,
+which is defined in the PCI busmanager header file and contains
+pointers to the busmanager's functions. Access to the USB bus works
+similar, alhough of course the functions in the <code>USB_bus_s</code> structure are different.</p>
+
+<div id="sectiontext">Device management</div>
+
+<p>Although the Syllable kernel driver interface is easy to use, it has
+one problem: Two device drivers may try to access one device. Also, the
+kernel does not know what devices are supported by the drivers and so
+cannot show a list of supported/unsupported hardware to the user. To
+solve these problems, the kernel contains a special device manager. A
+device can be registered by any device driver or busmanager and is
+later claimed by the driver that wants to access the device. All later
+tries by other drivers to claim the device will fail, and so the driver
+knows that it should not use this device. If you write a PCI or USB
+device driver, the busmanager can give you the handles to the devices
+it knows. All you have to do is to call the <code>claim_device()</code> function:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> int nHandle = sMyDevice.nHandle // get Handle from the busmanager
+<br><span id="codenumber"> 2</span> if<font color="#4444ff">(</font> claim_device<font color="#4444ff">(</font> nDeviceID, // device ID of the driver
+<br><span id="codenumber"> 3</span>                   nHandle,
+<br><span id="codenumber"> 4</span>                   "My device", // name for the device
+<br><span id="codenumber"> 5</span>                   DEVICE_AUDIO <font color="#4444ff">)</font> // type of the device
+<br><span id="codenumber"> 6</span>     != 0 <font color="#4444ff">)</font> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 7</span>         // handle error
+<br><span id="codenumber"> 8</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p>Please note that if you support hardware that can be removed while
+the computer is running (such as USB devices), you have to call <code>release_device( nHandle )</code> if the busmanager informs you about the removal.</p>
+<p>If you want to support hardware which is not managed by any busmanager, you can call <code>register_device()</code> yourself:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> int nHandle = register_device<font color="#4444ff">(</font> "My device", // name
+<br><span id="codenumber"> 2</span>                                <font class="stringliteral">"isa"</font> <font color="#4444ff">)</font>; // busname
+<br><span id="codenumber"> 3</span> claim_device<font color="#4444ff">(</font> nDeviceID, nHandle, "My device", DEVICE_AUDIO <font color="#4444ff">)</font>;
+<br></div>
+
+<p>This will not prevent two drivers to access one device, but it will show some nice information to the user.</p>
+
+<div id="sectiontext">Reducing boottime by disabling PCI device drivers</div>
+
+<p>To avoid unnecessary attempts to load drivers, it is possible to
+disable device drivers. This feature is only available for pure PCI
+device drivers. If you did not find any supported hardware, you should
+call <code>disable_device( nDeviceID )</code>. This will disable the device driver until the PCI busmanager detects a hardware change.</p>
+
+<div id="sectiontext">Busmanager Drivers</div>
+
+<a name="sec_bus_1"><h2>Structure of a busmanager</h2></a>
+
+<p>A busmanager is a normal kernel module that is located in the <span id="filename">/system/drivers/bus</span> directory . Unlike the kernel device drivers, it does not export <span id="filename">device_init()</span> and <span id="filename">device_uninit()</span>. Instead, the following functions need to be implemented:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> status_t bus_init<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 2</span> void     bus_uninit<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 3</span> void*    bus_get_hooks<font color="#4444ff">(</font> <font class="keywordtype">int</font> nVersion <font color="#4444ff">)</font>;
+<br></div>
+
+<p>The <code>bus_init()</code> function should initialize the busmanager and do a device scan on the bus if possible. Then <code>register_device()</code>
+should be called for the found devices. If the bus does not support
+hotplugging, the busmanager should also load a previously saved list of
+the attached devices and compare it with the current configuration. If
+it detects any change, the busmanager should call <code>enable_all_devices()</code> so that device drivers which use this busmanager can safely disable themselves. If the initialization of the bus fails, <code>bus_init()</code> should return a value != 0.</p>
+
+<p><code>bus_uninit()</code> is called during shutdown. The busmanager can save a list of the currently attached devices here using the <code>write_config_entry...()</code> functions of the kernel.</p>
+
+<p>Finally, <code>bus_get_hooks()</code> returns a pointer to a private
+structure that will probably contain pointers to the busmanager's
+functions. The busmanager should respect the <code>nVersion</code> flags to keep backward compatibility with older drivers.</p>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+/ide/ should be replaced with /ata/ 
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+It looks as if the article on video drivers was somehow merged with the
+article on "general" device drivers. If this was intentional, the video
+driver part needs a more noticeable headline - I was quite surprised by
+the sudden change of topic until I realized that there were basically
+two articles lumped together :)
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>Hm, I still don't know how I can do something. I would rewrite
+driver for my ethernet controler (eepro) from Linux, but I don't know
+how.
+</div>
+ </div>
+</div>
+
+<br><br>
+
+</body></html

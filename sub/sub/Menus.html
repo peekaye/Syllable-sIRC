@@ -1,0 +1,152 @@
+<html><head>
+
+<title>Syllable User Bible - Syllable Menus</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Syllable Menus</div>
+</div>
+<div id="pageStats">
+<table border="0">
+<tbody><tr><td valign="top">Written by:</td><td>Brent P. Newhall</td></tr>
+<tr><td valign="top">Last Updated:</td><td>Apr 11, 2007</td></tr>
+<tr><td valign="top">Version:</td><td>0.3.4 to 0.5.3</td></tr>
+</tbody></table>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+
+<p>In Syllable, menus are implemented using two widgets: Menus and
+MenuItems. Menus act as containers for MenuItems, while MenuItems
+correspond to final, clickable entries in a menu.</p>
+<p>So, to create a full-scale menu bar, you'll start off by creating
+one Menu that will correspond to the menu bar itself. Then you'll
+create extra Menus, which will correspond to the various drop-down
+menus on the menu bar (e.g., "File", "Help", etc.). Then, you'll add
+MenuItems to each of those Menus.</p>
+<p>Let's create a simple menu bar, with one menu ("App"), which will have one item ("Quit"):</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> #include &lt;gui/menu.h&gt;
+<br><span id="codenumber"> 2</span> 
+<br><span id="codenumber"> 3</span> MainWindow :: MainWindow<font color="#4444ff">(</font> const Rect &amp; r <font color="#4444ff">)</font>
+<br><span id="codenumber"> 4</span>       : Window<font color="#4444ff">(</font> r, "MainWindow", "Window", 0, CURRENT_DESKTOP <font color="#4444ff">)</font>
+<br><span id="codenumber"> 5</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 6</span>    Menu *mainMenuBar, *tempMenu;
+<br><span id="codenumber"> 7</span>    mainMenuBar = new Menu<font color="#4444ff">(</font> Rect<font color="#4444ff">(</font>0,0,0,0<font color="#4444ff">)</font>, "mainMenuBar", ITEMS_IN_ROW <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 8</span>    mainMenuBar-&gt;SetFrame<font color="#4444ff">(</font> Rect<font color="#4444ff">(</font>0, 0, GetBounds<font color="#4444ff">(</font><font color="#4444ff">)</font>.Width<font color="#4444ff">(</font><font color="#4444ff">)</font> + 1, mainMenuBar-&gt;GetPreferredSize<font color="#4444ff">(</font>false<font color="#4444ff">)</font>.y + 1<font color="#4444ff">)</font> <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 9</span> 
+<br></div>
+
+<p>OK, first off we declare a few variables. Then we create a new Rect,
+which is the same size as the window, except that the bottom is cropped
+to 18 pixels. This is the perfect place for a menu bar, don't you think?</p>
+<p>We then create a new Menu object named "mainMenuBar", placed on that
+rectangle's location, specifying that entries on this menu should
+appear in a row. The user won't see the name of the object, so we can
+call it whatever we want.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>    tempMenu = new Menu<font color="#4444ff">(</font> Rect<font color="#4444ff">(</font>0,0,0,0<font color="#4444ff">)</font>, "App", ITEMS_IN_COLUMN <font color="#4444ff">)</font>;
+<br></div>
+
+<p>Next, we create another Menu, called "App". This one corresponds to
+the actual "App" entry that will appear on the menu bar. We pass in a
+dummy rectangle (it will be ignored), name the Menu "App", and specify
+that any entries in the menu should appear in a column.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>    tempMenu-&gt;AddItem<font color="#4444ff">(</font> "Quit", NULL <font color="#4444ff">)</font>;
+<br></div>
+
+<p>Now we add a new MenuItem onto the "App" menu. We could explicitly
+create a MenuItem object, but we can use this convenience function,
+which will create a MenuItem object for us based on the parameters we
+pass in. In this case, we name the new MenuItem "Quit". The other
+parameter is the Message that will get sent when this MenuItem is
+invoked; for this example, we just won't pass any message.</p>
+
+<p>Next, a bit of cleanup:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>    mainMenuBar-&gt;AddItem<font color="#4444ff">(</font> tempMenu <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 2</span>    AddChild<font color="#4444ff">(</font> mainMenuBar <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 3</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p>We add the new "App" menu to the menu bar, and then add the menu bar
+to the window. If we were to run this application, we'd see a menu bar
+with a single entry ("App"), and if we clicked on that App menu, a
+drop-down menu would appear, with "Quit" as its only item.</p>
+
+<p>Now that you've seen a simple example, let's finish up the tutorial with a more robust one:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> #include &lt;gui/menu.h&gt;
+<br><span id="codenumber"> 2</span> 
+<br><span id="codenumber"> 3</span> MainWindow :: MainWindow<font color="#4444ff">(</font> const Rect &amp; r <font color="#4444ff">)</font>
+<br><span id="codenumber"> 4</span>       : Window<font color="#4444ff">(</font> r, "MainWindow", "Window", 0, CURRENT_DESKTOP <font color="#4444ff">)</font>
+<br><span id="codenumber"> 5</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 6</span>    Rect r = GetBounds<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 7</span>    r.bottom = 18;
+<br><span id="codenumber"> 8</span>    Menu *mainMenuBar, *tempMenu;
+<br><span id="codenumber"> 9</span>    mainMenuBar = new Menu<font color="#4444ff">(</font> r, "mainMenuBar", ITEMS_IN_ROW <font color="#4444ff">)</font>;
+<br><span id="codenumber">10</span>    // App menu
+<br><span id="codenumber">11</span>    tempMenu = new Menu<font color="#4444ff">(</font> Rect<font color="#4444ff">(</font>0,0,0,0<font color="#4444ff">)</font>, "App", ITEMS_IN_COLUMN <font color="#4444ff">)</font>;
+<br><span id="codenumber">12</span>    tempMenu-&gt;AddItem<font color="#4444ff">(</font> "Settings", NULL <font color="#4444ff">)</font>;
+<br><span id="codenumber">13</span>    tempMenu-&gt;AddItem<font color="#4444ff">(</font> "About", NULL <font color="#4444ff">)</font>;
+<br><span id="codenumber">14</span>    tempMenu-&gt;AddItem<font color="#4444ff">(</font> "Quit", NULL <font color="#4444ff">)</font>;
+<br><span id="codenumber">15</span>    mainMenuBar-&gt;AddItem<font color="#4444ff">(</font> tempMenu <font color="#4444ff">)</font>;
+<br><span id="codenumber">16</span>    // File menu
+<br><span id="codenumber">17</span>    tempMenu = new Menu<font color="#4444ff">(</font> Rect<font color="#4444ff">(</font>0,0,0,0<font color="#4444ff">)</font>, "File", ITEMS_IN_COLUMN <font color="#4444ff">)</font>;
+<br><span id="codenumber">18</span>    tempMenu-&gt;AddItem<font color="#4444ff">(</font> "New", NULL <font color="#4444ff">)</font>;
+<br><span id="codenumber">19</span>    tempMenu-&gt;AddItem<font color="#4444ff">(</font> "Save", NULL <font color="#4444ff">)</font>;
+<br><span id="codenumber">20</span>    tempMenu-&gt;AddItem<font color="#4444ff">(</font> "Open", NULL <font color="#4444ff">)</font>;
+<br><span id="codenumber">21</span>    tempMenu-&gt;AddItem<font color="#4444ff">(</font> "Close", NULL <font color="#4444ff">)</font>;
+<br><span id="codenumber">22</span>    mainMenuBar-&gt;AddItem<font color="#4444ff">(</font> tempMenu <font color="#4444ff">)</font>;
+<br><span id="codenumber">23</span>    // Help menu
+<br><span id="codenumber">24</span>    tempMenu = new Menu<font color="#4444ff">(</font> Rect<font color="#4444ff">(</font>0,0,0,0<font color="#4444ff">)</font>, "Help", ITEMS_IN_COLUMN <font color="#4444ff">)</font>;
+<br><span id="codenumber">25</span>    tempMenu-&gt;AddItem<font color="#4444ff">(</font> "Contents", NULL <font color="#4444ff">)</font>;
+<br><span id="codenumber">26</span>    tempMenu-&gt;AddItem<font color="#4444ff">(</font> "Homepage", NULL <font color="#4444ff">)</font>;
+<br><span id="codenumber">27</span>    mainMenuBar-&gt;AddItem<font color="#4444ff">(</font> tempMenu <font color="#4444ff">)</font>;
+<br><span id="codenumber">28</span>    AddChild<font color="#4444ff">(</font> mainMenuBar <font color="#4444ff">)</font>;
+<br><span id="codenumber">29</span>    mainMenuBar-&gt;SetTargetForItems<font color="#4444ff">(</font> this <font color="#4444ff">)</font>;
+<br><span id="codenumber">30</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p>I hope this tutorial has helped you to understand how to implement Menus in your own Syllable applications.  Good luck!</p>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+</div>
+ </div>
+</div>
+
+<br><br>
+
+</body></html

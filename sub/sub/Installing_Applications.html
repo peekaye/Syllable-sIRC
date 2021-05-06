@@ -1,0 +1,93 @@
+<html><head>
+
+<title>Syllable User Bible - Installing Applications</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Installing Applications</div>
+</div>
+<div id="pageStats">
+<table border="0">
+<tbody><tr><td valign="top">Written by:</td><td>digitaliz and Brent P. Newhall</td></tr>
+<tr><td valign="top">Last Updated:</td><td>Apr 11, 2007</td></tr>
+<tr><td valign="top">Version:</td><td>0.3.4 to 0.5.3</td></tr>
+</tbody></table>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+
+<p>Syllable applications can be found at <a href="http://kamidake.other-space.com/">Kamidake</a>.</p>
+
+<div id="sectiontext">Installing GUI/Window Applications</div>
+
+<p>Start a Terminal window and untar the application.  For example, if you're installing Juggler:</p>
+
+<div id="terminal">
+$ tar -xvpzf Juggler-1.0.0.tgz
+</div>
+
+<p>That's it!  You're done.</p>
+
+<div id="sectiontext">Installing Command-Line Applications</div>
+
+<p>To install a command-line package such as emacs, start a Terminal window and do the following:</p>
+
+<div id="terminal">
+$ su -l<br>
+<i>(Enter root's password)</i><br>
+$ cd /usr/<br>
+$ tar -xvpzf /syllable/packages/emacs-19.34.bin.tgz<br>
+$ pkgmanager -a /usr/emacs
+</div>
+
+<p>This will make a bunch of symlinks in various subdirectories of <span id="filename">/syllable/autolnk/</span> to make it possible for the system to find executables and other files belonging to the package.</p>
+
+<p>Voila!  You should now have the package installed.</p>
+
+<p id="header">Uninstalling Command-Line Applications</p>
+
+<p>If you want to uninstall the package, you should clean out the symbolic links from <span id="filename">/syllable/autolnk/</span> by running pkgmanager.  For emacs:</p>
+
+<div id="terminal">
+$ pkgmanager -r /usr/emacs
+</div>
+
+<p>Then delete the actual package directory itself.  For emacs:</p>
+
+<div id="terminal">
+$ rm -R /usr/emacs
+</div>
+
+<div id="strongwarning">
+Please note that this way of installing applications should <strong>only
+be used for command-line applications and applications ported to
+Syllable from UNIX and other OS's using a Unix-like file system</strong>.
+Native applications should use the various mechanisms available in
+Syllable for making the application "position independent" so it can be
+installed anywhere on the hard drive. This mechanism includes the
+option of opening files using paths relative to the location of the
+executable files (and to obtain the path to the directory where the
+binary lives) and the ability to embed resources within the executable
+image itself.
+</div>
+
+ </div>
+</div>
+
+<br><br>
+
+</body></html

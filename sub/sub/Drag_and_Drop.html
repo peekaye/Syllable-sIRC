@@ -1,0 +1,127 @@
+<html><head>
+
+<title>Syllable User Bible - Drag and Drop</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Drag and Drop</div>
+</div>
+<div id="pageStats">
+<table border="0">
+<tbody><tr><td valign="top">Written by:</td><td>Andrew Brown</td></tr>
+<tr><td valign="top">Last Updated:</td><td>Apr 11, 2007</td></tr>
+<tr><td valign="top">Version:</td><td>0.3.7 to 0.5.3</td></tr>
+</tbody></table>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+
+<p>We are going to drag <code>os::ListViewStringRow</code>s between two <code>os::ListView</code>s.</p>
+
+<p>First we need to subclass <code>os::ListView</code> and provide the following methods:</p>
+
+<ul>
+<li> <code>virtual void MouseUp(const os::Point&amp; position, uint32 buttons, os::Message* data);</code></li>
+<li> <code>virtual bool DragSelection(const os::Point&amp; point);</code></li>
+</ul>
+
+<p>In <code>DragSelection()</code>, the following code will start the drag and drop:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> bool MyListView::DragSelection<font color="#4444ff">(</font>const os::Point&amp; point<font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    ListViewStringRow* row = static_cast<listviewstringrow *=""><font color="#4444ff">(</font>GetRow<font color="#4444ff">(</font>point<font color="#4444ff">)</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 4</span>    Message* msg = new Message<font color="#4444ff">(</font>YOUR_MESSAGE_CODE<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span>    msg-&gt;AddString<font color="#4444ff">(</font>"label", row.GetString<font color="#4444ff">(</font>1<font color="#4444ff">)</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 6</span> 
+<br><span id="codenumber"> 7</span>    // This call starts the drag and drop
+<br><span id="codenumber"> 8</span>    BeginDrag<font color="#4444ff">(</font>msg, point, Rect<font color="#4444ff">(</font>0,0,row-&gt;GetWidth<font color="#4444ff">(</font>this,1<font color="#4444ff">)</font>,row-&gt;GetHeight<font color="#4444ff">(</font>this<font color="#4444ff">)</font><font color="#4444ff">)</font>, NULL<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 9</span> 
+<br><span id="codenumber">10</span>    // BeginDrag<font color="#4444ff">(</font><font color="#4444ff">)</font> makes a copy of the Message so this is safe
+<br><span id="codenumber">11</span>    delete msg;
+<br><span id="codenumber">12</span> 
+<br><span id="codenumber">13</span>    return true;
+<br><span id="codenumber">14</span> <font color="#4444ff">}</font>
+<br></listviewstringrow></div>
+
+<p>Note: <code>DragSelection()</code> will only be called on columns
+&gt;= 1, i.e. add a dummy column of width 1 and label "" to let your
+actual string be dragged-and-dropped.</p>
+
+<p><code>BeginDrag()</code> takes 3 required arguments:</p>
+
+<ol>
+<li> <code>os::Message *</code> &#8211; The message to deliver to the drop protion of the drag and drop</li>
+<li> <code>os::Point &amp;</code> &#8211; Where the mouse cursor is relative to the dragged object</li>
+<li> <code> os::Rect &amp;</code> &#8211; The bounds of the dragged-and-dropped object
+  <b>or</b>
+  <code>os::Bitmap *</code> &#8211; The image to display while dragging (have yet to try this version)</li>
+<li> <code>os::Handler *</code> <i>(optional)</i> &#8211; Which handler to recieve replies sent by the receiver of the message</li>
+</ol>
+
+<p>Next, we implement <code>MouseUp()</code>:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> void MyListView::MouseUp<font color="#4444ff">(</font>const os::Point&amp; position, uint32 buttons, os::Message* data<font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    if<font color="#4444ff">(</font>data<font color="#4444ff">)</font> // only DnD provide os::Message*
+<br><span id="codenumber"> 4</span>    <font color="#4444ff">{</font>
+<br><span id="codenumber"> 5</span>       if<font color="#4444ff">(</font>data-&gt;GetCode<font color="#4444ff">(</font><font color="#4444ff">)</font> == YOUR_MESSAGE_CODE<font color="#4444ff">)</font>
+<br><span id="codenumber"> 6</span>       <font color="#4444ff">{</font>
+<br><span id="codenumber"> 7</span>          std::string label;
+<br><span id="codenumber"> 8</span>          msg-&gt;FindString<font color="#4444ff">(</font>"label", &amp;label<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 9</span>          ListViewStringRow* row = new ListViewStringRow<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber">10</span>          row-&gt;AppendString<font color="#4444ff">(</font>""<font color="#4444ff">)</font>;
+<br><span id="codenumber">11</span>          row-&gt;AppendString<font color="#4444ff">(</font>label<font color="#4444ff">)</font>;
+<br><span id="codenumber">12</span>          InsertRow<font color="#4444ff">(</font>row<font color="#4444ff">)</font>;
+<br><span id="codenumber">13</span>       <font color="#4444ff">}</font>
+<br><span id="codenumber">14</span>    <font color="#4444ff">}</font>
+<br><span id="codenumber">15</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p>After you have your MyListView built, add 2 of them to a window. Add
+a few entries into one of the MyListViews, compile, and run.</p>
+
+<p>You should be able to select a row, then click and drag that row into the other MyListView.</p>
+
+<p>Quick notes:</p>
+<ul>
+<li> You can actually call <code>BeginDrag</code> anywhere; my suggestion would be in <code>MouseMoved()</code>.</li>
+<li> Another feature of Drag and Drop in Syllable is that <code>MouseMoved()</code> can actually look at the os::Message to try and show the user what might happen.</li>
+<li> I have not tried, but I believe that you are unable to Drag and Drop between applications.  If I'm wrong let me know :)</li>
+</ul>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+</div>
+ </div>
+</div>
+
+<br><br>
+
+</body></html

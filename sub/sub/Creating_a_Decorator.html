@@ -1,0 +1,54 @@
+<html><head>
+
+<title>Syllable User Bible - Creating a Decorator</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Creating a Decorator</div>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+<p>To create a decorator:
+
+</p>
+<ol>
+<li> Get the appserver source</li>
+<li> Dive into system/sys/appserver/appserver/drivers/decorators</li>
+<li> Copy one of the dirs</li>
+<li> Hack away! :-)</li>
+<p></p></ol>
+
+<p></p>
+<p>It's far easier to make a base a new decorator on existing code than
+to write from scratch. It's recommended that you try any decorator
+other than the Beish decorator, which is messy in places.
+</p>
+<p>The Win98 and Amiga decorators are fairly easy to play around with.
+All of the decorators are built with vanilla drawing functions in C++;
+there are no pixmaps involved.
+</p>
+<p>Essentially, you have a function which looks out for collisions (ie
+mouse over corners), a function which return button presses, various
+functions to draw the buttons, and a layout function which orders it
+all. There's more to it than that &#8211; but they're easy to get started
+with.
+</p> </div>
+</div>
+
+<br><br>
+
+</body></html

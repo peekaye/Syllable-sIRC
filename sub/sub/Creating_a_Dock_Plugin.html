@@ -1,0 +1,143 @@
+<html><head>
+
+<title>Syllable User Bible - Creating a Dock Plugin</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Creating a Dock Plugin</div>
+</div>
+<div id="pageStats">
+<table border="0">
+<tbody><tr><td valign="top">Last Updated:</td><td>Apr 11, 2007</td></tr>
+</tbody></table>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+
+<h1>Dock Plugin Tutorial</h1>
+
+<table>
+<tbody><tr><td>Written by:</td><td>William Hoggarth</td></tr>
+<tr><td>Last Updated:</td><td>18th December 2004</td></tr>
+<tr><td>Version:</td><td>0.5.4</td></tr>
+</tbody></table>
+
+<h3>Introduction</h3>
+
+<p>This tutorial explains how to create plugins for the Syllable Dock.
+To create a plugin, you must download dockplugin.h from the Syllable
+CVS repository (or from ViewCVS), in
+syllable/syllable/system/apps/desktop/dock/. This header file is not
+included in the default install.</p>
+
+<p>If you examine dockplugin.h, you will see that there is a DockPlugin
+class from which all plugins inherit, and a typedef for the
+init_dock_plugin() function. This is the function that the dock calls
+to initialise the plugin. Creating a plugin is simply a matter creating
+a DockPlugin class and a corresponding initialisation function.</p>
+
+<p>A plugin is not an ordinary program, but is a module loaded in by
+the dock. This means that the code must be linked with the -shared flag
+indicating that a shared library is to be created. Here's an example
+from the makefile for Meter:</p>
+
+<pre>g++ -o meter.so -shared meter.o -lsyllable
+</pre>
+
+<p>The DockPlugin has three pure virtual methods which must be
+implemented by every plugin in addition to the init_dock_plugin()
+function. This tutorial will consider each in turn.</p>
+
+<h3>GetIdentifier()</h3>
+
+<p>This method is used by the Dock to uniquely identify each plugin.
+This method should return a name and is easy to implement, as seen in
+this example from Meter:</p>
+
+<pre>String Meter::GetIdentifier()
+{
+	return "Meter";
+}
+</pre>
+
+<h3>GetPreferredSize()</h3>
+
+<p>This method is used by the Dock to determine what size the plugin should be.  The method should return the <em>preferred</em>
+size of the plugin; the maximum height and width of the plugin will be
+limited to that of the dock. The size that should be returned depends
+on the nature of the plugin.</p>
+
+<h3>GetPath()</h3>
+
+<p>This method is used by the Dock to determine the path for the plugin
+file. This path is passed to the init_dock_plugin() function, which can
+then pass this information to the plugin constructor. Then, in the
+plugin constructor, the path can be stored in a member variable ready
+to be recalled later. This then makes the implementation of the method
+rather easy, as the code from Meter shows:</p>
+
+<pre>Path Meter::GetPath()
+{
+	return m_cPath;
+}
+</pre>
+
+<h3>init_dock_plugin()</h3>
+
+<p>Once the Dock has loaded the plugin, it calls this function to
+initialise it. The function must create a plugin object and return its
+pointer. This is usually done with the <code>new</code> operator. The
+path of the plugin and a pointer to the Dock are passed to the
+function; normally these are passed straight on to the plugin
+constructor. The path is useful for implementing GetPath() as mentioned
+above. The dock pointer is of the Looper type. This is useful to have
+as it enables the plugin to do things it otherwise could not do, eg set
+up timers. The use of the <b>extern "C"</b> construct to allow C linkage is required, as shown in the example below:</p>
+
+<pre>extern "C"
+{
+	DockPlugin* init_dock_plugin(os::Path cPluginFile, os::Looper* pcDock)
+	{
+		return new Meter(cPluginFile, pcDock);
+	}
+}
+</pre>
+
+<h3>Finishing off</h3>
+
+<p>This tutorial has only covered the bare bones of creating a dock
+plugin. The DockPlugin class is inherited from the standard View class,
+thus a plugin is merely a custom View. The rest of the plugin code must
+be application-specific and depends on the nature of the plugin.</p>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+</div>
+ </div>
+</div>
+
+<br><br>
+
+</body></html

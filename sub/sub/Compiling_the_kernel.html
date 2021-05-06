@@ -1,0 +1,74 @@
+<html><head>
+
+<title>Syllable User Bible - Compiling the kernel</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Compiling the kernel</div>
+</div>
+<div id="pageStats">
+<table border="0">
+<tbody><tr><td valign="top">Last Updated:</td><td>Apr 11, 2007</td></tr>
+</tbody></table>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+<p>Generally you should never need to compile your own kernel unless you wish to hack on the kernel yourself.</p>
+
+<p>First of all you will need to be comfortable using CVS to retrieve the kernel sources.  See <a href="http://syllable.sourceforge.net/modules.php?name=Downloads">the instructions on the Syllable website</a> on how to access the CVS repository.</p>
+
+<p>You will need to retrieve the system headers, the kernel source, and two files which are used by the Makefiles:</p>
+
+<div id="terminal">
+$ cvs -d:pserver:anonymous@cvs.syllable.sourceforge.net:/cvsroot/syllable checkout syllable/system/sys/include<br>
+$ cvs -d:pserver:anonymous@cvs.syllable.sourceforge.net:/cvsroot/syllable checkout syllable/system/sys/kernel/kernel<br>
+$ cvs -d:pserver:anonymous@cvs.syllable.sourceforge.net:/cvsroot/syllable checkout syllable/system/makefile.rules<br>
+$ cvs -d:pserver:anonymous@cvs.syllable.sourceforge.net:/cvsroot/syllable checkout syllable/system/recurse.rules
+</div>
+
+<p>You must set up the basic build enviroment.  Create <span id="filename">/usr/src</span> and move <span id="filename">makefile.rules</span> and <span id="filename">recurse.rules</span> there.  Now edit <span id="filename">/etc/profile</span> and find the enviroment variable ATHEOS_SRC.  Change the line to the following:</p>
+
+<div id="terminal">
+export ATHEOS_SRC=/usr/src<br>
+export ATHEOS_INCLUDE_PATH=/ainc
+</div>
+
+<p>Save the file.  Close and reopen your ATerm so that the new enviroment variables can take effect.</p>
+
+<p>Now copy all the include files to <span id="filename">/ainc</span>:</p>
+
+<div id="terminal">
+cd syllable/system/sys/include<br>
+cp -dpr * /ainc/
+</div>
+
+<p>You are now ready to build the kernel.  Simply change to the directory with the kernel sources and run "make":</p>
+
+<div id="terminal">
+cd syllable/system/sys/kernel/kernel/<br>
+make
+</div>
+
+<p>You can also run "make install" to install the new <span id="filename">kernel.so</span>, <span id="filename">libkernel.so</span>, and <span id="filename">eth_if</span>
+files, but be warned that should you hack on the source and break
+something, you may find that your Syllable installation is unbootable!</p>
+ </div>
+</div>
+
+<br><br>
+
+</body></html

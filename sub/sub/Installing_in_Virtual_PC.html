@@ -1,0 +1,110 @@
+<html><head>
+
+<title>Syllable User Bible - Syllable and Virtual PC</title>
+<link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Syllable and Virtual PC</div>
+</div>
+<div id="pageStats">
+<table border="0">
+<tbody><tr><td valign="top">Written by:</td><td>AgentM</td></tr>
+<tr><td valign="top">Last Updated:</td><td>Apr 11, 2007</td></tr>
+<tr><td valign="top">Version:</td><td>0.5.1 to 0.5.3</td></tr>
+</tbody></table>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+
+<div id="sectiontext">Q: Does Syllable work in Connectix Virtual PC (version 3, 4, or 5)?</div>
+
+<p>Short answer: Not yet.  The install freezes.</p>
+
+<p>In earlier versions of Syllable, A BIOS limitation seems to halt an untar. Everything else functions correctly and as expected.</p>
+
+<p>All versions of VPC have notable differences, particularly between
+3.x and the others. VPC 3 seems to have the best support for generic PC
+compatability (i.e., not just for Microsoft products). If you want to
+get Syllable to boot from GRUB in the MBR, you will probably end up
+using version 3 to make a final distributable image.</p>
+
+<p>The normal diskette boot to install works great. Get the diskette images for use with VPC from:</p>
+
+<p><a href="http://agentm.perlmonk.org/projects/SyllableVPC/SyllableBootDiskettes.sit.hqx">http://agentm.perlmonk.org/projects/SyllableVPC/SyllableBootDiskettes.sit.hqx</a></p>
+
+<p>Here are some quick instructions to get to the point of failure yourself:</p>
+
+<ol>
+<li> Set up the disks. Make a new "Syllable" configuration and create a
+new hard drive image for it using the Disk Assistance ("Windows, Linux,
+Other, etc." &#8211; the drive type is irrelevant since it will be
+overwritten anyway). At least 500 MB is recommended for a developer's
+installation. VPC comes minimally with DOS (or once long ago, Linux),
+so you can download the <code>base-syllable...tar.gz</code> file onto
+the FAT partition you normally use or you'll have to make one of those,
+too. Syllable will be able to access the FAT partition later. In the
+Settings, set Drive 1 to the new and empty Syllable disk and Drive 2 to
+the FAT drive.</li>
+<li> Boot into the Syllable installation shell &#8211; just like the generic
+install. You'll need, of course, the disk images that I mention above.
+You will not need nor use a real disk drive. You can drag the boot
+diskette images onto the disk icon in the toolbar to "insert" it. You
+pretty much just drag on diskette 1, restart the virtual machine, drag
+on diskette 2 when prompted, dragon on diskette 3 when prompted, then
+click <strong>OK</strong>. The shell will fire up in a matter of seconds.</li>
+<li> See shells. If you've followed the instructions, <span id="filename">/dev/disk/bios/hda/0</span> is the empty Syllable hard drive and <span id="filename">/dev/disk/bios/hdb/0</span> is the hard drive with the FAT partition.</li>
+</ol>
+
+<p>Now,</p>
+
+<div id="terminal">
+$ <b>format /dev/disk/bios/hda/0 afs Syllable</b><br>
+$ <b>mkdir dos</b><br>
+$ <b>mkdir afs</b><br>
+$ <b>mount /dev/disk/bios/hda/0 afs</b><br>
+$ <b>mount /dev/disk/bios/hdb/0 dos</b><br>
+$ <b>cd /afs</b><br>
+$ <b>tar -zvxpf /dos/base-syllable...tar.gz</b> (use the <strong>Tab</strong> key for auto-completion)<br>
+</div>
+
+<p>Now here's the trouble! No matter which version of VPC you'll use,
+kernel options you'll try, or memory adjustments you'll make, the tar
+write will block on 6 MB of hard drive writes (according to VPC 5's
+stats). The untar'ing just blocks forever on <span id="filename">syllable/Documentation/gui/classos_1_1NodeMonitor-members.html</span> (let <a href="mailto:agentm@cmu.edu">agentm@cmu.edu</a>
+know if this is not the case for you). The system does not freeze. You
+can resize the shell window, move the mouse, etc., yet nothing
+progresses beyond this. Obviously, this has something to do with a
+limitation in the BIOS hard drive access.</p>
+
+<p>Send mail to the syllable-developer mailing list if you can get
+beyond this. Currently, AgentM's efforts involve stripping down the <span id="filename">base-syllable...tar.gz</span> for essential components to get beyond the evil NodeMonitor documentation.</p>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+write it so that it accesses things in chunks of less than 6mb's then...
+
+William Ashley
+w_ashley@rogers.com
+
+</div>
+ </div>
+</div>
+
+<br><br>
+
+</body></html

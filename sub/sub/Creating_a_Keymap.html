@@ -1,0 +1,172 @@
+<html><head>
+
+<title>Syllable User Bible - Creating a Keymap</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Creating a Keymap</div>
+</div>
+<div id="pageStats">
+<table border="0">
+<tbody><tr><td valign="top">Written by:</td><td>Frederico Afonso</td></tr>
+<tr><td valign="top">Last Updated:</td><td>Apr 11, 2007</td></tr>
+<tr><td valign="top">Version:</td><td>0.3.4 to 0.5.3</td></tr>
+</tbody></table>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+
+<p>I have written this How-To for all of you who wish to make a keymap for Syllable.</p>
+
+<p>I made mine, and although it was not difficult to figure out how the
+keymap file was stuctured, finding the code which represented each
+letter proved to be a little bit more difficult. I hope you find this
+document useful, and that it keeps you from having the trouble I had
+when making my keymap.</p>
+
+<div id="sectiontext">What's a keymap?</div>
+
+<p>A keymap is a file that links each key from your keyboard to a
+symbol that will be displayed on your computer. By having a keymap
+specific for your keyboard, you will be able to see the correct symbols
+when you press a key. Having a wrong keymap can make you to see an "r"
+when you pressed a "W", for example.</p>
+
+<div id="sectiontext">How is a keymap file structured?</div>
+
+<p>A keymap file is structured in columns and rows. It is a simple
+table, and each field represents the character that will appear when a
+key or a combination of keys is pressed. There is also a small section
+that comes before that BIG table that allows the keymap to know which
+keys are <strong>Ctrl</strong>, <strong>Alt</strong>, <strong>Shift</strong>, <strong>Numlock</strong>, etc.  You can take a look at <a href="http://www.other-space.com/sub/American">this American keymap</a> for an example.</p>
+
+<p>Lets look at part of the BIG table:</p>
+
+<table border="1" cellpadding="3">
+ <tbody><tr>
+  <th>Key</th> <th>n</th> <th>s</th>  <th>c</th>  <th>o</th>
+  <th>os</th>  <th>C</th> <th>Cs</th> <th>Co</th> <th>Cos</th>
+ </tr>
+ <tr>
+  <td>0x00</td> <td>0x0</td> <td>0x0</td> <td>0x0</td> <td>0x0</td>
+  <td>0x0</td>  <td>0x0</td> <td>0x0</td> <td>0x0</td> <td>0x0</td>
+ </tr>
+ <tr>
+  <td>0x01</td> <td>0x0</td> <td>0x0</td> <td>0x0</td> <td>0x0</td>
+  <td>0x0</td>  <td>0x0</td> <td>0x0</td> <td>0x0</td> <td>0x0</td>
+ </tr>
+ <tr>
+  <td>0x3c</td> <td>'a'</td> <td>'A'</td> <td>0x0</td> <td>0x0</td>
+  <td>0x0</td>  <td>'A'</td> <td>'a'</td> <td>0x0</td> <td>0x0</td>
+ </tr>
+ <tr>
+  <td>0x4d</td> <td>'x'</td> <td>'X'</td> <td>0x0</td> <td>0x0</td>
+  <td>0x0</td>  <td>'X'</td> <td>'x'</td> <td>0x0</td> <td>0x0</td>
+ </tr>
+</tbody></table>
+
+<div id="sectiontext">What does each column mean?</div>
+
+<p>Each column represents a combination of keys, except for the first one.  The first one (the Key column) represents the <i>id</i> of the key you press.  Each key has its own <i>id</i>, independently of the character that the key represents.  For example: the <strong>Esc</strong> key could have the id of 1, the <strong>F1</strong> key could have id 2, the <strong>Enter</strong> key the id 3, etc.  This also changes from keyboard to keyboard.</p>
+
+<p>Then, shouldn't it show "Key 1", "Key 2" instead of "Key 0x00" and
+"Key 0x01"? Nope! The key numbers are in hexadecimal, and so will be
+most of the symbols in the keymap.</p>
+
+<div id="sectiontext">And how about the other columns?</div>
+
+<p>The second column (the "n" column) represents the characters that
+will be shown when a key is pressed with no combination at all (just
+pressing the <strong>A</strong> key for example).</p>
+
+<p>The third column (the "s" column) represents the combination of the shift key and the key itself (<strong>Shift A</strong> for example).</p>
+
+<p>The fourth column (the "c" column) represents the combination of <strong>Ctrl</strong> and the key itself (<strong>Ctrl A</strong>).</p>
+
+<p>The fifth column (the "o" column) represents the combination of <strong>AltGr</strong> and the key itself.</p>
+
+<p>The sixth column (the "os" column) the combination of <strong>Shift</strong>, <strong>AltGr</strong>, and the key itself.</p>
+
+<p>The seventh column (the "C" column) represents the combination of
+the CapsLock key and the key itself, and so on for the other columns.</p>
+
+<div id="sectiontext">Why do some of the fields have a letter instead of a hexadecimal number?</div>
+
+<p>Some symbols can be represented using a plain letter, but others
+will not appear correctly unless written in hexadecimal. Using letters
+can also give you a better reference when editing the table, since it
+would be much simpler to locate an "X" than a hexadecimal number. You
+can still represent the entire list in hexadecimal, if you want to
+(OUCH!).</p>
+
+<div id="sectiontext">How do I know which hexadecimal number represents which letter or symbol?</div>
+
+<p>You can take a look at <a href="http://www.syllable.org/sub/unicode-utf8-list.txt">this document</a>.
+It is very large, and shows characters for several alphabets: Latin,
+Arabic, Greek, and many more. The codes you should use are in the first
+column. This should suit anyone!</p>
+
+<div id="sectiontext">So that's it? I just have to edit the file?</div>
+
+<p>Well, no. In order for the file to be read by the system, it will
+need to be converted from a text file into a binary file. Save your
+file as <span id="filename">MyLanguage.map</span> and then type the following in a terminal window:</p>
+
+<div id="terminal">
+  $ <b>Keymapconv MyLanguage.map MyLanguage</b>
+</div>
+
+<p>The resulting file should be saved in the <span id="filename">/system/keymaps</span>
+directory, so that the system will find it. You can now open
+Preferences, and change the keyboard map the system is using.
+"MyLanguage" should now appear in the list. Just select it and click
+the <strong>Apply</strong> button.  Done!</p>
+
+<p>Note: you can also convert a binary keymap file into a text file by typing:</p>
+
+<div id="terminal">
+  $ <b>Keymapconv MyLanguage MyLanguage.map</b>
+</div>
+
+<p>If you think something should be changed in this document, please be kind enough to say so.  It can always be improved.</p>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+The link to the sample American keymap is broken.
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+perhaps it points to the keymap file rather than the ascii keymap.map file
+
+<hr>
+Does anybody know how can figure out which code correspond to a physical key on the keyboard?
+
+</div>
+ </div>
+</div>
+
+<br><br>
+
+</body></html

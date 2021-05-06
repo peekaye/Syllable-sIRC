@@ -1,0 +1,131 @@
+<html><head>
+
+<title>Syllable User Bible - Networking</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<!-- <center><table border="0" cellpadding="0" cellspacing="0" width="100%">
+ <tr>
+  <td valign="top" width="65%"> -->
+<div id="mainContainer">
+ <div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> | <a href="http://www.other-space.com/sub/requests.php">Request a Tutorial</a>
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Networking</div>
+</div>
+
+ <div id="mainContent">
+<p id="tutorialname">Connecting to a Network</p>
+<p>To connect to a network, you'll need to know a few things:
+
+</p>
+<ul>
+<li> Your Primary DNS (Domain Name Service) server</li>
+<li> Your Secondary DNS server, if you have one</li>
+<li> Whether your network uses DHCP or not.  If your network does not use DHCP, you will also need to know:</li>
+<ul>
+<li> Your computer's IP address</li>
+<li> The network's netmask (usually 255.255.255.255 or 255.255.255.0)</li>
+<p></p></ul>
+</ul>
+
+<p></p>
+<p>On the desktop, double-click the <strong>Preferences</strong> icon.  The Preferences window is displayed.  Double-click the <strong>Network</strong> icon.  The Network Preferences window is displayed:
+
+</p>
+<p></p><center><img src="../files/network_prefs.png" alt="[IMAGE]"></center>
+
+<p></p>
+<p>In the <strong>Host</strong> field, type a name for this computer.  This field is optional.
+
+</p>
+<p>The <strong>Domain</strong> field is optional; if you want, you can type in the name of the network.
+
+</p>
+<p>In the <strong>Primary DNS</strong> field, type in the name of your primary Domain Name Server.  This is often 192.168.1.1.
+
+</p>
+<p>If your network has a secondary DNS, enter it in the <strong>Secondary DNS</strong> field.
+
+</p>
+<p>If the <strong>Network Interfaces</strong> field is blank, no
+network card was found in your PC, and you won't be able to get online.
+If a network card was found, it will be displayed as eth0. Select it
+and click the <strong>Modify</strong> button.  The <strong>Network Interface</strong> window is displayed.
+
+</p>
+<p>If your network uses DHCP, click the <strong>Use DHCP</strong>
+checkbox, then close the window. DHCP is a service that allows the
+computer to request its IP address and netmask from the DNS server.
+With this checkbox checked, all the information in this window will be
+received from the DNS server, so all the fields are disabled.
+</p>
+<p>If your network does not use DHCP, enter this computer's IP address in the <strong>IP Address</strong> field, and the network's netmask in the <strong>Netmask</strong> field, then close the window.
+
+</p>
+<p>Click the <strong>Apply</strong> button to save the changes you've made to your network preferences.  You should now be connected to the network.
+
+</p>
+
+<p>On the command line, you must edit <em>/atheos/sys/net_init.sh</em> so it looks like:
+</p><pre>#!bin/sh
+ifconfig eth0 inet [your_ip] netmask [your_mask]
+route add net [your_ip] mask 0.0.0.0 gw [your_gateway]
+</pre>
+
+<p></p>
+<p>and <em>/etc/resolv.conf</em> as follows:
+</p><pre>nameserver [primary_dns]
+nameserver [secondary_dns]
+</pre>
+
+<p></p>
+<p>and then just reboot or run <em>/atheos/sys/net_init.sh</em>.
+
+</p>
+
+<p id="tutorialname">Enabling the telnet server</p>
+
+<p>Telnetd runs, but is not available by default on Syllable. To enable
+telnet connections, type the following in a terminal window:</p>
+
+<div id="terminal">
+$ <b>cd /usr/inetutils/etc/</b><br>
+$ <b>jed inetd.conf</b><br>
+</div>
+
+<p>(Replace "jed" with whichever text editor you prefer.  AEdit for example.)</p>
+
+<p>Now scroll on down and you'll see the line:</p>
+
+<div id="filetext">
+#telnet  stream  tcp    nowait  root   /usr/inetutils/libexec/in.telnetd  in.telnetd
+</div>
+
+<p>Delete the `#` character to uncomment the line, so that it looks like this:</p>
+
+<div id="filetext">
+telnet  stream  tcp    nowait  root   /usr/inetutils/libexec/in.telnetd  in.telnetd
+</div>
+
+<p>Save the file, and then enter the following in the terminal window:</p>
+
+<div id="terminal">
+$ <b>kill_all inetd inetd</b><br>
+$ <b>inetd</b>
+</div>
+
+<p>This restarts inetd. Now telnet to Syllable will work, but be
+warned, there will be no username or password requested, and you will
+always log in as root. So, how about installing sshd instead? <code>;-)</code></p>
+
+ </div>
+</div>
+
+</body></html

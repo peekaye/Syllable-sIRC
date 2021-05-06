@@ -1,0 +1,195 @@
+<html><head>
+
+<title>Syllable User Bible - The Messaging System</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">The Messaging System</div>
+</div>
+<div id="pageStats">
+<table border="0">
+<tbody><tr><td valign="top">Written by:</td><td>Brent P. Newhall</td></tr>
+<tr><td valign="top">Last Updated:</td><td>Apr 11, 2007</td></tr>
+<tr><td valign="top">Version:</td><td>0.3.4 to 0.5.3</td></tr>
+</tbody></table>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+
+<p>There are three main classes that are used when dealing with Messages, at least on a basic level:</p>
+
+<ol>
+<li> The Message class itself</li>
+<li> Handlers</li>
+<li> Loopers, which are derived from Handlers</li>
+</ol>
+
+<h3>Messages</h3>
+
+<p>First, you have Messages. A Message is an object that contains
+arbitrary data, where that data is stored as a set of names and values.
+Let's construct a quick Message containing some vital statistics for a
+game character:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> /* Create a new message */
+<br><span id="codenumber"> 2</span> Message *myTestMessage;
+<br><span id="codenumber"> 3</span> myTestMessage = new Message<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 4</span> /* Put data into the new message */
+<br><span id="codenumber"> 5</span> myTestMessage-&gt;AddString<font color="#4444ff">(</font> "characterName", "Harry" <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 6</span> myTestMessage-&gt;AddInt<font color="#4444ff">(</font> "health", 0 <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 7</span> myTestMessage-&gt;AddFloat<font color="#4444ff">(</font> "intelligence", 3.5 <font color="#4444ff">)</font>;
+<br></div>
+
+<p>OK, it's pretty simple to add data to a Message, and of course you
+can pass variable data into a Message just as easily as a static value.
+The Message class comes with a whole slew of <code>Add...()</code> functions for a wide variety of data types; there's also an <code>AddData()</code> function which takes an arbitrary <code>(void *)</code>, so you can put pretty much anything into there.</p>
+
+<p>You'll note in the above example that the Message is pretty
+anonymous. It contains interesting data, but the Message above doesn't
+exactly advertise its exact type. Fortunately, Messages have a special
+"code," called...ummmmm...the "code," which is an integer. The "code"
+can be used to uniquely identify a particular type of message, and is
+usually passed to the constructor, like so:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> /* Define a few message types */
+<br><span id="codenumber"> 2</span> unsigned int CHARACTER_INFO_MESSAGE = 10001;
+<br><span id="codenumber"> 3</span> unsigned int CHARACTER_HURT_MSG = 10002;
+<br><span id="codenumber"> 4</span> unsigned int CHARACTER_KILLED_MSG = 10003;
+<br><span id="codenumber"> 5</span> /* Create a new message */
+<br><span id="codenumber"> 6</span> Message *myTestMessage;
+<br><span id="codenumber"> 7</span> myTestMessage = new Message<font color="#4444ff">(</font> CHARACTER_INFO_MESSAGE <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 8</span> /* Put data into the new message */
+<br><span id="codenumber"> 9</span> ...
+<br></div>
+
+<p>So, you can identify Messages based on that particular constant value that you pass to the constructor.</p>
+
+<p>To get data out of a Message, you use its <code>Find...()</code> methods, like so:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> /* I magically got a message in myMessage.
+<br><span id="codenumber"> 2</span>     Set up the variables */
+<br><span id="codenumber"> 3</span> string charName;
+<br><span id="codenumber"> 4</span> int health;
+<br><span id="codenumber"> 5</span> float intelligence;
+<br><span id="codenumber"> 6</span> /* Get the data out of the message */
+<br><span id="codenumber"> 7</span> if<font color="#4444ff">(</font> myMessage-&gt;GetCode<font color="#4444ff">(</font><font color="#4444ff">)</font> == CHARACTER_INFO_MESSAGE <font color="#4444ff">)</font>
+<br><span id="codenumber"> 8</span>    <font color="#4444ff">{</font>
+<br><span id="codenumber"> 9</span>    myMessage-&gt;FindString<font color="#4444ff">(</font> "characterName", &amp;charName <font color="#4444ff">)</font>;
+<br><span id="codenumber">10</span>    myMessage-&gt;FindInt<font color="#4444ff">(</font> "health", &amp;health <font color="#4444ff">)</font>;
+<br><span id="codenumber">11</span>    myMessage-&gt;FindFloat<font color="#4444ff">(</font> "intelligence", &amp;intelligence <font color="#4444ff">)</font>;
+<br><span id="codenumber">12</span>    ...
+<br></div>
+
+<p>OK, so that's a Message.</p>
+
+<h3>Handlers</h3>
+
+<p>The next obvious question is: How do you move Messages around? Well,
+that's a question that you have to divide into two parts: How do you <i>get</i> messages, and how do you <i>send</i> messages?</p>
+
+<p>To get a message, you use a Handler.  Handlers are great at handling messages; in fact, Handlers have a function called <code>HandleMessage()</code>,
+which is called whenever that Handler receives a Message. You can
+re-implement that function to handle the specific Messages that you're
+interested in. So....</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>    void MyHandler :: HandleMessage<font color="#4444ff">(</font> Message *pcMessage <font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span>       <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>       /* Figure out what kind of Message I got */
+<br><span id="codenumber"> 4</span>       switch<font color="#4444ff">(</font> pcMessage-&gt;GetCode<font color="#4444ff">(</font><font color="#4444ff">)</font> <font color="#4444ff">)</font>
+<br><span id="codenumber"> 5</span>          <font color="#4444ff">{</font>
+<br><span id="codenumber"> 6</span>          case CHARACTER_INFO_MESSAGE:
+<br><span id="codenumber"> 7</span>             /* Got important character information; grab and store */
+<br><span id="codenumber"> 8</span>             myMessage-&gt;FindString<font color="#4444ff">(</font> "characterName", &amp;charName <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 9</span>             myMessage-&gt;FindInt<font color="#4444ff">(</font> "health", &amp;health <font color="#4444ff">)</font>;
+<br><span id="codenumber">10</span>             myMessage-&gt;FindFloat<font color="#4444ff">(</font> "intelligence", &amp;intelligence <font color="#4444ff">)</font>;
+<br><span id="codenumber">11</span>             break;
+<br><span id="codenumber">12</span>          default:
+<br><span id="codenumber">13</span>             /* Let the parent do whatever it does */
+<br><span id="codenumber">14</span>             Handler :: HandleMessage<font color="#4444ff">(</font> pcMessage <font color="#4444ff">)</font>;
+<br><span id="codenumber">15</span>             break;
+<br><span id="codenumber">16</span>          <font color="#4444ff">}</font> /* end switch */
+<br><span id="codenumber">17</span>       <font color="#4444ff">}</font> /* end HandleMessage<font color="#4444ff">(</font><font color="#4444ff">)</font> function */
+<br></div>
+
+<h3>Loopers</h3>
+
+<p>Now that you know how to get messages, you need to know how to send
+them. There are several ways to send a Message to another object,
+actually, but the most straightforward way is by using a Looper.</p>
+
+<p>You can send Messages directly to a Looper, because Loopers come with a handy function called <code>PostMessage()</code>.  Here's how it works:</p>
+
+<p>Let's say you want to create an object named Flynn, and you want to
+send a message to it. Flynn would be a Looper. You'd create a new
+Message, then call Flynn's <code>PostMessage()</code> function, passing the new Message as the argument to <code>PostMessage()</code>, like so:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> Flynn *flynn; // Flynn inherits from Looper
+<br><span id="codenumber"> 2</span> flynn = new Flynn<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 3</span> Message *msg = new Message<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 4</span> msg-&gt;AddInt<font color="#4444ff">(</font> "age", 32 <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span> flynn-&gt;PostMessage<font color="#4444ff">(</font> msg <font color="#4444ff">)</font>;
+<br></div>
+
+<p>Here's what happens next:  A copy of msg is created (meaning that you can delete msg immediately after calling <code>PostMessage()</code>), and then sent asynchronously to the <code>flynn</code> object.  The <code>flynn</code> object's <code>HandleMessage()</code>
+function will be called, and your new message will be passed in as the
+argument. The code for Flynn would have to override the <code>HandleMessage()</code> function and look for your particular message.</p>
+
+<p>Loopers are also useful because they spawn a separate process to do the looping that gives them their name.  They also don't <i>have</i>
+to be the only objects that respond to the Messages you send them; they
+can also send those messages to other Handlers. So, if you want to
+create a thread which sends Messages to various objects in your system,
+it might be a good idea to use the Looper class.</p>
+
+<p>There's a lot more to the world of Messaging that I won't get into
+here. I can tell you that Messengers are useful because they can send
+messages outside of the application they run in, and that MessageQueues
+are rarely used by application developers (they're convenience classes
+having to do with the implementation of messaging), but anything beyond
+that belongs in another tutorial.</p>
+
+<p>Good luck!</p>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+Please write another tutorial with deeper topics! thanks, very good one!
+
+Tanner
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+</div>
+ </div>
+</div>
+
+<br><br>
+
+</body></html

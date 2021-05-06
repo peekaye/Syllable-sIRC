@@ -1,0 +1,111 @@
+<html><head>
+
+<title>Syllable User Bible - User Accounts</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">User Accounts</div>
+</div>
+<div id="pageStats">
+<table border="0">
+<tbody><tr><td valign="top">Written by:</td><td>Brent P. Newhall</td></tr>
+<tr><td valign="top">Last Updated:</td><td>Apr 11, 2007</td></tr>
+<tr><td valign="top">Version:</td><td>0.5.5 to 0.5.3</td></tr>
+</tbody></table>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+
+<p>Syllable is a multi-user operating system, right from the ground up.
+When you first boot in to your Syllable installation, you'll find that
+you have to log in.</p>
+
+<p>Syllable comes with two users pre-installed: root (username "root"
+and password "root") and guest (username "guest" and password "guest").
+Root is the administrator user, and has complete access to the system.
+Guest is a regular user.</p>
+
+<p>To create a new user, log in as root, double-click the Applications
+icon on the desktop, double-click the Users folder, and double-click
+the Users application.</p>
+
+<center><img src="../files/users.jpg" alt="[Users and Passwords]" align="middle" height="426" width="458"></center><br>
+
+<p>Click the <strong>Add User...</strong> button to create a new user.</p>
+
+<p>Let's say you're creating a user named Spike Spiegel.  Enter the following information:</p>
+
+<ul>
+<li> Name: <em>Spike Spiegel</em></li>
+<li> Login: <em>sspiegel</em></li>
+<li> Home: <em>/home/sspiegel</em></li>
+</ul>
+
+<p>Then click the <strong>OK</strong> button.</p>
+
+<p>But you're not done yet! The Users application currently doesn't
+create the user's directory. You have to do that manually. Open a
+Terminal window and type the following:</p>
+
+<div id="terminal">
+$ cd /home<br>
+$ cp -a guest sspiegel<br>
+$ find sspiegel -print | xargs chown sspiegel:users<br>
+</div>
+
+<p>This creates Spike Spiegel's home directory, and makes everything in
+it owned by that user. Now the user is created, and you can log in as
+that user.</p>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+Hi! And what became with others?
+
+<hr>
+Hi
+Who can answer my question?
+
+<hr>
+Tell, and here at you always so?
+
+<hr>
+Hi
+As to me to adjust correctly time on my computer?
+
+<hr>
+Hi! And at whom what animal of a house?
+
+<hr>
+Interesting site, it is well written. Registration not so was pleasant,
+and with scripts of a problem. Let's vary references, or banners.
+Write, how solve
+<hr>Hey guys, my name is Sam, I am a 24 year old player from San
+Michel, USA. I've been reading here for a few months and just want to
+be registered. I play online a lot <a href="http://www.syllable.org/sub/%27http://www.onlinecasino-bonuce.info%27">Casino Bonus room</a>.
+I am very excited, I hit my first Straight Flush a few minutes ago!!!
+in the beginning of my poker hobby.. can somebody tell me about other
+online places I could parctise?
+<hr>
+A great site where one can enjoy the thought of a great mind long departed. Cheers for the good work!
+
+</div>
+ </div>
+</div>
+
+<br><br>
+
+</body></html

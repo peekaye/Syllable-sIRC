@@ -1,0 +1,98 @@
+<html><head>
+
+<title>Syllable User Bible - Introduction</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Introduction</div>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+<p></p><h3>Syllable OS Development Introduction</h3>
+<p></p>
+
+<p>Welcome to Syllable!  We're glad you want to help out.
+
+</p>
+<p>First of all, you'll need some basic development tools.  You have two options:
+
+</p>
+<ul>
+<li> <a href="http://sourceforge.net/project/showfiles.php?group_id=55553&amp;package_id=85852">Download Developer's Delight</a>, which contains all of the most common packages you'll need, though they may not always be the most up-to-date versions. OR</li>
+<li> Download the individual packages you want from <a href="http://sourceforge.net/project/showfiles.php?group_id=55553">the Syllable website</a>.  At a minimum these should be:</li>
+<ul>
+<li> Gcc 3.3 or newer</li>
+<li> Binutils 2.14 or newer</li>
+<li> The latest version of make</li>
+<p></p></ul>
+</ul>
+
+<p></p>
+<p>Read the README included in the Developer Pack for installation
+instructions. Note that, if you're downloading the Developer Pack 4 for
+0.6.0, get a copy of libgcc_s.so.1 and put it in /system/lib/. It'll be
+on the install CD, or in 0.5.7.
+</p>
+<p>Those are the minimum you would need to build C or C++ software, but
+if you also want to build the kernel or deal with third party source
+code, the following packages may also be required:
+</p>
+<ul>
+<li> nasm</li>
+<li> Autoconf</li>
+<li> Perl</li>
+<li> Diffutils</li>
+<li> Ruby (needed to install Builder)</li>
+<p></p></ul>
+
+<p></p>
+<p>You should probably download the latest CVS package in order to access the Syllable CVS repository, including Builder.
+
+</p>
+<p>Retrieve Builder from CVS:
+
+</p>
+<pre>cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/syllable co syllable/system/apps/utils/Builder
+</pre>
+
+<p>Retrieve from CVS two files which are used by some of the system Makefiles:
+
+</p>
+<pre>cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/syllable co syllable/system/makefile.rules
+cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/syllable co syllable/system/recurse.rules
+</pre>
+
+<p>These two files should go in /usr/src  Also modify /etc/profile and
+set the ATHEOS_SRC environment variable to point to /usr/src.  Directly
+below this, add:
+
+</p>
+<pre>export ATHEOS_INCLUDE_PATH=/ainc
+</pre>
+
+<p>Close and re-open your terminal window for these changes to take effect.
+
+</p>
+<p>Some code may require extra libraries.  For example, libogg, libpng, etc. are
+required by some parts of Syllable.  You would need to download and
+install these as needed.
+</p> </div>
+</div>
+
+<br><br>
+
+</body></html

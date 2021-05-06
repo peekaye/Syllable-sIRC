@@ -1,8 +1,8 @@
-#Makefile for sIRC
-COPTS = -c -Wall -fexceptions -ffast-math
+#Makefile for SBasic
+COPTS = -c -fexceptions -ffast-math
 
 APPBIN = /system/bin
-OBJS = sIRC32.o postoffice.o
+OBJS = sIRC32.o postoffice1.o
 
 
 OBJDIR := objs

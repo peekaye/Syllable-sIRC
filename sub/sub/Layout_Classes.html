@@ -1,0 +1,224 @@
+<html><head>
+
+<title>Syllable User Bible - Layout Classes</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Layout Classes</div>
+</div>
+<div id="pageStats">
+<table border="0">
+<tbody><tr><td valign="top">Written by:</td><td>William Hoggarth</td></tr>
+<tr><td valign="top">Last Updated:</td><td>Apr 11, 2007</td></tr>
+<tr><td valign="top">Version:</td><td>0.5.2 to 0.5.3</td></tr>
+</tbody></table>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+
+<h2>Introduction</h2>
+The Syllable API has a set of classes to aid the layout of GUI
+components. One of the most common uses is to lay out the controls in a
+dialog box, but equally these classes can be used within any window or
+view. This tutorial introduces some of these layout classes and
+demonstrates their use with a simple Stop Clock program. The program
+binary and source for StopClock can be downloaded from its <a href="http://kamidake.other-space.com/display_entry.php?id=253">entry at Kamidake</a>.
+
+<p>The main layout classes are as follows:
+
+</p><ul>
+<li><b>LayoutView</b> - A view that is designed to contain LayoutNodes.</li>
+<li><b>LayoutNode</b> - Arranges components either in a row or a
+column, more complex schemes can be devised by using a number of these
+nodes in conjunction.</li>
+<li><b>LayoutSpacer</b> - Spacers can be used to ensure there is adequate spacing between items.</li>
+</ul>
+
+<h2>Layout design</h2>
+
+<p>The diagram below shows how the StopClock GUI is laid out:</p>
+
+<p><img src="../files/layout.png" border="0" height="268" width="461">
+
+</p><p>The VLayoutNode (green area) lays out its children vertically,
+in this case the StringView showing the time and a HLayoutNode. The
+HLayoutNode (blue area) lays out is children horizontally, in this case
+three buttons and two HLayoutSpacers (grey areas). Layout spacers
+simply ensure a minimum gap is kept between items.</p>
+
+<p>As can be seen above, a system for laying out components can be
+derived by identifying horizontal and vertical groups of items. Note
+that a LayoutNode itself can be counted as an item. It may be useful to
+draw out a diagram similar to the above before coding, especially in
+the case of more complicated designs.</p>
+
+<h2>The Code</h2>
+
+<p>This tutorial assumes that you know how to create simple Syllable applications. If you don't you may wish to try the <a href="http://www.other-space.com/sub/?section=Programming&amp;tutorial=Hello_World">Hello World tutorial</a>.
+This section will cover the constructor of the custom LayoutView used
+in StopClock, which is where the laying out of components is done.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> StopClockView::StopClockView<font color="#4444ff">(</font><font color="#4444ff">)</font> : LayoutView<font color="#4444ff">(</font>Rect<font color="#4444ff">(</font>0, 0, 220, 80<font color="#4444ff">)</font>, "StopClockView"<font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    //initialise clock
+<br><span id="codenumber"> 4</span>    m_bStart = false;
+<br><span id="codenumber"> 5</span>    m_nDeciSeconds = 0;
+<br><span id="codenumber"> 6</span>    m_nSeconds = 0;
+<br><span id="codenumber"> 7</span>    m_nMinutes = 0;
+<br><span id="codenumber"> 8</span>    m_nHours = 0;
+<br><span id="codenumber"> 9</span> 
+<br><span id="codenumber">10</span>    ...
+<br></div>
+
+<p>The StopClock program uses a custom LayoutView class to layout out
+it's GUI components. It is also possible to use the standard class and
+use it's public methods from within the Window's constructor.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>    ...
+<br><span id="codenumber"> 2</span> 
+<br><span id="codenumber"> 3</span>    //create the vertical root layout node
+<br><span id="codenumber"> 4</span>    LayoutNode* pcRootNode = new VLayoutNode<font color="#4444ff">(</font>"Root"<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span> 
+<br><span id="codenumber"> 6</span>    ...
+<br></div>
+
+<p>Every LayoutView has a Root Node. In this case, it is a VLayoutNode (see diagram).</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>    ...
+<br><span id="codenumber"> 2</span> 
+<br><span id="codenumber"> 3</span>    //create and add the time
+<br><span id="codenumber"> 4</span>    m_pcTime = new StringView<font color="#4444ff">(</font>Rect<font color="#4444ff">(</font>0, 0, 0, 0<font color="#4444ff">)</font>, "Time", "00:00:00.0", ALIGN_CENTER<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span>    m_pcTime-&gt;GetFont<font color="#4444ff">(</font><font color="#4444ff">)</font>-&gt;SetSize<font color="#4444ff">(</font>20<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 6</span>    pcRootNode-&gt;AddChild<font color="#4444ff">(</font>m_pcTime<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 7</span> 
+<br><span id="codenumber"> 8</span>    ...
+<br></div>
+
+<p>Referring to the diagram, the first item to be added to the Root
+VLayoutNode is the time. The time is displayed using a StringView
+object which is created and then added to the RootNode via the <code>AddChild()</code> method.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>    ...
+<br><span id="codenumber"> 2</span> 
+<br><span id="codenumber"> 3</span>    //create the horizontal layout node containing the buttons
+<br><span id="codenumber"> 4</span>    LayoutNode* pcButtonNode = new HLayoutNode<font color="#4444ff">(</font>"Buttons"<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span> 
+<br><span id="codenumber"> 6</span>    ...
+<br></div>
+
+<p>The next item to add to the Root Node is the HLayoutNode containing the three buttons that control the timer.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>    ...
+<br><span id="codenumber"> 2</span> 
+<br><span id="codenumber"> 3</span>    m_pcStart = new Button<font color="#4444ff">(</font>Rect<font color="#4444ff">(</font>0, 0, 0, 0<font color="#4444ff">)</font>, "Start", "Start", new Message<font color="#4444ff">(</font>MSG_START<font color="#4444ff">)</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 4</span>    m_pcStart-&gt;GetFont<font color="#4444ff">(</font><font color="#4444ff">)</font>-&gt;SetSize<font color="#4444ff">(</font>10<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span>    pcButtonNode-&gt;AddChild<font color="#4444ff">(</font>m_pcStart<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 6</span> 
+<br><span id="codenumber"> 7</span>    pcButtonNode-&gt;AddChild<font color="#4444ff">(</font>new HLayoutSpacer<font color="#4444ff">(</font>"Spacer1", 20, 20<font color="#4444ff">)</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 8</span> 
+<br><span id="codenumber"> 9</span>    m_pcStop = new Button<font color="#4444ff">(</font>Rect<font color="#4444ff">(</font>0, 0, 0, 0<font color="#4444ff">)</font>, "Stop", "Stop", new Message<font color="#4444ff">(</font>MSG_STOP<font color="#4444ff">)</font><font color="#4444ff">)</font>;
+<br><span id="codenumber">10</span>    m_pcStop-&gt;GetFont<font color="#4444ff">(</font><font color="#4444ff">)</font>-&gt;SetSize<font color="#4444ff">(</font>10<font color="#4444ff">)</font>;
+<br><span id="codenumber">11</span>    pcButtonNode-&gt;AddChild<font color="#4444ff">(</font>m_pcStop<font color="#4444ff">)</font>;
+<br><span id="codenumber">12</span> 
+<br><span id="codenumber">13</span>    pcButtonNode-&gt;AddChild<font color="#4444ff">(</font>new HLayoutSpacer<font color="#4444ff">(</font>"Spacer2", 20, 20<font color="#4444ff">)</font><font color="#4444ff">)</font>;
+<br><span id="codenumber">14</span> 
+<br><span id="codenumber">15</span>    m_pcReset = new Button<font color="#4444ff">(</font>Rect<font color="#4444ff">(</font>0, 0, 0, 0<font color="#4444ff">)</font>, "Reset", "Reset", new Message<font color="#4444ff">(</font>MSG_RESET<font color="#4444ff">)</font><font color="#4444ff">)</font>;
+<br><span id="codenumber">16</span>    m_pcReset-&gt;GetFont<font color="#4444ff">(</font><font color="#4444ff">)</font>-&gt;SetSize<font color="#4444ff">(</font>10<font color="#4444ff">)</font>;
+<br><span id="codenumber">17</span>    pcButtonNode-&gt;AddChild<font color="#4444ff">(</font>m_pcReset<font color="#4444ff">)</font>;
+<br><span id="codenumber">18</span> 
+<br><span id="codenumber">19</span>    ...
+<br></div>
+
+<p>The three buttons and two spacers are created and added to the
+HLayoutNode. Note that in VLayoutNodes items are added in top to bottom
+order, and in HLayoutNodes items are added in left to right order. The
+first and second numbers in the HLayoutSpacer constructor specify the
+minimum and maximum width of the spacer. If the maximum width is left
+unspecified the spacer takes up as much space as it can.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>    ...
+<br><span id="codenumber"> 2</span> 
+<br><span id="codenumber"> 3</span>    //make the buttons the same size
+<br><span id="codenumber"> 4</span>    pcButtonNode-&gt;SameWidth<font color="#4444ff">(</font>"Start", "Stop", "Reset", NULL<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span> 
+<br><span id="codenumber"> 6</span>    ...
+<br></div>
+
+<p>The <code>SameWidth()</code> function makes the specified items the
+same width. The items are specified by listing their names, as supplied
+in their constructors, and terminating the list with a NULL value.
+There is of course an equivalent <code>SameHeight()</code> function.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>    ...
+<br><span id="codenumber"> 2</span> 
+<br><span id="codenumber"> 3</span>    //add the row of buttons to the vertical layout node
+<br><span id="codenumber"> 4</span>    pcRootNode-&gt;AddChild<font color="#4444ff">(</font>pcButtonNode<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span> 
+<br><span id="codenumber"> 6</span>    //add it all to this layout view
+<br><span id="codenumber"> 7</span>    SetRoot<font color="#4444ff">(</font>pcRootNode<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 8</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p>To finish off the HLayoutNode is added to the Root Node, the Root Node is then added to the LayoutView.</p>
+
+<h2>Creating your own designs</h2>
+
+<p>StopClock is a fairly trivial example, but it demonstrates basic
+usage of the Layout classes. Examining the source code of programs
+which have a layout similar to that which you require is a useful way
+to learn how things are done. Figuring out how to break down a design
+into various LayoutNodes is the most important part, a diagram is often
+helpful. The Syllable API documentation is a useful source of help.
+Often a bit of tweaking or a rethink is important in getting the layout
+you desire.</p>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+gggggrg
+
+<hr>
+geaaaaaaagregaergaegraeg
+
+<hr>
+gaaaaaaaaaaergaeyeryeryertafdsfasdfasdfasdfasd
+
+</div>
+ </div>
+</div>
+
+<br><br>
+
+</body></html

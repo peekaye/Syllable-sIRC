@@ -1,0 +1,231 @@
+<html><head>
+
+<title>Syllable User Bible - Video Drivers</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Video Drivers</div>
+</div>
+<div id="pageStats">
+<table border="0">
+<tbody><tr><td valign="top">Last Updated:</td><td>Apr 11, 2007</td></tr>
+</tbody></table>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+<div id="sectiontext">Basic description</div>
+
+<p>The Syllable Video Driver API is unique to Syllable, and may at
+first appear to be a little confusing. This guide tries to explain the
+basic structure of a video driver and how the appserver handles video
+drivers and drawing functions.</p>
+
+<div id="sectiontext">The basic driver model</div>
+
+<p>Syllable video drivers are written in C++ and provide methods
+required to open a video framebuffer, accelerated drawing functions and
+video overlay controls.</p>
+<p>The DisplayDriver base class provides unacclerated software
+rendering functions which can draw a line between two points, or blit a
+bitmap into the video framebuffer. The VesaDriver class is a fully
+functional VESA 2.0 display driver, and is the default display driver
+which Syllable will attempt to use if no accelerated display driver can
+be found for the installed hardware. Most video drivers generally
+inherit from the DisplayDriver base class, but some may choose to
+inherit from the VesaDriver class. The VesaDriver provides additional
+VESA mode switching functions which may be used for certain hardware.
+For example, the Mach64 accelerated driver inherits from the VesaDriver
+in order to use the VESA mode switching functions for some chipsets.</p>
+
+<div id="sectiontext">Functionality</div>
+
+<p>Because the DisplayDriver base class provides basic software
+rendering functions, an unaccelerated or partially accelerated video
+driver does not have to offer hardware drawing for all functions. The
+most basic display driver can implement only the required functions to
+detect and initialise the video hardware and allow the appserver to
+handle all of the video drawing in software. A more complete display
+driver can implement hardware accelerated drawing functions by
+overriding the various drawing methods in the DisplayDriver class. This
+generally provides much faster video drawing. A complete video driver
+would also implement the various Video Overlay functions which can be
+used by the Media Framework to display accelerated video playback.</p>
+
+<div id="sectiontext">The basic API</div>
+
+<p>For the purposes of this guide we'll pretend we have some video
+hardware called "Fire", and assume we are writing a display driver for
+that hardware.</p>
+
+<p>The most basic video driver for any hardware must provide the following functions and methods.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> Fire::Fire<font color="#4444ff">(</font> void <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 2</span> Fire::~Fire<font color="#4444ff">(</font> void <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 3</span> bool Fire::IsInitiated<font color="#4444ff">(</font> void <font color="#4444ff">)</font> const;
+<br><span id="codenumber"> 4</span> area_id Fire::Open<font color="#4444ff">(</font> void <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span> int GetFramebufferOffset<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 6</span> int Fire::GetScreenModeCount<font color="#4444ff">(</font> void <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 7</span> bool Fire::GetScreenModeDesc<font color="#4444ff">(</font> int nIndex, os::screen_mode* psMode <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 8</span> int Fire::SetScreenMode<font color="#4444ff">(</font> os::screen_mode sMode <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 9</span> extern "C" DisplayDriver* init_gfx_driver<font color="#4444ff">(</font> void <font color="#4444ff">)</font>;
+<br></div>
+
+<p>The last function in that list is not a C++ method, but instead a C
+style function. This function is called when the display driver is
+initialised. Most display drivers simply implement <code>init_gfx_driver()</code>
+to create a new instance of their display driver class, and then do the
+actual hardware detection and initialisation in the class constructor.
+The constructor and destructor should be fairly obvious. Generally the
+constructor will probe for the video hardware using the usual <code>pci_*</code>
+functions. If supported hardware is found then generally the hardware
+must be initialised, although this is an internal function of the
+display driver and will differ between different video hardware. What
+your initialisation code must do however is create and remap an area
+over the video framebuffer. This area is returned to the appserver
+later in the initialisation process and is the only way in which the
+DisplayDriver base class can access the video framebuffer.</p>
+
+<p>Unless your hardware has a functional VESA BIOS and you have
+inherited from the VesaDriver class, you will have to provide three
+methods which are used by the appserver to set the correct video mode. <code>GetScreenModeCount()</code> should simply return the total number of valid screenmodes. <code>GetScreenModeDesc()</code> returns a structure which  contains the display mode information for the requested display mode. Finally, <code>SetScreenMode()</code> is used to  actually set the desired video mode. <code>GetScreenModeCount()</code> and <code>GetScreenModeDesc()</code> are generally implemented in a  similiar maner in any display driver as they are hardware independent. <code>SetScreenMode()</code> is obviously extremely  hardware dependent, and how you implement this will depend on your hardware.</p>
+
+<p><code>IsInitiated()</code> simply returns true if the driver was able to detect and initialise the video hardware, or false  otherwise.</p>
+
+<p><code>GetFramebufferOffset()</code> should almost always return 0.</p>
+
+<p>The <code>Open()</code> method is the last piece of the puzzle. All
+it does it is return the area ID of the previously created framebuffer
+area. The appserver can then find the video framebuffer base address
+from this area and use it to access the video framebuffer to perform
+drawing functions.</p>
+
+<div id="sectiontext">Accelerated Drawing</div>
+
+<p>An accelerated video driver will also provide methods which override
+the DisplayDriver software rendering methods. There implementation is
+highly hardware dependent, but most drivers implement methods to
+accelerate line drawing, rectangular fills and bitmap blits. The
+methods are:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> bool Fire::DrawLine<font color="#4444ff">(</font>
+SrvBitmap* pcBitMap, const IRect&amp; cClipRect, const IPoint&amp;
+cPnt1, const IPoint&amp; cPnt2, const Color32_s&amp; sColor, int nMode <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 2</span> bool Fire::FillRect<font color="#4444ff">(</font> SrvBitmap* pcBitMap, const IRect&amp; cRect, const Color32_s&amp; sColor <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 3</span> bool Fire::BltBitmap<font color="#4444ff">(</font> SrvBitmap* pcDstBitMap, SrvBitmap* pcSrcBitMap, IRect cSrcRect, IPoint cDstPos, int nMode <font color="#4444ff">)</font>;
+<br></div>
+
+<p>All of these methods receive a pointer to a <code>SrvBitmap</code> class. This class is the internal bitmap which is being  rendered too. <code>SrvBitmap</code>s
+can either be in video memory or user memory, depending on wether they
+are on screen or off screen. Generally, video hardware cannot perform
+rendering operations on memory which is not in its own video
+framebuffer, so you must first check to ensure that the bitmap you are
+rendering to exists in video memory[1]. If not, you should pass the
+rendering request down to your base class, which will use the software
+rendering methods in DisplayDriver.[2]</p>
+
+<p><code>DrawLine()</code> and <code>FillRect()</code> recieve Color
+information, which indicates the color that the line or fill should be
+drawn in. You may need to convert the RGBA information contained in the
+<code>Color32_s</code> class to information which can be  used by your video hardware, but this is hardware dependent.</p>
+
+<p><code>Drawline()</code> and <code>BltBitmap()</code> recieve the <code>nMode</code>
+argument, which indicates the drawing mode which should be used to
+perform the operation. This argument will specify DM_COPY (A stright
+drawing operation), DM_OVER (An alpha transparent "stamp" operation
+where the transparency is either "On" or "Off") or DM_BLEND (An alpha
+blending operation). DM_COPY and DM_OVER operations are the most
+common, and you may choose not to support hardware accelerated DM_OVER
+and DM_BLEND operations. Generally, passing this drawing operations
+down to the DisplayDriver methods does not noticably slow down
+rendering[3].</p>
+
+<div id="sectiontext">Video Overlays</div>
+
+<p>If your hardware supports Video Overlays, you may wish to support
+this functionality in your display driver. There are four methods which
+you must provide in order to support Video Overlays correctly. They are:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> bool Fire::CreateVideoOverlay<font color="#4444ff">(</font> const os::IPoint&amp; cSize, const os::IRect&amp; cDst, os::color_space eFormat, os::Color32_s sColorKey, area_id *pBuffer <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 2</span> bool Fire::RecreateVideoOverlay<font color="#4444ff">(</font> const os::IPoint&amp; cSize, const os::IRect&amp; cDst, os::color_space eFormat, area_id *pBuffer <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 3</span> void Fire::UpdateVideoOverlay<font color="#4444ff">(</font> area_id *pBuffer <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 4</span> void Fire::DeleteVideoOverlay<font color="#4444ff">(</font> area_id *pBuffer <font color="#4444ff">)</font>;
+<br></div>
+
+<p>Unlike the rendering functions, these functions do not have a
+software implementation in the DisplayDriver class. Your video driver
+must either support Video Overlays or the user will not be able to use
+them at all.[4]</p>
+
+<p><code>CreateVideoOverlay()</code> and <code>DeleteVideoOverlay()</code> are self explanitory. <code>UpdateVideoOverlay()</code> is actually not used by  any DisplayDriver at this point, so the implementation of this method will be empty. <code>RecreateVideoOverlay()</code> is  used to resize a current Video Overlay or to change the current color space of a Video Overlay.</p>
+
+<p>All of these functions will be highly hardware&#8211;specific and the
+functionality is complex. You should refer to actual driver
+implementations of these methods if you wish to understand how they
+work.[5]</p>
+
+<div id="sectiontext">Hardware Cursor</div>
+
+<p>Supporting the hardware cursor can be a bit tricky, because you have
+to convert the syllable cursor format into the native hardware format.
+In general these methods need to be implemented:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> void Fire::SetCursorBitmap<font color="#4444ff">(</font> os::mouse_ptr_mode eMode, const os::IPoint&amp; cHotSpot, const void* pRaster, int nWidth, int nHeight <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 2</span> void Fire::MouseOn<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 3</span> void Fire::MouseOff<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 4</span> void Fire::SetMousePos<font color="#4444ff">(</font> os::IPoint cNewPos <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span> bool Fire::IntersectWithMouse<font color="#4444ff">(</font> const os::IRect&amp; cRect <font color="#4444ff">)</font>;
+<br></div>
+
+<p><code>IntersectWithMouse()</code> returns false in all drivers and what <code>MouseOn()</code>, <code>MouseOff()</code>, <code>SetMousePos()</code> do should be obvious. <code>SetCursorBitmap()</code>
+is the most difficult method. At the moment Syllable only supports mono
+cursors, so eMode will be MPTR_MONO ( but you should fall back to
+software cursor if eMode is != MPTR_MONO ). pRaster is a pointer to a
+buffer with 8bit values. The values mean:
+</p><pre>0 - Transparent
+1 - Black
+2 - Black
+3 - White
+</pre>
+
+<p>You should probably look into the drivers that implement hardware cursors to understand everything.[6]</p>
+
+<div id="sectiontext">Footnotes</div>
+
+<p>[1]: SrvBitmap contains a public member called m_bVideoMem which is true if the SrvBitmap exists within the video framebuffer.</p>
+<p>[2]: For example:
+</p><div id="codelisting">
+<span id="codenumber"> 1</span> if<font color="#4444ff">(</font> pcBitMap-&gt;m_bVideoMem == false <font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    return<font color="#4444ff">(</font> DisplayDriver::FillRect<font color="#4444ff">(</font> pcBitMap, cRect, sColor <font color="#4444ff">)</font> <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 4</span> <font color="#4444ff">}</font>
+<br></div>
+<p>[3]: The DisplayDriver class now also supports MMX accelerated
+functions on hardware which supports MMX. This generally provides quite
+fast software rendering on most systems.</p>
+<p>[4]: Users can instead use the slower Bitmap rendering output provided by the Media Framework.</p>
+<p>[5]: At the time of writing, the nVidia, Mach64 and SiS drivers implement Video Overlays.</p>
+<p>[6]: At the time of writing, the Mach64 and SiS drivers implement Hardware Cursors.</p>
+ </div>
+</div>
+
+<br><br>
+
+</body></html

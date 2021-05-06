@@ -1,0 +1,384 @@
+<html><head>
+
+<title>Syllable User Bible - Coding Style Guide</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Coding Style Guide</div>
+</div>
+<div id="pageStats">
+<table border="0">
+<tbody><tr><td valign="top">Written by:</td><td>Rick Caudill</td></tr>
+<tr><td valign="top">Last Updated:</td><td>Apr 11, 2007</td></tr>
+</tbody></table>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+
+<p id="section">Overview</p>
+<div id="sectiontext">
+
+<p>This document explains the coding style that is to be used in
+Syllable. This document should be followed when you submit any new code
+to the core components of the OS, including the kernel, appserver, and
+the various API libraries that is part fo the core distribution.</p>
+
+<strong>Note</strong><div id="note">
+This document is not finished and will change as the code base gets bigger.
+</div>
+<br>
+
+<strong>Note</strong><div id="note">
+Applications that will not be in the base distribution do not have to
+follow these guidelines. However, it is recommended that application
+developers follows these guidelines so that all Syllable code is
+reasonably similar.
+</div>
+
+</div>
+
+<p id="section">Naming</p>
+<div id="sectiontext">
+
+<p>All variable names and struct/class members should be constructed
+from one or more type prefixes, followed by a mixed-case descriptive
+name. The only exception to this rule is counter variables and other
+iterators typically used in loops.</p>
+
+<p>Rationale: The prefixes are a great help when reading others' code
+(and your own a few moments after it is written). It also makes it
+easier to search for members and variables since they tend to be more
+unique.</p>
+
+<p>Counter variables and other iterators don't have to follow the coding standards.  It is legal to write:</p>
+
+<strong>Example</strong><div id="codelisting">
+<span id="codenumber"> 1</span> for <font color="#4444ff">(</font> int i = 0 ; i &lt; 16 ; ++i <font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    DoStuff<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 4</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p>Type prefixes:</p>
+
+<ul>
+<li> <code>n</code> - Any integer type (char, short int, long, long long)</li>
+<li> <code>v</code> - Floating-point types (float, double, long double)</li>
+<li> <code>s</code> - Structures</li>
+<li> <code>c</code> - Classes</li>
+<li> <code>e</code> - Enums</li>
+<li> <code>u</code> - Unions</li>
+<li> <code>h</code> - Handles (variables that are never de-referenced, like file descriptors and message ports)</li>
+<li> <code>f</code> - Functions (only used in conjunction with the <code>p</code> prefix to build function pointers)</li>
+</ul>
+
+<p>Qualifier prefixes:</p>
+
+<ul>
+<li> <code>p</code> - Pointer to</li>
+<li> <code>a</code> - Array of</li>
+</ul>
+
+<p>And, no rule without exceptions:</p>
+
+<ul>
+<li> <code>z</code> - Zero-terminated string</li>
+</ul>
+
+<p>All variables should be prefixed with one of the type prefixesl.  Examples:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> int nSize;
+<br><span id="codenumber"> 2</span> float vScale;
+<br><span id="codenumber"> 3</span> struct stat sStat;
+<br><span id="codenumber"> 4</span> Rect cBoundary;
+<br></div>
+
+<p>If the variable is a pointer or an array, the type prefix should be preixed with a qualifier:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> int anSizes[256];
+<br><span id="codenumber"> 2</span> float* pvScale;
+<br><span id="codenumber"> 3</span> struct stat* psStat;
+<br><span id="codenumber"> 4</span> Rect acRectangles[16];
+<br></div>
+
+<p>In addition to the type prefix(es), all class members should be prefixed with <code>m_</code>
+to distinguish them from local variables in member functions. Structure
+members should normally be prefixed with an abbreviation of the
+structure name. This is not required, but since many structures have
+matching member names, and structure members often match other variable
+names, it is much easier to search for a structure member if it has a
+prefix.</p>
+
+<p>Global variables and module variables should have a <code>g_</code>
+prefix. Global variables should (for obvious reasons) be very rare,
+especially in C++ where there often are better solutions (like
+singleton classes).</p>
+
+<p>Member functions should have mixed-case names, while global function
+names should be all lower-case with words separated by underscores.
+Example:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> int g_my_global_stat_function<font color="#4444ff">(</font> void <font color="#4444ff">)</font>;
+<br></div>
+
+<p>Defines, macros, and enum items should have uppercase-only names with words separated by underscores.  Example:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> #define G_MY_PI_VALUE 3.14159
+<br></div>
+
+</div>
+
+<p id="section">Indentation and Tab Size</p>
+<div id="sectiontext">
+
+<p>We have come up with a good solution for indentation and tab size.
+Indentation of anything is one tab in size, and the tab size is
+whatever you want to make it.</p>
+
+<strong>Example Using Tabs</strong><div id="codelisting">
+<span id="codenumber"> 1</span> if <font color="#4444ff">(</font> a == 2 <font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    printf<font color="#4444ff">(</font> "a is 2\n" <font color="#4444ff">)</font>;  //one tab over
+<br><span id="codenumber"> 4</span> <font color="#4444ff">}</font>
+<br><span id="codenumber"> 5</span> 
+<br><span id="codenumber"> 6</span> if <font color="#4444ff">(</font> a != 2 <font color="#4444ff">)</font>
+<br><span id="codenumber"> 7</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 8</span>    printf<font color="#4444ff">(</font> "a is not 2\n" <font color="#4444ff">)</font>;  //one tab over
+<br><span id="codenumber"> 9</span>    printf<font color="#4444ff">(</font> "it might be 3\n" <font color="#4444ff">)</font>;  // one tab over
+<br><span id="codenumber">10</span> 
+<br><span id="codenumber">11</span>    if <font color="#4444ff">(</font> a != 3 <font color="#4444ff">)</font>
+<br><span id="codenumber">12</span>       printf<font color="#4444ff">(</font> "No, not 3 either\n" <font color="#4444ff">)</font>;  // two tabs over
+<br><span id="codenumber">13</span> <font color="#4444ff">}</font>
+<br></div>
+
+</div>
+
+<p id="section">Brackets</p>
+<div id="sectiontext">
+
+<p>Code blocks start on a new line, and align with the beginning of the
+statement above. The only exception to this rule is a single statement
+when a code block is not required. See the above code listing for
+examples.</p>
+
+</div>
+
+<p id="section">Switch/Case</p>
+<div id="sectiontext">
+
+<p>Brackets should be at the same indentation level as the <code>switch</code> statement.  Each <code>case</code> label should be one indentation level deeper than the <code>switch</code> statement.  The code for each case should be one indentation level deeper than the <code>case</code> label.  Example:</p>
+
+<strong>Example of Switch/Case</strong><div id="codelisting">
+<span id="codenumber"> 1</span> switch<font color="#4444ff">(</font> nAction <font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    case CRASH_AND_BURN:
+<br><span id="codenumber"> 4</span>       SetFire<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span>       Crash<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 6</span>       break;
+<br><span id="codenumber"> 7</span>    default:
+<br><span id="codenumber"> 8</span>       printf<font color="#4444ff">(</font> "Unknown command: %d\n", nAction <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 9</span>       break;
+<br><span id="codenumber">10</span> <font color="#4444ff">}</font>
+<br></div>
+
+</div>
+
+<p id="section">Parentheses</p>
+<div id="sectiontext">
+
+<p>There should NOT be any spaces between a function name and the
+opening parenthesis for the function parameter. For other constructs
+like for/while, switch/case, if, etc., you may include a space if
+desired.</p>
+
+</div>
+
+<p id="section">Comments</p>
+<div id="sectiontext">
+
+<p>Just keep in mind that the API documentation is generated with <a href="http://www.stack.nl/%7Edimitri/doxygen/" title="Doxygen">Doxygen</a>.  Write comments so that as much documentation can be automatically extracted.</p>
+
+</div>
+
+<p id="section">Code Cleanliness</p>
+<div id="sectiontext">
+
+<p>There is no standard for code cleanliness yet, but we suggest you use either <a href="http://www.gnu.org/software/indent/" title="GNU Indent">GNU Indent</a> or <a href="http://astyle.sf.net/">Artistic Style</a> to clean up your code.</p>
+
+</div>
+
+<p id="section">Header Files</p>
+<div id="sectiontext">
+
+<p>The standard format for inclusion safeuards is: __F_(DIRECTORY FILE IS LOCATED IN)_(FILENAME)_H__</p>
+
+<p>Examples:</p>
+
+<ul>
+<li> <code>__F_GUI_WINDOW_H__</code> would be the inclusion guard for <span id="filename">/include/gui/window.h</span></li>
+<li> <code>__F_STORAGE_FSNODE_H__</code> would be the inclusion guard for <span id="filename">/include/storage/fsnode.h</span></li>
+<li> <code>__F_CODEVIEW_CODEVIEW_H__</code> would be the inclusion guard for <span id="filename">/include/codeview/codeview.h</span></li>
+</ul>
+
+</div>
+
+<p id="section">Classes</p>
+<div id="sectiontext">
+
+<p>As Syllable gets bigger and includes more and more classes, changes
+to those classes will inevitably break binary compatibility. Here are a
+couple of guidelines that we have come up with in our Sysiphean fight
+against this inevitability. Hey, every little bit helps.</p>
+
+<p>All classes should have a separate class for private members, like so:</p>
+
+<strong>Example class using Private Member Class</strong><div id="codelisting">
+<span id="codenumber"> 1</span> class Window : public os::Looper
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span> public:
+<br><span id="codenumber"> 4</span>    Window<font color="#4444ff">(</font> const std::string&amp; cTitle <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span>    ~Window<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 6</span> private:
+<br><span id="codenumber"> 7</span>    class Private;
+<br><span id="codenumber"> 8</span>    Private* m;
+<br><span id="codenumber"> 9</span> <font color="#4444ff">}</font>;
+<br><span id="codenumber">10</span> 
+<br><span id="codenumber">11</span> class Window::Private
+<br><span id="codenumber">12</span> <font color="#4444ff">{</font>
+<br><span id="codenumber">13</span> public:
+<br><span id="codenumber">14</span>    Private<font color="#4444ff">(</font><font color="#4444ff">)</font>
+<br><span id="codenumber">15</span>    <font color="#4444ff">{</font>
+<br><span id="codenumber">16</span>       m_cTitle = "";
+<br><span id="codenumber">17</span>    <font color="#4444ff">}</font>
+<br><span id="codenumber">18</span> 
+<br><span id="codenumber">19</span>    std::string m_cTitle; // Holds the title name of the window
+<br><span id="codenumber">20</span> <font color="#4444ff">}</font>;
+<br><span id="codenumber">21</span> 
+<br><span id="codenumber">22</span> Window::Window<font color="#4444ff">(</font> const std::string&amp; cTitle <font color="#4444ff">)</font> : os::Looper<font color="#4444ff">(</font><font color="#4444ff">)</font>
+<br><span id="codenumber">23</span> <font color="#4444ff">{</font>
+<br><span id="codenumber">24</span>    m = new Private;
+<br><span id="codenumber">25</span>    m-&gt;m_cTitle = cTitle;
+<br><span id="codenumber">26</span> <font color="#4444ff">}</font>
+<br><span id="codenumber">27</span> 
+<br><span id="codenumber">28</span> Window::~Window<font color="#4444ff">(</font><font color="#4444ff">)</font>
+<br><span id="codenumber">29</span> <font color="#4444ff">{</font>
+<br><span id="codenumber">30</span>    // Do not forget to delete the private class.
+<br><span id="codenumber">31</span>    delete m;
+<br><span id="codenumber">32</span> <font color="#4444ff">}</font>
+<br></div>
+
+<br>
+
+<strong>Note</strong><div id="note">The above is <strong>not</strong> real code for the <code>Window</code> class.</div>
+
+<p>All classes should have five to ten extra virtual functions, even if
+they are all empty, so that adding a virtual function won't break
+compatibility. When you want to add another virtual method, start with
+the highest reserved method, and rename it to whatever you want. This
+way, you and everyone else will know that you added a new virtual
+method.</p>
+
+<p>Empty virtual functions should be named using the form: <code>__(class abbreviation)_reserved(number)__</code></p>
+
+<p>Example:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> class Window : public os::Looper
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span> public:
+<br><span id="codenumber"> 4</span>    Window<font color="#4444ff">(</font> const std::string&amp; <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span>    virtual void __WI_reserved1__<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 6</span>    virtual void __WI_reserved2__<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 7</span>    virtual void __WI_reserved3__<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 8</span>    virtual void __WI_reserved4__<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 9</span>    virtual void __WI_reserved5__<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber">10</span>    virtual void __WI_reserved6__<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber">11</span>    virtual void __WI_reserved7__<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber">12</span>    virtual void __WI_reserved8__<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber">13</span>    virtual void __WI_reserved9__<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber">14</span>    virtual void __WI_reserved10__<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber">15</span> <font color="#4444ff">}</font>;
+<br></div>
+
+</div>
+
+<p id="section">Other/Miscellaneous Stuff</p>
+<div id="sectiontext">
+
+<p>Using the keyword <strong><code>const</code></strong> is taught early on in C++ programming classes.  It is important because it tells the programmer that the <code>const</code>
+data cannot change. Declaring something constant is usually up to the
+programmer, but the rule of thumb is that if the data shouldn't be
+changed, then it should be declared constant. Examples:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> const float PI = 3.14159
+<br><span id="codenumber"> 2</span> void SetTitle<font color="#4444ff">(</font> const std::string&amp; cTitle <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 3</span> bool GetSelected<font color="#4444ff">(</font><font color="#4444ff">)</font> const;
+<br></div>
+
+<p>GCC 3.0 came with a more strict and more standard-like <strong>standard namespace</strong>, so here are a couple of rules that you <strong>have</strong> to follow.</p>
+
+<p>You can declare the standard namespace completely:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> using namespace std;
+<br></div>
+
+<p>You can declare the parts of the namespace you need:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> using std::cin;
+<br><span id="codenumber"> 2</span> using std::cout;
+<br><span id="codenumber"> 3</span> using std::string;
+<br><span id="codenumber"> 4</span> using std::endl;
+<br></div>
+
+<p>You can put <code>std::</code> in front of anything you need:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> std::cout &lt;&lt; "Hello World" &lt;&lt; std::endl;
+<br><span id="codenumber"> 2</span> std::string cString = "Hello World";
+<br><span id="codenumber"> 3</span> std::vector &lt; std::string &gt; tList;
+<br></div>
+
+</div>
+
+<p id="section">Questions/Comments/Problems</p>
+<div id="sectiontext">
+
+<p>All questions, comments, or problems with this document can be e-mailed to the <a href="mailto:syllable-developer@lists.sourceforge.net" title="Syllable-Developer Mailing List">Syllable Development List</a>.</p>
+
+</div>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+What's the type prefix for bool variables? b?
+
+<hr>
+elias karam elhasrouni
+
+</div>
+ </div>
+</div>
+
+<br><br>
+
+</body></html

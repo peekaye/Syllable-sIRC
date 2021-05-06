@@ -1,0 +1,64 @@
+<html><head>
+
+<title>Syllable User Bible - Syllable and Virtual PC</title>
+<link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Installing in QEMU</div>
+</div>
+<div id="pageStats">
+<table border="0">
+<tbody><tr><td valign="top">Written by:</td><td>AgentM</td></tr>
+<tr><td valign="top">Last Updated:</td><td>Apr 11, 2007</td></tr>
+<tr><td valign="top">Version:</td><td>0.5.1 to 0.5.3</td></tr>
+</tbody></table>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+
+<p>Installing in <a href="http://fabrice.bellard.free.fr/qemu/">qemu</a> is exactly as installing from a basic or premium cd, with one exception: you MUST turn off ata dma. To do that:
+
+</p>
+<ol>
+<li> At the grub menu, press the <strong>E</strong> key.</li>
+<li> Press the down arrow once until the kernel=... line is highlighted.</li>
+<li> Press the <strong>E</strong> key again.</li>
+<li> Type: enable_ata_dma=false</li>
+<li> Press the <strong>Enter</strong> key.</li>
+<li> Press the <strong>Esc</strong> key.</li>
+<li> Press the <strong>B</strong> key to start the boot process.</li>
+<p></ol>
+
+</p>
+<p>When the installer asks if you want to view, edit, or install the menu.lst, edit it and disable DMA.
+</p> </div>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+write it so that it accesses things in chunks of less than 6mb's then...
+
+William Ashley
+w_ashley@rogers.com
+
+</div>
+ </div>
+</div>
+
+<br><br>
+
+</body></html

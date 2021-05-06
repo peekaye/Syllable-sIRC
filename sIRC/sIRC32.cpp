@@ -1,54 +1,41 @@
 
-/*****************************************************************************/
-/*                                                                           */
-/*  This program is free software; you can redistribute it and/or modify     */
-/*  it under the terms of the GNU General Public License as published by     */
-/*  the Free Software Foundation; either version 2 of the License, or        */
-/*  (at your option) any later version.                                      */
-/*                                                                           */
-/*  This program is distributed in the hope that it will be useful,          */
-/*  but WITHOUT ANY WARRANTY; without even the implied warranty of           */
-/*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            */
-/*  GNU General Public License for more details.                             */
-/*                                                                           */
-/*  You should have received a copy of the GNU General Public License        */
-/*  along with this program; if not, write to the Free Software              */
-/*  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA  */
-/*                                                                           */
-/*****************************************************************************/
-// 	sIRC 0.03 - Syllable Internet Relay Chat Client 
-//	Copyright (C) 2006 James Coxon jac208@cam.ac.uk
-//	Yeah its GPL :-D
-//	Based on various tutorials from Syllable User Bible
-//	Thanks to: Spikeb, Brent, Jonas, Vanders, Rick
+/**
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ */
 
 #include "sIRC.h"
-#include "postoffice1.h"
-
-using namespace os;
-using namespace std;
-
-//----------------------------------------------------------------------------------
+#include "postoffice.h"
+#include "messages.h"
 
 //User Variables
-string host = "chat.freenode.net";
-string channel = "#syllable";	
-string nick = "sIRC_";	
-string user = "sIRC_";
-string password = "";
+std::string HOST = "chat.freenode.net";
+std::string CHAN = "#syllable";
+std::string NICK = "sIRC_";
+std::string USER = "sIRC_";
+std::string PASS = "password";
+std::string NAME = "Syllable User";
 
 //Common Strings/Variables
-int sockfd, erase, messagetosend;
-char buf[MAXDATASIZE];
-string sendmessage;
+std::string sendmessage = "";
 
 //----------------------------------------------------------------------------------
 
-CommThread::CommThread( const Messenger& cTarget ):Looper( "comm_worker" )
+CommThread::CommThread( const os::Messenger &cTarget ):os::Looper( "comm_worker" )
 {
 	m_cTarget = cTarget;
 	m_eState = S_STOP;
-
 	AddMailbox( "Commthread" );
 }
 
@@ -57,20 +44,33 @@ bool CommThread::OkToQuit()
 	return true;
 }
 
-void CommThread::HandleMessage( Message * pcMessage )
+void CommThread::HandleMessage( os::Message *pcMessage )
 {
-	switch( pcMessage->GetCode() )
+	switch ( pcMessage->GetCode() )
 	{
 		case MSG_TOLOOPER_START:
 		{
-			SendReceiveLoop();
+			if( m_eState == S_STOP )
+			{
+				m_eState = S_START;
+				Connect();
+			}
+			break;
+		}
+		case MSG_TOLOOPER_STOP:
+		{
+			if( m_eState == S_START )
+			{
+				Disconnect();
+				m_eState = S_STOP;
+			}
 			break;
 		}
 		case MSG_TOLOOPER_SEND:
 		{
 			SendMessage();
 			break;
-		}				
+		}
 		case MSG_TOLOOPER_RECEIVE:
 		{
 			ReceiveMessage();
@@ -78,21 +78,23 @@ void CommThread::HandleMessage( Message * pcMessage )
 		}
 		default:
 		{
-			Looper::HandleMessage( pcMessage );
+			os::Looper::HandleMessage( pcMessage );
 			break;
 		}
 	}
 }
 
-void CommThread::SendReceiveLoop()
+void CommThread::SendReceiveLoop( bool messagetosend )
 {
-	if ( messagetosend == 1 )
+	if( messagetosend == true )
 	{
-		SendMessage();
+		os::Message *msg = new os::Message( MSG_TOLOOPER_SEND );
+		Mail( "Commthread", msg );
 	}
-	else if( messagetosend == 0 )
+	else if( messagetosend == false )
 	{
-		ReceiveMessage();
+		os::Message *msg = new os::Message( MSG_TOLOOPER_RECEIVE );
+		Mail( "Commthread", msg );
 	}
 }
 
@@ -111,13 +113,12 @@ void CommThread::SendMessage()
 
 	if( rv == -1 )
 	{
-		perror( "select" );	//error occured in select()
+		perror( "(Write) select" );
 	}
 	else if( rv == 0 )
 	{
 		printf( "(Write) Timeout occured! Blocked after 2.5 seconds. \n" );
-		messagetosend = 0;
-		Message *msg = new Message( MSG_TOLOOPER_START );
+		os::Message *msg = new os::Message( MSG_TOLOOPER_RECEIVE );
 		Mail( "Commthread", msg );
 	}
 	else
@@ -126,8 +127,7 @@ void CommThread::SendMessage()
 		{
 			send( sockfd, sendmessage.c_str(), sendmessage.length(), MSG_DONTWAIT );
 			sendmessage = "";
-			messagetosend = 0;
-			Message *msg = new Message( MSG_TOLOOPER_START );
+			os::Message *msg = new os::Message( MSG_TOLOOPER_RECEIVE );
 			Mail( "Commthread", msg );
 		}
 	}
@@ -137,7 +137,8 @@ void CommThread::ReceiveMessage()
 {
 	fd_set readfds;
 	struct timeval tv;
-	int rv;
+	int numbytes, rv;
+	char buf[MAXDATASIZE];
 
 	FD_ZERO( &readfds );
 	FD_SET( sockfd, &readfds );
@@ -148,12 +149,12 @@ void CommThread::ReceiveMessage()
 
 	if( rv == -1 )
 	{
-		perror( "select" );	//error occured in select()
+		perror( "(Read) select" );
 	}
 	else if( rv == 0 )
 	{
 		printf( "(Read) Timeout occured! No data after 2.5 seconds. \n" );
-		Message *msg = new Message( MSG_TOLOOPER_START );
+		os::Message *msg = new os::Message( MSG_TOLOOPER_RECEIVE );
 		Mail( "Commthread", msg );
 	}
 	else
@@ -161,170 +162,33 @@ void CommThread::ReceiveMessage()
 		if( FD_ISSET( sockfd, &readfds ) )
 		{
 			bzero( buf, MAXDATASIZE );
-			recv( sockfd, buf, MAXDATASIZE, 0 );
-			Message *msg = new Message( MSG_FROMLOOPER_NEW_MESSAGE );
-			Mail( "MainView", msg );
+			if( ( numbytes = recv( sockfd, buf, MAXDATASIZE, 0 ) ) < 1 )
+			{
+				if( numbytes == -1 )
+					perror( "recv" );
+				return;
+			}
+			buf[numbytes] = '\0';
+			SendMessage( buf );
 		}
 	}
 }
 
-//----------------------------------------------------------------------------------
-
-MainView::MainView( const Rect& cRect ):LayoutView( cRect, "MainView" )
-//	Here is where we construct the window e.g views, buttons, textviews, etc...
-{
-	//create the vertical root layout node
-	LayoutNode *pcRootNode = new VLayoutNode( "Root" );
-
-	//create output box
-	pcRootNode->AddChild( new VLayoutSpacer( "Spacer1", 19, 19 ) );
-	textOutputView = new TextView( Rect( 0, 0, 0, 0 ), "OutputView", "", CF_FOLLOW_ALL );
-	textOutputView->SetMultiLine( true );
-	textOutputView->SetReadOnly( true );
-	pcRootNode->AddChild( textOutputView );
-
-	//create input box
-	pcRootNode->AddChild( new VLayoutSpacer( "Spacer2", 5, 5 ) );
-	LayoutNode *pcButtonNode = new HLayoutNode( "Buttons", 0 );
-	pcButtonNode->AddChild( new HLayoutSpacer( "Spacer3", 5, 5 ) );
-	textInputView = new TextView( Rect( 0, 0, 0, 0 ), "InputView", "Input", CF_FOLLOW_ALL );
-	pcButtonNode->AddChild( textInputView );
-	pcButtonNode->AddChild( new HLayoutSpacer( "Spacer4", 5, 5 ) );
-	m_pcStart = new Button( Rect( 0, 0, 0, 0 ), "Send", "Send", new Message( MSG_SEND ) );
-	m_pcStart->GetFont()->SetSize( 10 );
-	pcButtonNode->AddChild( m_pcStart );
-	pcButtonNode->AddChild( new HLayoutSpacer( "Spacer5", 5, 5 ) );
-
-	//add the row of buttons to the vertical layout node    
-	pcRootNode->AddChild( new VLayoutSpacer( "Spacer6", 5, 5 ) );
-	pcRootNode->AddChild( pcButtonNode );
-	pcRootNode->AddChild( new VLayoutSpacer( "Spacer7", 5, 5 ) );
-
-	//add it all to this layout view
-	SetRoot( pcRootNode );
-
-	//create main menu
-	mainMenuBar = new Menu( Rect( 0, 0, 0, 0 ), "mainMenuBar", ITEMS_IN_ROW );
-	mainMenuBar->SetFrame( Rect( 0, 0, GetBounds().Width(  ) + 1, 18 ) );
-
-	// App menu 
-	tempMenu = new Menu( Rect( 0, 0, 0, 0 ), "Application", ITEMS_IN_COLUMN );
-	tempMenu->AddItem( "Settings", new Message( MSG_SETTINGS ) );
-	tempMenu->AddItem( "About", new Message( M_MENU_ABO ) );
-	tempMenu->AddItem( "Quit", new Message( M_MENU_QUIT ) );
-	mainMenuBar->AddItem( tempMenu );
-	// File menu 
-	tempMenu = new Menu( Rect( 0, 0, 0, 0 ), "Server", ITEMS_IN_COLUMN );
-	tempMenu->AddItem( "Connect", new Message( M_MENU_CONNECT ) );
-	tempMenu->AddItem( "Login", new Message( M_MENU_LOGIN ) );
-	tempMenu->AddItem( "Disconnect", new Message( M_MENU_DISCONNECT ) );
-	mainMenuBar->AddItem( tempMenu );
-	// Help menu 
-	tempMenu = new Menu( Rect( 0, 0, 0, 0 ), "Channel", ITEMS_IN_COLUMN );
-	tempMenu->AddItem( "Join Channel", new Message( MSG_JOINCHANNEL ) );
-	tempMenu->AddItem( "Send Message", new Message( MSG_SEND ) );
-	mainMenuBar->AddItem( tempMenu );
-	AddChild( mainMenuBar );
-
-	m_CommThread = new CommThread( this );
-	m_CommThread->Run();
-
-	AddMailbox( "MainView" );
-}
-
-void MainView::AttachedToWindow()
-{
-	//ensure messages are sent to the view and not the window
-	LayoutView::AttachedToWindow();
-
-	mainMenuBar->SetTargetForItems( this );
-	textInputView->SetTarget( this );
-	m_pcStart->SetTarget( this );
-	erase = 0;
-}
-
-void MainView::HandleMessage( Message* pcMessage )
-{
-	switch( pcMessage->GetCode() )
-	{
-		case M_MENU_QUIT:
-		{
-			OkToQuit();
-			break;
-		}
-		case MSG_SEND:
-		{
-			SendMsg();
-			break;
-		}
-		case MSG_FROMLOOPER_NEW_MESSAGE:
-		{
-			Update();
-			break;
-		}
-		case M_MENU_ABO:
-		{
-			ShowAbout();
-			break;
-		}
-		case M_MENU_CONNECT:
-		{
-			Connect();
-			break;
-		}
-		case M_MENU_LOGIN:
-		{
-			Login();
-			break;
-		}
-		case MSG_JOINCHANNEL:
-		{
-			Join();
-			break;
-		}
-		case MSG_SINGLEUPDATE:
-		{
-			Update();
-			break;
-		}
-		case MSG_UPDATE:
-		{
-			if( m_CommThread )
-				m_CommThread->PostMessage( MSG_TOLOOPER_START, m_CommThread, m_CommThread );
-			break;
-		}
-		case M_MENU_DISCONNECT:
-		{
-			Disconnect();
-			break;
-		}
-		case MSG_SETTINGS:
-		{
-			break;
-		}
-		default:
-		{
-			LayoutView::HandleMessage( pcMessage );
-			break;
-		}
-	}
-}
-
-void MainView::Connect( void )
+void CommThread::Connect( void )
 {
 	struct hostent *he;
 	struct sockaddr_in their_addr;	// connector's address information 
 
-	if( ( he = gethostbyname( host.c_str() ) ) == NULL )	// get the host info 
+	if( ( he = gethostbyname( HOST.c_str() ) ) == NULL )	// get the host info 
 	{
-		perror( "gethostbyname" );
-		exit( 1 );
+		herror( "gethostbyname" );
+		return;
 	}
 
 	if( ( sockfd = socket( AF_INET, SOCK_STREAM, 0 ) ) == -1 )
 	{
 		perror( "socket" );
-		exit( 1 );
+		return;
 	}
 
 	their_addr.sin_family = AF_INET;	// host byte order 
@@ -335,131 +199,309 @@ void MainView::Connect( void )
 	if( connect( sockfd, ( struct sockaddr * )&their_addr, sizeof( struct sockaddr ) ) == -1 )
 	{
 		perror( "connect" );
-		exit( 1 );
+		return;
 	}
 
-	sendmessage = "NICK " + nick + " \n";
-	send( sockfd, sendmessage.c_str(), sendmessage.length(  ), MSG_DONTWAIT );
+	sendmessage = "NICK " + NICK + "\r\n";
+	send( sockfd, sendmessage.c_str(), sendmessage.length(), MSG_DONTWAIT );
 
-	sendmessage = "USER sIRC sIRC_ sIRC__ :sIRC\r\n";
-	send( sockfd, sendmessage.c_str(), sendmessage.length(  ), MSG_DONTWAIT );
+	sendmessage = "USER " + USER + " 0 * :" + NAME + "\r\n";
+	send( sockfd, sendmessage.c_str(), sendmessage.length(), MSG_DONTWAIT );
 
-	Message *msg = new Message( MSG_TOLOOPER_RECEIVE );
+	os::Message *msg = new os::Message( MSG_TOLOOPER_RECEIVE );
 	Mail( "Commthread", msg );
 }
 
-
-void MainView::Disconnect( void )
+void CommThread::Disconnect( void )
 {
 	close( sockfd );
 }
 
-void MainView::Update( void )
+void CommThread::SendMessage( const os::String& cName )
 {
-	string bufstring;
-	int i;
-
-	bufstring = buf;
-	i = bufstring.find( "PING" );
-
-	// test for server PING
-	if( ( i != -1 ) && ( i < 80 ) )
+	try
 	{
-		cout << "Yes Ping" << endl;
-		sendmessage = "PONG " + nick + " \n";
-		messagetosend = 1;
+		os::Message cMsg( MSG_FROMLOOPER_NEW_MESSAGE );
+		cMsg.AddString( "name", cName );
+
+		m_cTarget.SendMessage( &cMsg );
 	}
-
-	// display server data
-	if( erase == true )
-	{
-		string find1 = "!";
-		string::size_type pos1 = bufstring.find( find1, 0 );
-		string find2 = "#";
-		string::size_type pos2 = bufstring.find( find2, 0 );
-
-		bufstring = bufstring.erase( pos1, pos2 - pos1 );
-	}
-
-	textOutputView->Insert( bufstring.c_str(), true );
-
-	if( m_CommThread )
-		m_CommThread->PostMessage( MSG_TOLOOPER_START, m_CommThread, m_CommThread );
-}
-
-void MainView::Login( void )
-{
-	string identify = "PRIVMSG NickServ :IDENTIFY ";
-	sendmessage = identify + password + " \n";
-}
-
-void MainView::Join( void )
-{
-	erase = 1;		
-	messagetosend = 1;
-	sendmessage = "JOIN " + channel + " \n";
-
-	Message *msg = new Message( MSG_TOLOOPER_START );
-	Mail( "Commthread", msg );
-}
-
-void MainView::SendMsg( void )
-{
-	string textfrominput, printinputmessage;
-
-	messagetosend = 1;
-	textfrominput = textInputView->GetBuffer()[0].const_str();
-	sendmessage = "PRIVMSG " + channel + " :" + textfrominput + " \n";
-	printinputmessage = nick + channel + " : " + textfrominput + " \n";
-
-	Message *msg = new Message( MSG_TOLOOPER_START );
-	Mail( "Commthread", msg );
-
-	textOutputView->Insert( printinputmessage.c_str(), true );
-	textInputView->Clear( true );
-}
-
-void MainView::ShowAbout(void)
-{
-	Alert* sAbout = new Alert("About sIRC...",
-		"sIRC 0.04\n"
-		"Syllable Internet Relay Chat Client\n\n"
-		"By David Kent 2021 'https://github.com/peekaye/'\n"
-		"By James Coxon 2006 'jac208@cam.ac.uk'",
-		0x00, "Close", NULL);
-	sAbout->Go( new Invoker() );
-}
-
-bool MainView::OkToQuit( void )
-{
-  Application::GetInstance()->PostMessage( M_QUIT );
-  return( true );
+	catch( ... ) { }
 }
 
 //----------------------------------------------------------------------------------
 
-MainWindow::MainWindow( const os::Rect & r ):Window( r, "MainWindow", "sIRC - Internet Relay Chat Client", 0, CURRENT_DESKTOP )
+// Here is where we construct the window e.g views, buttons, textviews, etc...
+MainView::MainView( const os::Rect &r ):os::View( r, "MainView", os::CF_FOLLOW_ALL, os::WID_FULL_UPDATE_ON_RESIZE )
+{
+	//create the vertical root structure
+	os::LayoutNode *pcRootNode = new os::VLayoutNode( "Root" );
+	os::LayoutView *pcView = new os::LayoutView( r, "Layout" );
+
+	//create main menu
+	mainMenuBar = new os::Menu( os::Rect( 0, 0, 0, 0 ), "mainMenuBar", os::ITEMS_IN_ROW );
+	mainMenuBar->SetFrame( os::Rect( 0, 0, GetBounds().Width() + 1, mainMenuBar->GetPreferredSize( false ).y + 1 ) );
+
+	// App menu
+	tempMenu = new os::Menu( os::Rect( 0, 0, 0, 0 ), "Application", os::ITEMS_IN_COLUMN );
+	tempMenu->AddItem( "Settings", new os::Message( M_MENU_SETTINGS ) );
+	tempMenu->AddItem( new os::MenuSeparator() );
+	tempMenu->AddItem( "About", new os::Message( M_MENU_ABOUT ) );
+	tempMenu->AddItem( "Quit", new os::Message( M_MENU_QUIT ) );
+	mainMenuBar->AddItem( tempMenu );
+	// File menu
+	tempMenu = new os::Menu( os::Rect( 0, 0, 0, 0 ), "Server", os::ITEMS_IN_COLUMN );
+	tempMenu->AddItem( "Connect", new os::Message( M_MENU_START ) );
+	tempMenu->AddItem( "Login", new os::Message( M_MENU_LOGIN ) );
+	tempMenu->AddItem( "Disconnect", new os::Message( M_MENU_STOP ) );
+	mainMenuBar->AddItem( tempMenu );
+	// Help menu
+	tempMenu = new os::Menu( os::Rect( 0, 0, 0, 0 ), "Channel", os::ITEMS_IN_COLUMN );
+	tempMenu->AddItem( "Join Channel", new os::Message( M_MENU_JOINCHANNEL ) );
+	tempMenu->AddItem( "Leave Channel", new os::Message( M_MENU_LEAVECHANNEL ) );
+	mainMenuBar->AddItem( tempMenu );
+	pcRootNode->AddChild( mainMenuBar );
+
+	//create output box
+	m_Text = new os::TextView( os::Rect( 0, 0, 0, 0 ), "output_view", "", os::CF_FOLLOW_ALL );
+	m_Text->SetMultiLine( true );
+	m_Text->SetReadOnly( true );
+	pcRootNode->AddChild( m_Text );
+	
+	//create input box
+	pcRootNode->AddChild( new os::VLayoutSpacer( "Spacer2", 5, 5 ) );
+	os::LayoutNode *pcButtonNode = new os::HLayoutNode( "Buttons", 0 );
+	pcButtonNode->AddChild( new os::HLayoutSpacer( "Spacer3", 5, 5 ) );
+	m_Input = new os::TextView( os::Rect( 0, 0, 0, 0 ), "input_view", "Input", os::CF_FOLLOW_ALL );
+	pcButtonNode->AddChild( m_Input );
+	pcButtonNode->AddChild( new os::HLayoutSpacer( "Spacer4", 5, 5 ) );
+	m_pcSend = new os::Button( os::Rect( 0, 0, 0, 0 ), "send_button", "Send", new os::Message( MSG_TOLOOPER_NEW_MESSAGE ) );
+	m_pcSend->GetFont()->SetSize( 10 );
+	pcButtonNode->AddChild( m_pcSend )->LimitMaxSize( m_pcSend->GetPreferredSize( false ) );
+
+	//add the row of buttons to the vertical layout node    
+	pcButtonNode->AddChild( new os::HLayoutSpacer( "Spacer5", 5, 5 ) );
+	pcRootNode->AddChild( pcButtonNode );
+	pcRootNode->AddChild( new os::VLayoutSpacer( "Spacer7", 5, 5 ) );
+
+	//add it all to the vertical root structure
+	pcView->SetRoot( pcRootNode );
+	AddChild( pcView );
+}
+
+void MainView::AttachedToWindow()
+{
+	//ensure messages are sent to the view and not the window
+	os::View::AttachedToWindow();
+
+	mainMenuBar->SetTargetForItems( this );
+	m_pcSend->SetTarget( this );
+	bInChannel = false;
+
+	m_CommThread = new CommThread( this );
+	m_CommThread->Run();
+}
+
+void MainView::HandleMessage( os::Message *pcMessage )
+{
+	switch ( pcMessage->GetCode() )
+	{
+		case M_MENU_START:
+		{	
+			m_Text->Clear();
+			if( m_CommThread )
+				m_CommThread->PostMessage( MSG_TOLOOPER_START, m_CommThread, m_CommThread );
+			break;
+		}
+		case M_MENU_STOP:
+		{
+			if( m_CommThread )
+				m_CommThread->PostMessage( MSG_TOLOOPER_STOP, m_CommThread, m_CommThread );
+			break;
+		}
+		case MSG_TOLOOPER_NEW_MESSAGE:
+		{
+			SendMsg( m_Input->GetBuffer()[0].const_str() );
+			m_Input->Clear();
+			break;
+		}
+		case MSG_FROMLOOPER_NEW_MESSAGE:
+		{
+			const char *pzName;
+			int nCount = 0;
+			pcMessage->GetNameInfo( "name", NULL, &nCount );
+			for( int i = 0; i < nCount ; ++i )
+			{
+				if( pcMessage->FindString( "name", &pzName, i ) == 0 )
+				{
+					Update( os::String( pzName ) );
+					break;
+				}
+			}
+			break;
+		}
+		case M_MENU_LOGIN:
+		{
+			Login();
+			break;
+		}
+		case M_MENU_JOINCHANNEL:
+		{
+			Join();
+			break;
+		}
+		case M_MENU_LEAVECHANNEL:
+		{
+			Leave();
+			break;
+		}
+		case M_MENU_SETTINGS:
+		{
+			// not yet implemented
+			break;
+		}
+		case M_MENU_ABOUT:
+		{
+			ShowAbout();
+			break;
+		}
+		case M_MENU_QUIT:
+		{
+			OkToQuit();
+			break;
+		}
+		default:
+		{
+			os::View::HandleMessage( pcMessage );
+			break;
+		}
+	}
+}
+
+void MainView::Update( os::String name )
+{
+	bool messagetosend = false;
+	std::string bufstring( name );
+
+	// test for ping command
+	if( bufstring[0] != ':' )
+	{
+		std::string::size_type pos = bufstring.find( "PING", 0 );
+		if( pos != std::string::npos )
+		{
+			std::cout << "Ping? Pong!" << std::endl;
+			sendmessage = "PONG :" + NICK + "\r\n";
+			messagetosend = true;
+		}
+	}
+
+	// display server data
+	if( bInChannel == true )
+	{
+		std::string find1 = "!";
+		std::string::size_type pos1 = bufstring.find( find1, 0 );
+		std::string find2 = "#";
+		std::string::size_type pos2 = bufstring.find( find2, 0 );
+		if( pos1 != std::string::npos && pos2 != std::string::npos )
+			bufstring = bufstring.erase( pos1, pos2 - pos1 - 1 );
+	}
+
+	AddStringToTextView( bufstring );
+
+	if( m_CommThread )
+		m_CommThread->SendReceiveLoop( messagetosend );
+}
+
+void MainView::Login( void )
+{
+	sendmessage = "PRIVMSG NickServ :IDENTIFY " + PASS + "\r\n";
+	os::Message *msg = new os::Message( MSG_TOLOOPER_SEND );
+	Mail( "Commthread", msg );
+}
+
+void MainView::Join( void )
+{
+	bInChannel = true;
+	sendmessage = "JOIN " + CHAN + "\r\n";
+	os::Message *msg = new os::Message( MSG_TOLOOPER_SEND );
+	Mail( "Commthread", msg );
+}
+
+void MainView::Leave( void )
+{
+	bInChannel = false;
+	sendmessage = "PART " + CHAN + "\r\n";
+	os::Message *msg = new os::Message( MSG_TOLOOPER_SEND );
+	Mail( "Commthread", msg );
+}
+
+void MainView::SendMsg( std::string textfrominput )
+{
+	sendmessage = "PRIVMSG " + CHAN + " :" + textfrominput + "\r\n";
+	textfrominput = NICK + " " + CHAN + " :" + textfrominput + "\r\n";
+
+	os::Message *msg = new os::Message( MSG_TOLOOPER_SEND );
+	Mail( "Commthread", msg );
+
+	AddStringToTextView( textfrominput );
+}
+
+/* add new text at the end of the os::TextView buffer */
+void MainView::AddStringToTextView( const std::string &cName ) const
+{
+	const os::TextView::buffer_type cBuffer = m_Text->GetBuffer();
+	const int posX = cBuffer[cBuffer.size()-1].size();
+	const int posY = cBuffer.size()-1;
+	const os::IPoint cPoint = os::IPoint( posX, posY );
+	m_Text->Insert( cPoint, cName.c_str() );
+}
+
+void MainView::ShowAbout( void )
+{
+	os::Alert *sAbout = new os::Alert( "About sIRC...",
+		"sIRC 0.09\n"
+		"Syllable Internet Relay Chat Client\n\n"
+		"sIRC 0.03 by James Coxon 2006 jac208@cam.ac.uk\n"
+		"sIRC 0.09 by David Kent 2021\n\n"
+		"Basically sIRC can connect to a single channel \n"
+		"(which has to be changed in the source) \n"
+		"and can send and receive messages.  \n\n"
+		"sIRC is released under the GNU General Public License.\n"
+		"Please see the file COPYING, distributed with sIRC,\n"
+		"or http://www.gnu.org for more information.",
+		os::Alert::ALERT_INFO, 0x00, "Close", NULL );
+	sAbout->CenterInWindow( GetWindow() );
+	sAbout->Go( new os::Invoker() );
+}
+
+bool MainView::OkToQuit( void )
+{
+	os::Application::GetInstance()->PostMessage( os::M_QUIT );
+	return ( true );
+}
+
+//----------------------------------------------------------------------------------
+
+MainWindow::MainWindow( const os::Rect &r ):os::Window( r, "MainWindow", "sIRC:- Syllable Internet Relay Chat Client", 0, os::CURRENT_DESKTOP )
 {
 	/* Set up "view" as the main view for the window, filling up the entire */
 	/* window (thus the call to GetBounds()). */
 	view = new MainView( GetBounds() );
 	AddChild( view );
-
-	AddMailbox( "MainWindow" );
 }
 
-bool MainWindow :: OkToQuit( void )
+bool MainWindow::OkToQuit( void )
 {
-	Application::GetInstance()->PostMessage( M_QUIT );
-	return( true );
+	os::Application::GetInstance()->PostMessage( os::M_QUIT );
+	return ( true );
 }
 
 //----------------------------------------------------------------------------------
 
-MyApplication::MyApplication( void ):Application( "application/x-vnd.jamescoxon-sIRC" )
+MyApplication::MyApplication( void ):os::Application( "application/x-vnd.Syllable-sIRC" )
 {
 	// Remember it goes "x" then "y"
-	myMainWindow = new MainWindow( Rect( 20, 20, 600, 400 ) );
+	myMainWindow = new MainWindow( os::Rect( 20, 20, 600, 400 ) );
 	myMainWindow->Show();
 	myMainWindow->MakeFocus();
 }
@@ -472,6 +514,5 @@ int main( void )
 	thisApp = new MyApplication();
 	thisApp->Run();
 
-	return( 0 );
+	return 0;
 }
-

@@ -1,0 +1,348 @@
+<html><head>
+
+<title>Syllable User Bible - A Dissection of Hello World</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">A Dissection of Hello World</div>
+</div>
+<div id="pageStats">
+<table border="0">
+<tbody><tr><td valign="top">Written by:</td><td>Brent P. Newhall</td></tr>
+<tr><td valign="top">Last Updated:</td><td>Apr 11, 2007</td></tr>
+<tr><td valign="top">Version:</td><td>0.3.4 to 0.5.3</td></tr>
+</tbody></table>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+
+<p>So you want to program for Syllable.  Well, first off you need a compiler; download and install the Syllable port of gcc.</p>
+
+<p>To compile a C++ app for Syllable, you can either compile it on the
+command line, or you can create a Makefile to automate the process. For
+this tutorial, we'll use the command line. The general model is as
+follows:</p>
+
+<div id="terminal">
+  $ <b>g++ <i>filename</i> -lsyllable -o CompiledAppName</b>
+</div>
+
+<div id="sectiontext">The structure of a Syllable Program, or, How It All Hangs Together</div>
+
+<p>Syllable programs are a bit complicated in structure, but sensible.
+Because the Syllable API is so aggressively object-oriented, things
+tend to be compartmentalized more than in other systems.</p>
+
+<p>All window-based Syllable programs (and by "all" I mean "all except
+for rare, weird cases") have three basic components: Application,
+Window, and View. The Application object is the main control engine of
+the program. You create a Window for every Syllable window you want to
+have in your application. Windows don't do much GUI work in and of
+themselves, however, so every functional area in your window has to be
+created as a new View (a menubar is a View, a text input field is a
+View, etc.).</p>
+
+<p>OK, now that you're familiar with the basic concepts, let's write a
+Hello World app. Each piece of code will go in different places, so
+stay sharp!</p>
+
+<div id="sectiontext">Hello World - the Application, or, How To Write A Job Application</div>
+
+<p>This section will go sequentially in the file, in the order in which
+it appears here. We're starting off with the application object, which
+controls the rest of the app.</p>
+
+<div id="filetext">
+  class MyApplication : public Application<br>
+  {<br>
+    public:<br>
+      MyApplication( void ); /* constructor */<br>
+    private:<br>
+      TestWindow *myTestWindow;<br>
+  };<br>
+</div>
+
+<p>This will be used to create the main Application object, which will
+in turn create the program's window. Note the creation of a pointer to
+a TestWindow, which will be our main Window object.</p>
+
+<div id="filetext">
+  MyApplication :: MyApplication( void )<br>
+      : Application( <font color="#ff0000">"application/x-vnd.Tutorial-HelloWorld"</font> )<br>
+  {<br>
+    myTestWindow = new TestWindow( Rect(20,20,300,200) );<br>
+    myTestWindow-&gt;Show();<br>
+  }
+</div>
+
+<p>All right, this creates our application. First off, it calls the
+Application's constructor, and passes that weird string,
+"application/x-vnd.Tutorial-HelloWorld". That's the unique signature of
+this particular application, which Syllable will use to keep track of
+it. You can put anything after the "x-vnd."; the convention is company
+name followed by product name, without spaces.</p>
+
+<p>We want to create a Window object, and to do that we have to define
+its position. We create a new Window and pass a new Rect (rectangle
+object) in, which holds the size and position of the main window. The
+upper-left corner of the window will be at position 20,20, and the
+lower-right corner will be at position 300,200.</p>
+
+<p>After we create the new window, we call its <code>Show()</code> method, which actually displays the window on the screen.</p>
+
+<div id="sectiontext">Hello World - the Window, or, No, Not That Kind Of Windows</div>
+
+<p>OK, now that we've seen what an application looks like, add in the following code <i>above</i> the MyApplication code.</p>
+
+<div id="filetext">
+  class TestWindow : public Window<br>
+  {<br>
+    public:<br>
+      TestWindow( const Rect &amp; r ); /* constructor */<br>
+      bool <font color="#ff0000">OkToQuit</font>();<br>
+    private:<br>
+      TestView *view;<br>
+  };
+</div>
+
+<p>Here we have a simple Window class. Note that the Window also
+declares a view; we'll see what that's for in a minute. The only thing
+of real interest is the <code>OkToQuit()</code> function, which is called when the user closes the Window.</p>
+<p>Let's look at the constructor for this Window.  Put this code right after the code above.</p>
+
+<div id="filetext">
+  TestWindow :: TestWindow( const Rect &amp; r )<br>
+      : Window( r, "TestWindow", "Hello World", 0, CURRENT_DESKTOP )<br>
+  {<br>
+    /* Set up "view" as the main view for the window, filling up the entire */<br>
+    /* window (thus the call to GetBounds()). */<br>
+    view = new TestView( GetBounds() );<br>
+    AddChild( view );<br>
+  }<br>
+</div>
+
+<p>All right, we call the default constructor for Window, then create a
+new TestView as a View for this window, filling this entire Window with
+it (with the <code>GetBounds()</code>).  Then we call <code>AddChild();</code> to actually add the new TestView onto the window.</p>
+<p>Now we'll look at the OkToQuit() function, which should go just below the code we just entered.
+
+</p><div id="filetext">
+  bool TestWindow :: OkToQuit( void )<br>
+  {<br>
+    <font color="#ff0000">Application::GetInstance()</font>-&gt;PostMessage( M_QUIT );<br>
+    return( true );<br>
+  }
+</div>
+
+<p>Hmmmmm, not very exciting.  <code>Application::GetInstance()</code>
+returns a pointer to the current application, so we use that for
+convenience. This function is called whenever the user tries to close
+the window. So, what we do is we send a message to the application
+itself, asking it to completely exit, and then return <code>true</code>, indicating that we can indeed close down the window.  We'd return <code>false</code> if, for example, the user had unsaved changes to his/her work, and we wanted to prevent the user from closing the window.</p>
+
+<div id="sectiontext">Hello World - the View, or, What A Nice View You Have From This Window</div>
+
+<p>Now we've looked at the Application and the Window, let's look at
+the View itself. This should go above the code we've already entered
+(at the top of the file).</p>
+
+<div id="filetext">
+  class TestView : public View<br>
+  {<br>
+    public:<br>
+      TestView( const Rect &amp; r ); /* constructor */<br>
+  };
+</div>
+
+<p>Again, nothing surprising.  This next chunk of code should go below the code we just put in.</p>
+
+<div id="filetext">
+  TestView :: TestView( cosnt Rect &amp; r )<br>
+      : View( r, "TestView", CF_FOLLOW_LEFT | CF_FOLLOW_TOP, WID_WILL_DRAW | WID_CLEAR_BACKGROUND )<br>
+  {<br>
+    /* Just let the View construtor do its thing */<br>
+  }
+</div>
+
+<p>Boy, this is boring.</p>
+
+<!-- <p><CODE>
+  void MainView :: Draw( BRect rectUpdate )<br />
+  {<br />
+  &nbsp; MovePenTo( BPoint( 20, 50 ) );<br />
+  &nbsp; DrawString( "Hello, World!" ); /* Phew!  Finally draw our message! */<br />
+  }<br />
+</CODE></p>
+
+<p>All right, now we move the current cursor position to 20,50 within the View (e.g., 20 pixels across from the left edge of the View, and 50 pixels down from the top edge of the View), and draw "Hello, World!" there.</p> -->
+
+<p>OK, now all we have remaining to add are <code>main()</code> and the header files.  Here's <code>main()</code>, which should go at the very bottom of the file.</p>
+
+<div id="filetext">
+  int main( void )<br>
+  {<br>
+    MyApplication *thisApp;<br>
+    thisApp = new MyApplication();<br>
+    thisApp-&gt;Run();<br>
+    return 0;<br>
+  }<br>
+</div>
+
+<p>This is straightforward C++; create a pointer to the Application
+object, then create a new Application, then run it. The Application
+object will create the Window, which will create the View. When the
+application's done running, it will return "0" (success).</p>
+
+<p><b>NOTE: You should <i>never</i> delete the application object.</b>
+This could cause both the app and the OS itself to crash. To quote
+Kurt: "All os::Looper derived objects will delete themselves when the
+message loop is terminated. Deleting it will most likely cause it to
+crash since the object will be deleted twice."</p>
+
+<p>The header files are easy enough, and go at the very tip-top of the file.</p>
+
+<div id="filetext">
+  #include &lt;gui/window.h&gt;<br>
+  #include &lt;gui/view.h&gt;<br>
+  #include &lt;gui/rect.h&gt;<br>
+  #include &lt;util/application.h&gt;<br>
+  <br>
+  <font color="#ff0000">using namespace os;</font><br>
+</div>
+
+<p>Wait; what's that line saying <code>using namespace os;</code>?  All of the Syllable components are in the "os" namespace.  If we didn't call <code>using namespace os;</code>, we'd have to prepend every reference to Application, Window, View, or Rect with <code>os::</code>.  So, this makes our coding life a little easier.</p>
+
+<p>All right!  We've got a complete Syllable Hello World program coded!  Here's how the code should look:</p>
+
+<div id="filetext">
+  #include &lt;gui/window.h&gt;<br>
+  #include &lt;gui/view.h&gt;<br>
+  #include &lt;gui/rect.h&gt;<br>
+  #include &lt;util/application.h&gt;<br>
+  <br>
+  using namespace os;<br>
+<br>
+<br>
+  class TestView : public View<br>
+  {<br>
+    public:<br>
+      TestView( const Rect &amp; r ); /* constructor */<br>
+  };<br>
+<br>
+  TestView :: TestView( const Rect &amp; r )<br>
+      : View( r, "TestView", CF_FOLLOW_LEFT | CF_FOLLOW_TOP, WID_WILL_DRAW | WID_CLEAR_BACKGROUND )<br>
+  {<br>
+    /* Just let the View construtor do its thing */<br>
+  }<br>
+<!-- <br />
+  void MainView :: Draw( BRect rectUpdate )<br />
+  {<br />
+  &nbsp; MovePenTo( BPoint( 20, 50 ) );<br />
+  &nbsp; DrawString( "Hello, World!" ); /* Phew!  Finally draw our message! */<br />
+  }<br /> -->
+<br>
+<br>
+  class TestWindow : public Window<br>
+  {<br>
+    public:<br>
+      TestWindow( const Rect &amp; r ); /* constructor */<br>
+      bool OkToQuit();<br>
+    private:<br>
+      TestView *view;<br>
+  };<br>
+<br>
+  TestWindow :: TestWindow( const Rect &amp; r )<br>
+      : Window( r, "TestWindow", "Hello World", 0, CURRENT_DESKTOP )<br>
+  {<br>
+    /* Set up "view" as the main view for the window, filling up the entire */<br>
+    /* window (thus the call to GetBounds()). */<br>
+    view = new TestView( GetBounds() );<br>
+    AddChild( view );<br>
+  }<br>
+<br>
+  bool TestWindow :: OkToQuit( void )<br>
+  {<br>
+    Application::GetInstance()-&gt;PostMessage( M_QUIT );<br>
+    return( true );<br>
+  }<br>
+<br>
+<br>
+  class MyApplication : public Application<br>
+  {<br>
+    public:<br>
+      MyApplication( void ); /* constructor */<br>
+    private:<br>
+      TestWindow *myTestWindow;<br>
+  };<br>
+<br>
+  MyApplication :: MyApplication( void )<br>
+      : Application( "application/x-vnd.Tutorial-HelloWorld" )<br>
+  {<br>
+    myTestWindow = new TestWindow( Rect(20,20,300,200) );<br>
+    myTestWindow-&gt;Show();<br>
+  }<br>
+<br>
+<br>
+  int main( void )<br>
+  {<br>
+    MyApplication *thisApp;<br>
+    thisApp = new MyApplication();<br>
+    thisApp-&gt;Run();<br>
+    return( 0 );<br>
+  }<br>
+</div>
+
+<p>To compile the program, save the above code as "HelloWorld.cpp" and type the following in the terminal window (without the "$"):</p>
+
+<div id="terminal">
+  $ <b>g++ HelloWorld.cpp -lsyllable -o HelloWorld</b><br>
+</div>
+
+<p>If you don't want to type in all of this code &#8211; though you should &#8211; you can <a href="http://www.syllable.org/sub/HelloWorld.cpp">download the source</a> as one file.</p>
+
+<hr>
+
+<div id="sectiontext">Optional Modifications</div>
+<ul>
+<li> Change the size of the displayed window.</li>
+<li> Change the message displayed, from "Hello, World!" to "Thank you, come again."  Make sure it fits.</li>
+</ul>
+
+</div>
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+"download the source as one file" hyperlink is broken
+
+</div>
+ </div>
+
+
+<br><br>
+
+</body></html

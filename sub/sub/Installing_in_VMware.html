@@ -1,0 +1,137 @@
+<html><head>
+
+<title>Syllable User Bible - Installing in VMware</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Installing in VMware</div>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+<p></p><h3>Does Syllable run in VMware version x?</h3>
+<p></p>
+<p>Syllable (as of 0.5.1) runs in VMware 3.2 and 4.0 for Linux, and
+VMware 3.0 for Windows. This makes it more likely that it also runs in
+3.2 and 4.0 for Windows and 3.0 for Linux. AtheOS (which Syllable is
+based on) runs in VMware 2.x, so it is likely Syllable also runs in
+VMware 2.x. If you have information about Sylable running or not
+running in specific VMware versions, please mail <a href="mailto:dang@fprintf.net">Daniel</a>
+
+</p>
+<p></p><h3>Where can I get a VMware image with Syllable already installed?</h3>
+<p></p>
+<p>There is a base install Syllable image pre-installed in a VMware 3.2 image available at <a href="http://www.fprintf.net/atheos/atheosvm.html">fprintf.net</a>.  In addition, there is a Syllable image with developer tools in VMware 4 at <a href="http://syllable.halebob.org/">syllable.halebob.org</a>.  The syllable.halebob.org image is newer than the one at fprintf.net.
+
+</p>
+<p></p><h3>Why is my screen messed up in Syllable?</h3>
+<p></p>
+<p>VMware 3.2 (and possibly other versions) seem to have problems with
+the Syllable VESA driver. The only resolution known to work in all
+situations is 1024x768 with 32 bits per pixel. Some other resolutions
+are reported to work with some video card/driver combinations of the
+host OS.
+</p>
+<p></p><h3>Why won't Syllable boot in VMware? The boot disk does.</h3>
+<p></p>
+<p>VMware assumes that its Guest OSs do not use memory beyond a certain
+address (0xf7ffffff). Ordinarily, Syllable does use this region, which
+causes it to not boot in VMware. There is a kernel parameter (which the
+boot disks already have) work-around for this. The parameter is
+"uspace_end=0xf7ffffff", which needs to be on the end of the kernel
+line in "/afs/boot/grub/menu.lst".
+</p>
+<p>Alternatively, you might need to disable DMA.  To do this, at the GRUB prompt, hit <strong>E</strong>, then move down to the line that starts:
+
+</p>
+<pre>kernel=
+</pre>
+
+<p>Hit <strong>E</strong> again to edit that line and add:
+
+</p>
+<pre>enable_ata_dma=false
+</pre>
+
+<p>Press <strong>Enter</strong>, then <strong>B</strong> to boot with the modified configuration.
+
+</p>
+<p></p><h3>Why is everything so slow?</h3>
+<p></p>
+<p>Recent versions of Syllable have a real ATA driver for hard drives.
+This driver does not work well with VMware, and runs extremely slowly.
+The solution is to use the BIOS driver, rather than the ATA driver.
+Change your GRUB boot menu to something like this (changing partition
+information to match your install):
+</p>
+<pre>kernel /atheos/sys/kernel.so root=/dev/disk/bios/hda/0 hda=bios ata0=disable ata1=nodma uspace_end=0xf7ffffff
+module=/atheos/sys/drivers/fs/afs
+module=/atheos/sys/drivers/dev/disk/bios
+</pre>
+
+<p>Note that this will still allow the CD to work, as long as it's a
+secondary master (which is the default for VMware). The kernel line
+should be one line.
+</p>
+<p>Another approach (tested under VMWare 4.5.2 and Syllable 0.5.4) is to use the ATA driver with this kernel line:
+
+</p>
+<pre>&lt;filename&gt;kernel /atheos/sys/kernel.so root=/dev/disk/ata/hda/0 uspace_end=0xf7ffffff enable_ata_dma=false&lt;/filename&gt;
+</pre>
+
+<p></p><h3>Does Syllable support the AMD PCNET network card in VMware?</h3>
+<p></p>
+<p>Theoretically, yes. There is a driver for this card included with
+Syllable. There are reports that it does not work with VMware 3.2 for
+Linux. There are reports that it does work on VMware 3.x for Windows.
+YMMV.
+</p>
+<p></p><h3>What about NAT?</h3>
+<p></p>
+<p>There are reports that Syllable 0.5.1 that has an Ethernet connection using NAT works in VMware.
+
+</p>
+
+
+
+
+
+
+
+<p></p><div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+the net driver works in vmware 4.0 for syllable 0.5.1
+<hr>If your install hangs because of DMA issues, try to simply add
+"enable_ata_dma=false" at the end of the kernel line in Grub (use the
+'e'dit option). Worked for me, VMWare 4.5.0, Syllable 0.5.4. -jd
+<hr>
+<hr>
+
+<hr>Works on VMWare workstation 5 beta. After installation, Grub hangs
+("GRUB _"). Solution: when you set up the partition, start at sector 63
+(seems like the sectors 0-62 are needed by Grub?)
+<hr>
+Another place for Syllable VMWare images is: http://www.cilinder.be/syllable
+
+Network works in VMWare Player if you use NAT and enable dhcp in Syllable.
+
+</div>
+ </div>
+</div>
+
+<br><br>
+
+</body></html

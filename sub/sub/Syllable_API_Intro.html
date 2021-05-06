@@ -1,0 +1,170 @@
+<html><head>
+
+<title>Syllable User Bible - Programming Intro</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Programming Intro</div>
+</div>
+<div id="pageStats">
+<table border="0">
+<tbody><tr><td valign="top">Written by:</td><td>Brent P. Newhall</td></tr>
+<tr><td valign="top">Last Updated:</td><td>Apr 11, 2007</td></tr>
+<tr><td valign="top">Version:</td><td>0.3.4 to 0.5.3</td></tr>
+</tbody></table>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+
+<div id="sectiontext">The API</div>
+
+<p>The Syllable API (Application Programming Interface) is a set of
+classes that Kurt wrote so that developers can use standard GUI widgets
+like windows, alert boxes, buttons, and so forth in their own Syllable
+programs.</p>
+
+<p>OK, so Syllable has got a whole bunch of classes, each one corresponding to an individual GUI widget.  There's <code>Window</code>, which creates a window, <code>CheckBox</code>, which displays a check box and a label, <code>Button</code>,
+which displays a pushbutton, and so forth. All of these classes are
+declared in .h files that reside in subdirectories within the <span id="filename">/boot/syllable/sys/include/</span> directory.  Thus, there's a <span id="filename">window.h</span> file, a <span id="filename">checkbox.h</span> file, a <span id="filename">button.h</span> file, etc.  Thus, to use any of these classes, all that a developer need do is #include the appropriate .h file.</p>
+
+<p>So if, for example, I wanted my Syllable program to have a window, a
+push button, and a list view, I'd have something like this at the
+beginning of my program:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> #include &lt;gui/window.h&gt;
+<br><span id="codenumber"> 2</span> #include &lt;gui/button.h&gt;
+<br><span id="codenumber"> 3</span> #include &lt;gui/listview.h&gt;
+<br></div>
+
+<p>However, there has to be some way for programmers to control the
+behavior of their widgets; when the user clicks on a button, the
+programmer needs to be able to specify what happens next. There are a
+couple of ways to do this.</p>
+
+<div id="sectiontext">Messages</div>
+
+<p>The API comes with a handy system for sending Messages when certain events occur.  Here's how it works:</p>
+
+<p>When you define a Button, you can specify a Message that that Button
+will send whenever the Button is clicked. That Message will, by
+default, be sent to the Window that contains the Button, though the
+destination can be changed. When the Window receives any Message, its <code>HandleMessage()</code> function is called, and you can override that function to respond to the particular Message you set up.</p>
+
+<p>Let's see an example:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> /* Define an identifier for the Reset Button message. */
+<br><span id="codenumber"> 2</span> const unsigned int RESET_BUTTON_PRESSED_MESSAGE = 1;
+<br><span id="codenumber"> 3</span> 
+<br><span id="codenumber"> 4</span> MyView :: MyView<font color="#4444ff">(</font> ... <font color="#4444ff">)</font>
+<br><span id="codenumber"> 5</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 6</span>    Button *resetButton;
+<br><span id="codenumber"> 7</span>    Message *message;
+<br><span id="codenumber"> 8</span>    Rect r;
+<br><span id="codenumber"> 9</span>    /* Create a new Message, for the Button */
+<br><span id="codenumber">10</span>    message = new Message<font color="#4444ff">(</font> RESET_BUTTON_PRESSED_MESSAGE <font color="#4444ff">)</font>;
+<br><span id="codenumber">11</span>    /* Create the Reset Button, telling it to send _message_ when it is clicked. */
+<br><span id="codenumber">12</span>    resetButton = new Button<font color="#4444ff">(</font> r, "resetButton", "Reset", message <font color="#4444ff">)</font>;
+<br><span id="codenumber">13</span> <font color="#4444ff">}</font>
+<br><span id="codenumber">14</span> 
+<br><span id="codenumber">15</span> 
+<br><span id="codenumber">16</span> 
+<br><span id="codenumber">17</span> MyWindow :: HandleMessage<font color="#4444ff">(</font> Message &amp;pcMessage <font color="#4444ff">)</font>
+<br><span id="codenumber">18</span> <font color="#4444ff">{</font>
+<br><span id="codenumber">19</span>    switch<font color="#4444ff">(</font> pcMessage-&gt;GetCode<font color="#4444ff">(</font><font color="#4444ff">)</font> <font color="#4444ff">)</font>
+<br><span id="codenumber">20</span>    <font color="#4444ff">{</font>
+<br><span id="codenumber">21</span>       case RESET_BUTTON_PRESSED_MESSAGE:
+<br><span id="codenumber">22</span>          /* Do whatever when the Reset Button is clicked */
+<br><span id="codenumber">23</span>          break;
+<br><span id="codenumber">24</span>       default:
+<br><span id="codenumber">25</span>          Window :: HandleMessage<font color="#4444ff">(</font> pcMessage <font color="#4444ff">)</font>;
+<br><span id="codenumber">26</span>    <font color="#4444ff">}</font>
+<br><span id="codenumber">27</span> <font color="#4444ff">}</font>
+<br></div>
+
+<div id="sectiontext">Deriving Classes</div>
+
+<p>If the messaging system is inadequate for a particular type of
+funcionality, the programmer can derive his or her own classes from the
+classes provided in the .h files. He or she then implements (or
+overrides) whatever functions are provided for that class, to control
+the widget. If our programmer wanted to have a button which does
+something once the user has clicked on it, s/he would create a class
+called, for example, MyButton which derives from Button, then override
+the <code>Invoke()</code> function, and write the code to do whatever needs to be done when the button is activated.</p>
+
+<p>OK, perhaps that's sort of unclear.  Let's see a simple example:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> #include <gui>
+<br><span id="codenumber"> 2</span> 
+<br><span id="codenumber"> 3</span> class MyButton : public Button
+<br><span id="codenumber"> 4</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 5</span>    MyButton<font color="#4444ff">(</font> void <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 6</span>    status_t Invoke<font color="#4444ff">(</font>Message *a_pcMessage<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 7</span> <font color="#4444ff">}</font>
+<br></gui></div>
+
+<p>So we've just created our own version of the Button, but we'll be able to write our own <code>Invoke()</code> function to do whatever we want:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> status_t MyButton :: Invoke<font color="#4444ff">(</font>Message *a_pcMessage<font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    /* Do something interesting here. */
+<br><span id="codenumber"> 4</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p>That <code>Invoke()</code> function will be called by Syllable whenever a user clicks on our button.</p>
+
+<div id="sectiontext">Compilers</div>
+
+<p>The only way to create GUI applications for Syllable is to download
+the port of gcc (the GNU C++ compiler) and compile applications using
+Makefiles and/or the command line. There are no GUI IDEs for Syllable
+yet.</p>
+
+<p>If you want to learn more about command-line compilation, see a Unix book (such as the excellent <i>Unix in a Nutshell</i> from <a href="http://www.oreilly.com/">O'Reilly</a>) for more information.</p>
+
+<p>That's about it.  If you're unclear on any of this, or just want to get into the specifics of coding, go to <a href="http://www.syllable.org/sub/?section=Programming&amp;tutorial=Hello_World">A Dissection of Hello World</a>.</p>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+Please use *correct* HTML - namely where your #include lines are. Use
+$lt; and &gt; entities instead of &lt; and &gt;, respectively.
+<hr>This article is rather old. Now there is at least sIDE, as IDE for
+syllable. It support code coloring, and project settings (freeing
+developers from writing makefiles)
+</div>
+ </div>
+</div>
+
+<br><br>
+
+</body></html

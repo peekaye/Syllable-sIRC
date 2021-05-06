@@ -1,0 +1,3139 @@
+<html><head>
+
+<title>Syllable User Bible - Application Programming</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<!-- <center><table border="0" cellpadding="0" cellspacing="0" width="100%">
+ <tr>
+  <td valign="top" width="65%"> -->
+<div id="mainContainer">
+ <div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> | <a href="http://www.other-space.com/sub/requests.php">Request a Tutorial</a>
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Application Programming</div>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+<p id="tutorialname">Introduction</p>
+<p></p><h3>Syllable OS Development Introduction</h3>
+<p></p>
+
+<p>Welcome to Syllable!  We're glad you want to help out.
+
+</p>
+<p>First of all, you'll need some basic development tools.  You have two options:
+
+</p>
+<ul>
+<li> <a href="http://kamidake.other-space.com/display_entry.php?id=284">Download the Developer Pack</a>, which contains all of the most common packages you'll need, though they may not always be the most up-to-date versions. OR</li>
+<li> Download the individual packages you want from <a href="http://syllable.org/modules.php?name=Downloads&amp;d_op=viewdownload&amp;cid=10">the Syllable website</a>.  At a minimum these should be:</li>
+<ul>
+<li> Gcc 3.3 or newer</li>
+<li> Binutils 2.14 or newer</li>
+<li> The latest version of make</li>
+<p></p></ul>
+</ul>
+
+<p></p>
+<p>Read the README included in the Developer Pack for installation
+instructions. Note that, if you're downloading the Developer Pack 4 for
+0.6.0, get a copy of libgcc_s.so.1 and put it in /system/lib/. It'll be
+on the install CD, or in 0.5.7.
+</p>
+<p>Those are the minimum you would need to build C or C++ software, but
+if you also want to build the kernel or deal with third party source
+code, the following packages may also be required:
+</p>
+<ul>
+<li> nasm</li>
+<li> Autoconf</li>
+<li> Perl</li>
+<li> Diffutils</li>
+<li> Ruby (needed to install Builder)</li>
+<p></p></ul>
+
+<p></p>
+<p>You should probably download the latest CVS package in order to access the Syllable CVS repository, including Builder.
+
+</p>
+<p>Retrieve Builder from CVS:
+
+</p>
+<pre>cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/syllable co syllable/system/apps/utils/Builder
+</pre>
+
+<p>Retrieve from CVS two files which are used by some of the system Makefiles:
+
+</p>
+<pre>cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/syllable co syllable/system/makefile.rules
+cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/syllable co syllable/system/recurse.rules
+</pre>
+
+<p>These two files should go in /usr/src  Also modify /etc/profile and
+set the ATHEOS_SRC environment variable to point to /usr/src.  Directly
+below this, add:
+
+</p>
+<pre>export ATHEOS_INCLUDE_PATH=/ainc
+</pre>
+
+<p>Close and re-open your terminal window for these changes to take effect.
+
+</p>
+<p>Some code may require extra libraries.  For example, libogg, libpng, etc. are
+required by some parts of Syllable.  You would need to download and
+install these as needed.
+</p>
+<p id="tutorialname">Syllable API Intro</p>
+
+<div id="sectiontext">The API</div>
+
+<p>The Syllable API (Application Programming Interface) is a set of
+classes that Kurt wrote so that developers can use standard GUI widgets
+like windows, alert boxes, buttons, and so forth in their own Syllable
+programs.</p>
+
+<p>OK, so Syllable has got a whole bunch of classes, each one corresponding to an individual GUI widget.  There's <code>Window</code>, which creates a window, <code>CheckBox</code>, which displays a check box and a label, <code>Button</code>,
+which displays a pushbutton, and so forth. All of these classes are
+declared in .h files that reside in subdirectories within the <span id="filename">/boot/syllable/sys/include/</span> directory.  Thus, there's a <span id="filename">window.h</span> file, a <span id="filename">checkbox.h</span> file, a <span id="filename">button.h</span> file, etc.  Thus, to use any of these classes, all that a developer need do is #include the appropriate .h file.</p>
+
+<p>So if, for example, I wanted my Syllable program to have a window, a
+push button, and a list view, I'd have something like this at the
+beginning of my program:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> #include &lt;gui/window.h&gt;
+<br><span id="codenumber"> 2</span> #include &lt;gui/button.h&gt;
+<br><span id="codenumber"> 3</span> #include &lt;gui/listview.h&gt;
+<br></div>
+
+<p>However, there has to be some way for programmers to control the
+behavior of their widgets; when the user clicks on a button, the
+programmer needs to be able to specify what happens next. There are a
+couple of ways to do this.</p>
+
+<div id="sectiontext">Messages</div>
+
+<p>The API comes with a handy system for sending Messages when certain events occur.  Here's how it works:</p>
+
+<p>When you define a Button, you can specify a Message that that Button
+will send whenever the Button is clicked. That Message will, by
+default, be sent to the Window that contains the Button, though the
+destination can be changed. When the Window receives any Message, its <code>HandleMessage()</code> function is called, and you can override that function to respond to the particular Message you set up.</p>
+
+<p>Let's see an example:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> /* Define an identifier for the Reset Button message. */
+<br><span id="codenumber"> 2</span> const unsigned int RESET_BUTTON_PRESSED_MESSAGE = 1;
+<br><span id="codenumber"> 3</span> 
+<br><span id="codenumber"> 4</span> MyView :: MyView<font color="#4444ff">(</font> ... <font color="#4444ff">)</font>
+<br><span id="codenumber"> 5</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 6</span>    Button *resetButton;
+<br><span id="codenumber"> 7</span>    Message *message;
+<br><span id="codenumber"> 8</span>    Rect r;
+<br><span id="codenumber"> 9</span>    /* Create a new Message, for the Button */
+<br><span id="codenumber">10</span>    message = new Message<font color="#4444ff">(</font> RESET_BUTTON_PRESSED_MESSAGE <font color="#4444ff">)</font>;
+<br><span id="codenumber">11</span>    /* Create the Reset Button, telling it to send _message_ when it is clicked. */
+<br><span id="codenumber">12</span>    resetButton = new Button<font color="#4444ff">(</font> r, "resetButton", "Reset", message <font color="#4444ff">)</font>;
+<br><span id="codenumber">13</span> <font color="#4444ff">}</font>
+<br><span id="codenumber">14</span> 
+<br><span id="codenumber">15</span> 
+<br><span id="codenumber">16</span> 
+<br><span id="codenumber">17</span> MyWindow :: HandleMessage<font color="#4444ff">(</font> Message &amp;pcMessage <font color="#4444ff">)</font>
+<br><span id="codenumber">18</span> <font color="#4444ff">{</font>
+<br><span id="codenumber">19</span>    switch<font color="#4444ff">(</font> pcMessage-&gt;GetCode<font color="#4444ff">(</font><font color="#4444ff">)</font> <font color="#4444ff">)</font>
+<br><span id="codenumber">20</span>    <font color="#4444ff">{</font>
+<br><span id="codenumber">21</span>       case RESET_BUTTON_PRESSED_MESSAGE:
+<br><span id="codenumber">22</span>          /* Do whatever when the Reset Button is clicked */
+<br><span id="codenumber">23</span>          break;
+<br><span id="codenumber">24</span>       default:
+<br><span id="codenumber">25</span>          Window :: HandleMessage<font color="#4444ff">(</font> pcMessage <font color="#4444ff">)</font>;
+<br><span id="codenumber">26</span>    <font color="#4444ff">}</font>
+<br><span id="codenumber">27</span> <font color="#4444ff">}</font>
+<br></div>
+
+<div id="sectiontext">Deriving Classes</div>
+
+<p>If the messaging system is inadequate for a particular type of
+funcionality, the programmer can derive his or her own classes from the
+classes provided in the .h files. He or she then implements (or
+overrides) whatever functions are provided for that class, to control
+the widget. If our programmer wanted to have a button which does
+something once the user has clicked on it, s/he would create a class
+called, for example, MyButton which derives from Button, then override
+the <code>Invoke()</code> function, and write the code to do whatever needs to be done when the button is activated.</p>
+
+<p>OK, perhaps that's sort of unclear.  Let's see a simple example:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> #include <gui>
+<br><span id="codenumber"> 2</span> 
+<br><span id="codenumber"> 3</span> class MyButton : public Button
+<br><span id="codenumber"> 4</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 5</span>    MyButton<font color="#4444ff">(</font> void <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 6</span>    status_t Invoke<font color="#4444ff">(</font>Message *a_pcMessage<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 7</span> <font color="#4444ff">}</font>
+<br></gui></div>
+
+<p>So we've just created our own version of the Button, but we'll be able to write our own <code>Invoke()</code> function to do whatever we want:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> status_t MyButton :: Invoke<font color="#4444ff">(</font>Message *a_pcMessage<font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    /* Do something interesting here. */
+<br><span id="codenumber"> 4</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p>That <code>Invoke()</code> function will be called by Syllable whenever a user clicks on our button.</p>
+
+<div id="sectiontext">Compilers</div>
+
+<p>The only way to create GUI applications for Syllable is to download
+the port of gcc (the GNU C++ compiler) and compile applications using
+Makefiles and/or the command line. There are no GUI IDEs for Syllable
+yet.</p>
+
+<p>If you want to learn more about command-line compilation, see a Unix book (such as the excellent <i>Unix in a Nutshell</i> from <a href="http://www.oreilly.com/">O'Reilly</a>) for more information.</p>
+
+<p>That's about it.  If you're unclear on any of this, or just want to get into the specifics of coding, go to <a href="http://www.other-space.com/sub/?section=Programming&amp;tutorial=Hello_World">A Dissection of Hello World</a>.</p>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+Please use *correct* HTML - namely where your #include lines are. Use
+$lt; and &gt; entities instead of &lt; and &gt;, respectively.
+<hr>This article is rather old. Now there is at least sIDE, as IDE for
+syllable. It support code coloring, and project settings (freeing
+developers from writing makefiles)
+<hr>
+yes, it's old, but somebody with programming knowledge would have to update it, and the developers are busy developing.
+
+</div>
+
+<p id="tutorialname">Basic Programming</p>
+
+<p>OK, today we're going to write a ridiculously simple program, one which will print the sentence <code>Hello, world!</code>
+on the screen. It won't teach you the Syllable API, and it won't even
+teach you much of C++; it will teach you the basics of how programming
+works.</p>
+
+<p>We'll start off by creating a directory to store our developmental
+programs in. Open up your home directory in a terminal window, and type
+the following:</p>
+
+<div id="terminal">
+  $ <b>mkdir development</b><br>
+  $ <b>cd development</b><br>
+</div>
+
+<p>OK, it's time to write our first program. Using a text editor,
+create a simple plain-text file. No formatting. Add the following to
+the file:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>   #include &lt;iostream&gt;
+<br><span id="codenumber"> 2</span>   int main<font color="#4444ff">(</font> void <font color="#4444ff">)</font>
+<br><span id="codenumber"> 3</span>   <font color="#4444ff">{</font>
+<br><span id="codenumber"> 4</span>   std::cout &lt;&lt; "Hello, world!" &lt;&lt; std::endl;
+<br><span id="codenumber"> 5</span>   return 0;
+<br><span id="codenumber"> 6</span>   <font color="#4444ff">}</font>
+<br></div>
+
+<div id="sectiontext">A Closer Look At The Program</div>
+
+<p>That's a complete C++ program. Let's go through it line-by-line.
+Don't worry if you don't understand everything here; again, the point
+of this tutorial is more to get you used to the programming process,
+rather than teach you all the particulars of how this particular
+program works.</p>
+
+<p>The C++ programming specification actually defines only the very
+basic layout of the language. In order to actually do useful things
+with C++, you need to add special files called <i>libraries</i> to
+your program. A library is just a file which defines special commands.
+Thus, the first line of our program uses the special <code>#include</code> command to pull in a particular library file, namely, <code>iostream</code>.   <code>iostream</code> contains commands for <b>i</b>nput and <b>o</b>utput <b>stream</b>s; thus the name of the file.</p>
+
+<p>Then, every program needs a block of code named <code>main</code>.  The program always starts executing here, no matter where the <code>main</code> block is located in the program.  The <code>int</code>
+word says that this block will end up with a number value when it's
+done processing &#8211; don't worry about exactly why we're bothering with
+this right now.</p>
+
+<p>(Actually, the proper term for these blocks is a "function," but we won't worry about that right now either.)</p>
+
+<p>OK, then we use a special command that's part of the <code>iostream</code> library; namely, the <code>cout</code> command.  <code>cout</code> is used to print things on the screen.  We then use the <code>&lt;&lt;</code>
+operator (a kind of command), to say that we're not done cout'ing yet,
+then we have the special string that we want to print out. This string
+must be surrounded with double-quote marks; otherwise, the C++ compiler
+won't know where the string begins and ends. Then we put another <code>&lt;&lt;</code> operator, and end the <code>cout</code> statement with the <code>endl</code>
+operator, which means that this is the end of this line on the screen,
+which will move the cursor on the screen to the next line. We end the
+line with a <code>;</code>, because all complete lines of code (except those starting with <code>#</code>) must end with a <code>;</code>.</p>
+
+<p>Now, remember how I said that this block will end up with a number
+value when it's done processing? Well, we have to say which number
+value that is, which is why we finish up this function with <code>return 0;</code>.  We end the program with a <code>}</code>, which finishes up the <code>main</code> function.</p>
+
+<div id="sectiontext">Compiling</div>
+
+<p>All right!  You've written your first program!  Now, save the file as <code>helloworld.cpp</code>, in the <code>development</code> directory of your home directory.</p>
+
+<p>OK, now we get to use the C++ <i>compiler</i>. A compiler is a
+program that takes commands in a particular programming language, and
+translates them to a whole bunch of commands that the operating system
+itself can recognize. Syllable can't directly interpret C++ commands;
+you have to compile each C++ program into a Syllable program.</p>
+
+<p>To compile your application, type the following in the terminal window (without the "$"):</p>
+
+<div id="terminal">
+  $ <b>gcc -lsyllable -lstdc++ helloworld.cpp -o helloworld</b><br>
+</div>
+
+<p>This will start the <code>gcc</code> program (which is the C++ compiler), telling it to load in the <code>syllable</code> and <code>stdc++</code> compiler libraries, compiling your <code>helloworld.cpp</code> program, and writing out the actual finished program as <code>helloworld</code>.</p>
+
+<p><code>gcc</code> may come back with a bunch of errors. If you get
+any errors, go back and make sure that you typed in your code exactly
+as it's listed above. If you find any errors, change your code, save
+it, and re-type the line above to re-compile your program.</p>
+
+<p>Once you compile without errors, enter the following in the terminal window:</p>
+
+<div id="terminal">
+  $ <b>./helloworld</b><br>
+  Hello, world!<br>
+  $ <br>
+</div>
+
+<p>You should immediately get back a line saying <code>Hello, world!</code>.  If so, congratulations!  You've successfully written, compiled, and executed your first Syllable program!</p>
+
+<div id="sectiontext">Variables</div>
+
+<p>It's time to start doing vaguely useful things with C++.  This tutorial will familiarize you with <i>variables</i>.</p>
+
+<p>Variables are simply containers that you can use to store a little
+data. You can think of a variable as being like a mug; you can fill it
+with water, or you can put a slip of paper into it, or whatever.</p>
+
+<p>However, unlike mugs, variables have to have a particular <i>type</i>.
+Whenever you create a variable, you have to say exactly what sort of
+thing you want to put into it. Thus, you could create a variable that
+will only be able to store one integer number at any given time, or
+that will only store text. This would be like declaring that your blue
+Hawaii mug is only to be used for drinking out of; nobody should store
+pencils in it.</p>
+
+<p>The syntax for creating a variable is simple: First comes the type
+of the variable, followed by the name that you want to use for the
+variable, followed by a semi-colon ("<code>;</code>").  To put a number in the variable, you just type the name of the variable, followed by an equals sign ("<code>=</code>"), followed by whatever value you want for the variable, followed by a <code>;</code>.</p>
+
+<p>What types are available?  Here's a quick list:</p>
+
+<table border="1">
+  <tbody><tr>
+    <td><b>Type</b></td>
+    <td><b>Examples</b></td>
+    <td><b>Notes</b></td>
+  </tr><tr>
+    <td><code>int</code></td>
+    <td>4, 102</td>
+    <td>Integer &#8211; a number with no decimal or fraction part</td>
+  </tr><tr>
+    <td><code>float</code></td>
+    <td>3.8, 40.10039, 6</td>
+    <td>Floating-point number &#8211; any sort of real number, with or without a decimal place</td>
+  </tr><tr>
+    <td><code>char</code></td>
+    <td>'a', '%', '2'</td>
+    <td>Character &#8211; a single character</td>
+  </tr><tr>
+    <td><code>string</code></td>
+    <td>"Hello", "5"</td>
+    <td>String &#8211; contains text; must use <code>#include <string></string></code></td>
+  </tr>
+</tbody></table>
+
+<p><strong>A Quick Example</strong></p>
+
+<p>Let's write an example before we go any farther. We'll write a
+simple program that stores a number, then displays it on the screen.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>   #include &lt;iostream&gt;
+<br><span id="codenumber"> 2</span>   int main<font color="#4444ff">(</font> void <font color="#4444ff">)</font>
+<br><span id="codenumber"> 3</span>   <font color="#4444ff">{</font>
+<br><span id="codenumber"> 4</span>     int num;
+<br><span id="codenumber"> 5</span>     num = 5;
+<br><span id="codenumber"> 6</span>     cout &lt;&lt; "The number is " &lt;&lt; num &lt;&lt; endl;
+<br><span id="codenumber"> 7</span>     return 0;
+<br><span id="codenumber"> 8</span>   <font color="#4444ff">}</font>
+<br></div>
+
+<p>OK.  The first thing we did was define a variable, named <code>num</code>, as an <code>int</code>
+(integer). We then assign the value of 5 to the variable, and then we
+print out a short message which also prints out whatever's in that
+variable.</p>
+
+<p>Save this program as <code>variables.cpp</code> in the <code>~/development</code> directory, then open a terminal window and type the following (type everything that comes after a "$"):</p>
+
+<div id="terminal">
+  $ <b>cd ~/development</b><br>
+  $ <b>gcc -lstdc++ variables.cpp -o variables</b><br>
+  $ <b>./variables</b><br>
+  The number is 5<br>
+  $ <br>
+</div>
+
+<div id="sectiontext">Some Simple Math Operations</div>
+
+<p>So, let's review. We've seen how to create variables, and how to
+assign a value to them, and how to print that out. Not very exciting.</p>
+
+<p>But wait! We can do math with our variables! We just use that
+"variable = value" syntax shown above, and add in mathematical symbols.
+Thus, you can do this:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>   num = 5 + 9;<br>
+<br></div>
+
+<p>After that command is executed, <code>num</code> will have the value
+of 14. This wouldn't be very powerful, except that you can also use
+variables in there too. Let's write another example.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>   #include <iostream>
+<br><span id="codenumber"> 2</span>   int main<font color="#4444ff">(</font> void <font color="#4444ff">)</font>
+<br><span id="codenumber"> 3</span>   <font color="#4444ff">{</font>
+<br><span id="codenumber"> 4</span>     <font color="#ff0000">/*  ----- Performs various mathematical operations on 8 and 3.
+<br><span id="codenumber"> 5</span>       Perform the math.
+<br><span id="codenumber"> 6</span>       Print out the result.  */</font>
+<br><span id="codenumber"> 7</span>     float number1;
+<br><span id="codenumber"> 8</span>     float number2;
+<br><span id="codenumber"> 9</span>     float add_result, subtract_result, multiply_result, divide_result;
+<br><span id="codenumber">10</span>     number1 = 8;
+<br><span id="codenumber">11</span>     number2 = 3;
+<br><span id="codenumber">12</span>     <font color="#ff0000">/*  Perform the math.  */</font>
+<br><span id="codenumber">13</span>     add_result     = number1 + number2;
+<br><span id="codenumber">14</span>     subtract_result = number1 - number2 - 2;
+<br><span id="codenumber">15</span>     multiply_result = number1 * number2;
+<br><span id="codenumber">16</span>     divide_result   = number1 / number2;
+<br><span id="codenumber">17</span>     <font color="#ff0000">/*  Print out the result.  */</font>
+<br><span id="codenumber">18</span>     cout &lt;&lt; number1 &lt;&lt; " + " &lt;&lt; number2
+<br><span id="codenumber">19</span>         &lt;&lt; " = " &lt;&lt; add_result &lt;&lt; endl
+<br><span id="codenumber">20</span>         &lt;&lt; number1 &lt;&lt; " - " &lt;&lt; number2
+<br><span id="codenumber">21</span>         &lt;&lt; " - 2 = " &lt;&lt; subtract_result &lt;&lt; endl
+<br><span id="codenumber">22</span>         &lt;&lt; number1 &lt;&lt; " * " &lt;&lt; number2
+<br><span id="codenumber">23</span>         &lt;&lt; " = " &lt;&lt; multiply_result &lt;&lt; endl
+<br><span id="codenumber">24</span>         &lt;&lt; number1 &lt;&lt; " / " &lt;&lt; number2
+<br><span id="codenumber">25</span>         &lt;&lt; " = " &lt;&lt; divide_result &lt;&lt; endl;
+<br><span id="codenumber">26</span>     return 0;
+<br><span id="codenumber">27</span>   <font color="#4444ff">}</font>
+<br></iostream></div>
+
+<p>The first thing you'll notice is a bunch of English sentences, surrounded by <code>/*</code> and <code>*/</code>.  These are <i>comments</i>,
+which are completely ignored by the compiler. Comments let you make
+notes to yourself (and other developers). What I did in the program
+above is my standard commenting scheme; I start out with a one-line
+description of this function (that is, <code>main</code>), followed by
+an outline of what the code does. I then insert each step of the
+outline wherever the code itself starts performing that step.
+</p><p>You'll also notice a special method of declaring our variables;
+rather than listing the type for each one, we listed the type, then a
+bunch of variables, separated by commas. This is perfectly legal C++,
+and is a convenient, quick way to set up a few variables.
+Unfortunately, this particular syntax makes it difficult to read and
+find variables, so I don't like to use it often.</p>
+
+<p>We then perform a few mathematical functions, and store the results
+in our four result variables. Finally, we print the results out. Note
+that we made the <code>cout</code> command work over a number of lines; since the <code>;</code> doesn't appear until after the last <code>endl</code> operator, the C++ compiler will know to treat it all as one <code>cout</code> command.</p>
+
+<p>OK, save the above code as <code>variables1.cpp</code>, and compile it and run it as usual.  Here's what you should see:</p>
+
+<div id="terminal">
+  8 + 3 = 11
+  8 - 3 - 2 = 3
+  8 * 3 = 24
+  8 / 3 = 2.666667
+</div>
+
+<p>Remember that variables are, well, variable; you can change them at any time during your program.  Thus, this is perfectly OK:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>   int var;
+<br><span id="codenumber"> 2</span>   var = 3 + 8;
+<br><span id="codenumber"> 3</span>   cout &lt;&lt; var &lt;&lt; endl;
+<br><span id="codenumber"> 4</span>   var = 100;
+<br><span id="codenumber"> 5</span>   cout &lt;&lt; var &lt;&lt; endl;
+<br></div>
+
+<div id="sectiontext">String Theory</div>
+
+<p>Before we leave, let's write one final example, one that uses chars and strings, just for completeness.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>   #include &lt;iostream&gt;
+<br><span id="codenumber"> 2</span>   <font color="#ff0000">#include <string></string></font>
+<br><span id="codenumber"> 3</span>   int main<font color="#4444ff">(</font> void <font color="#4444ff">)</font>
+<br><span id="codenumber"> 4</span>   <font color="#4444ff">{</font>
+<br><span id="codenumber"> 5</span>     string firstName;
+<br><span id="codenumber"> 6</span>     char   middleInitial;
+<br><span id="codenumber"> 7</span>     string lastName;
+<br><span id="codenumber"> 8</span>     string fullName;
+<br><span id="codenumber"> 9</span>     firstName = "George";
+<br><span id="codenumber">10</span>     middleInitial = 'C';
+<br><span id="codenumber">11</span>     lastName = "Scott";
+<br><span id="codenumber">12</span>     cout &lt;&lt; "The person's name is: ";
+<br><span id="codenumber">13</span>     fullName = firstName + " " + middleInitial + ". " + lastName;
+<br><span id="codenumber">14</span>     cout &lt;&lt; fullName &lt;&lt; endl;
+<br><span id="codenumber">15</span>     return 0;
+<br><span id="codenumber">16</span>   <font color="#4444ff">}</font>
+<br></div>
+
+<p>(By the way, variable names can contain any letters (upper- or
+lower-case), numbers, and underscores, as long as they don't start with
+a number. Thus, <code>health</code>, <code>a1</code>, and <code>Speaker_System</code> are all valid variable names; <code>2a</code>, <code>health!</code>, and <code>George'C'</code> are not.  Also, variable names are case-sensitive, so <code>health</code> and <code>Health</code> are completely different variables.)</p>
+
+<p>The above should be fairly straightforward; only note that we had to include the <code>string</code>
+library, so that we would have string variables. We just stored the
+first name, last name, and middle initial of someone into three
+variables, then stuffed all of that into <code>fullName</code> (formatted with a few spaces), and printed that out.  Save this program as <code>variables2.cpp</code>, compile it, and run it.  Here's what you should get:</p>
+
+<div id="terminal">
+  The person's name is: George C. Scott<br>
+</div>
+
+<div id="sectiontext">Text Input</div>
+
+<p>How many programs do you have that don't need any input from you at
+all to do anything useful? Not many, I'll bet. Today we'll look at
+reading input from the keyboard, so that we can write some really
+useful C++ programs.</p>
+
+<p>Keyboard input is accomplished using <code>cout</code>'s lesser sibling, <code>cin</code>.  <code>cin</code> uses very similar syntax to <code>cout</code>; you simply put in a list of variables that you want to read in.  Let's see an example:</p>
+
+<div id="sectiontext">Number Input</div>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>   #include &lt;iostream&gt;
+<br><span id="codenumber"> 2</span>   int main<font color="#4444ff">(</font> void <font color="#4444ff">)</font>
+<br><span id="codenumber"> 3</span>   <font color="#4444ff">{</font>
+<br><span id="codenumber"> 4</span>     float number1;
+<br><span id="codenumber"> 5</span>     float number2;
+<br><span id="codenumber"> 6</span>     cout &lt;&lt; "Enter any number: ";
+<br><span id="codenumber"> 7</span>     <font color="#ff0000">cin &gt;&gt; number1;</font>
+<br><span id="codenumber"> 8</span>     cout &lt;&lt; endl;
+<br><span id="codenumber"> 9</span>     cout &lt;&lt; "Enter another number: ";
+<br><span id="codenumber">10</span>     <font color="#ff0000">cin &gt;&gt; number2;</font>
+<br><span id="codenumber">11</span>     cout &lt;&lt; endl;
+<br><span id="codenumber">12</span>     cout &lt;&lt; number1 &lt;&lt; " + " &lt;&lt; number2 &lt;&lt; " = " &lt;&lt; number1 + number2 &lt;&lt; endl;
+<br><span id="codenumber">13</span>     return 0;
+<br><span id="codenumber">14</span>   <font color="#4444ff">}</font>
+<br></div>
+
+<p>This program should be fairly obvious. It prompts the user to enter
+two numbers, then prints out the sum of the two numbers. Notice how <code>cin</code> works:  You use the command <code>cin</code>, followed by the <code>&gt;&gt;</code> operator (the reverse of <code>cout</code>'s <code>&lt;&lt;</code> operator), followed by the name of the variable that you want to put the user's input into.</p>
+
+<p>Let's run through the program once.  Save the above code as <code>input.cpp</code>, compile it, and run it.  The stuff that you're supposed to type in is in <b>bold</b>:</p>
+
+<div id="terminal">
+  $ <b>./input</b><br>
+  Enter any number: <b>30</b>
+  Enter another number: <b>5.5</b>
+  30 + 5.5 = 35.5
+  $ 
+</div>
+
+<p>Pretty simple, huh?  Let's try this with strings.</p>
+
+<p><strong>String Input</strong></p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>   #include &lt;iostream&gt;
+<br><span id="codenumber"> 2</span>   #include &lt;string&gt;
+<br><span id="codenumber"> 3</span>   int main<font color="#4444ff">(</font> void <font color="#4444ff">)</font>
+<br><span id="codenumber"> 4</span>   <font color="#4444ff">{</font>
+<br><span id="codenumber"> 5</span>     string name;
+<br><span id="codenumber"> 6</span>     cout &lt;&lt; "What is your name? ";
+<br><span id="codenumber"> 7</span>     cin &gt;&gt; name;
+<br><span id="codenumber"> 8</span>     cout &lt;&lt; "Hello, " &lt;&lt; name &lt;&lt; "." &lt;&lt; endl;
+<br><span id="codenumber"> 9</span>     return 0;
+<br><span id="codenumber">10</span>   <font color="#4444ff">}</font>
+<br></div>
+
+<p>Save this as <code>input1.cpp</code> and compile it.  Let's run through it once.</p>
+
+<div id="terminal">
+  $ <b>./input1</b><br>
+  What is your name? <b>Lain</b>
+  Hello, Lain.
+</div>
+
+<div id="sectiontext">If Statements</div>
+
+<p>Thus far, our programs have been pretty linear; they start, they do
+some stuff, and then they stop. Our programs haven't made any sort of
+decision-making. They're about to.</p>
+
+<p>Let's look at the wonderful world of <code>if()</code> statements.  <code>if()</code>
+statements are special commands that make a comparison (or a bunch of
+comparisons), and make a yes/no decision based on those comparisons.
+There are no "maybe's" when you're using <code>if</code>; the result is either true or false.</p>
+
+<p>The syntax of the <code>if()</code> statement looks a lot like the syntax of the <code>main()</code> function.  You start out with <code>if</code>, followed by an opening parentheses ("<code>(</code>"), followed by an <i>expression</i> (more on that in a moment), then a closing parentheses ("<code>)</code>"), an opening curly bracket ("<code>{</code>"), the code that you want to execute if the expression is true, and finally, a closing curly bracket ("<code>}</code>}).  Here's a quick example:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>   int i;
+<br><span id="codenumber"> 2</span>   i = 5;
+<br><span id="codenumber"> 3</span>   if<font color="#4444ff">(</font> i &gt; 1 <font color="#4444ff">)</font>
+<br><span id="codenumber"> 4</span>   <font color="#4444ff">{</font>
+<br><span id="codenumber"> 5</span>     i = 1;
+<br><span id="codenumber"> 6</span>   <font color="#4444ff">}</font>
+<br></div>
+
+<p>The above declares a variable named <code>i</code>, puts 5 into it, then sees if the value of <code>i</code> is greater than 1.  If <code>i</code> is greater than 1, then <code>i</code> is set to 1.  Simple enough.  Yes, it's silly; we'll see some more useful examples in a little bit.</p>
+
+<p>Note that you can have any number of spaces between the <code>if</code>, the parentheses, and the values of the expression (or no spaces, if you prefer); the following is perfectly legal C++:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>   if<font color="#4444ff">(</font>i &gt;1<font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span>   <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>     i = 1;
+<br><span id="codenumber"> 4</span>   <font color="#4444ff">}</font>
+<br></div>
+
+<p>This is OK, too:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>   if   <font color="#4444ff">(</font>   i &gt; 1   <font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span>   <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>     i = 1;
+<br><span id="codenumber"> 4</span>   <font color="#4444ff">}</font>
+<br></div>
+
+<p>I just prefer my own little syntax ("<code>if( i &gt; 1 )</code>"); you can format it however you want.</p>
+
+<div id="sectiontext">Expressionism</div>
+
+<p>So, what are these expressions?  An expression is composed of one or more comparisons (e.g., "<code>health &lt; 100</code>", separated by <i>Boolean operators</i>.  Let's see exactly what I mean.</p>
+
+<p>Comparisons are simply a matter of comparing one thing to another;
+is the value of this variable greater than this number? Is the value of
+this variable equal to the value of this other variable? Here's a quick
+list of the operators that you can use:</p>
+
+<table border="1">
+  <tbody><tr>
+    <td><b>Operator</b></td>
+    <td><b>Meaning</b></td>
+    <td><b>Example</b></td>
+    <td><b>Sample value</b></td>
+  </tr>
+  <tr>
+    <td align="center"><code>&lt;</code></td>
+    <td>Less than</td>
+    <td><code>if( i &lt; j )</code></td>
+    <td><code>1 &lt; 5</code> will be <i>true</i></td>
+  </tr>
+  <tr>
+    <td align="center"><code>&gt;</code></td>
+    <td>Greater than</td>
+    <td><code>if( i &gt; j )</code></td>
+    <td><code>1 &gt; 5</code> will be <i>false</i></td>
+  </tr>
+  <tr>
+    <td align="center"><code>&lt;=</code></td>
+    <td>Less than or equal to</td>
+    <td><code>if( i &lt;= j )</code></td>
+    <td><code>1 &lt;= 5</code> will be <i>true</i></td>
+  </tr>
+  <tr>
+    <td align="center"><code>&gt;=</code></td>
+    <td>Greater than or equal to</td>
+    <td><code>if( i &gt;= j )</code></td>
+    <td><code>1 &gt;= 5</code> will be <i>false</i></td>
+  </tr>
+  <tr>
+    <td align="center"><code>==</code></td>
+    <td>Equal to</td>
+    <td><code>if( i == j )</code></td>
+    <td><code>1 == 5</code> will be <i>false</i></td>
+  </tr>
+  <tr>
+    <td align="center"><code>!=</code></td>
+    <td>Not equal to</td>
+    <td><code>if( i != j )</code></td>
+    <td><code>1 != 5</code> will be <i>true</i></td>
+  </tr>
+</tbody></table>
+
+<p>OK, that makes sense. What about these Boolean operators? Well,
+they're a way to put a bunch of comparisons all in one if statement.
+For example, what if your program had to check to see if a variable was
+within a valid range, say from 1 to 100? You could write it like this:
+</p><div id="codelisting">
+<span id="codenumber"> 1</span>   if<font color="#4444ff">(</font> num &gt;= 1 <font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span>   <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>     if<font color="#4444ff">(</font> num &lt;= 100 <font color="#4444ff">)</font>
+<br><span id="codenumber"> 4</span>     <font color="#4444ff">{</font>
+<br><span id="codenumber"> 5</span>       /*  Do whatever  */
+<br><span id="codenumber"> 6</span>     <font color="#4444ff">}</font>
+<br><span id="codenumber"> 7</span>   <font color="#4444ff">}</font>
+<br></div>
+
+<p>Fortunately, there's an easier way! You can combine conditions
+together using Boolean operators. Here are the two main Boolean
+operators:</p>
+
+<table border="1">
+  <tbody><tr>
+    <td><b>Operator</b></td>
+    <td><b>Meaning</b></td>
+    <td><b>Example</b></td>
+    <td><b>Sample value</b></td>
+  </tr>
+  <tr>
+    <td><code>&amp;&amp;</code></td>
+    <td>And</td>
+    <td><code>if( a &gt;= 1 &amp;&amp; a &lt;= 100 )</code></td>
+    <td><code>5 &gt;= 1 &amp;&amp; 5 &lt;= 100</code> will be <i>true</i></td>
+  </tr>
+  <tr>
+    <td><code>||</code></td>
+    <td>Or</td>
+    <td><code>if( a &lt;= 100 || b &lt;= 100 )</code></td>
+    <td><code>5 &lt;= 100 || 219 &lt;= 100</code> will be <i>true</i></td>
+  </tr>
+</tbody></table>
+
+<p>So, we could compress the above code like this:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>   if<font color="#4444ff">(</font> num &gt;= 1 &amp;&amp; num &lt;= 100 <font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span>   <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>     /*  Do whatever  */
+<br><span id="codenumber"> 4</span>   <font color="#4444ff">}</font>
+<br></div>
+
+<div id="sectiontext">What Else?</div>
+
+<p>OK, what happens if you want to do something when the condition is <i>not</i>
+satisfied? For example, let's say we want to protect our program with a
+password prompt. If the user enters the correct password, they should
+be able to use the rest of the program, but if they don't enter the
+right password, they should get an error message.</p>
+
+<p>We can do this with the secret other half of the <code>if()</code> statement; the <code>else</code> clause.  Let's just see it in action:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>   #include &lt;iostream&gt;
+<br><span id="codenumber"> 2</span>   #include &lt;string&gt;
+<br><span id="codenumber"> 3</span>   int main<font color="#4444ff">(</font> void <font color="#4444ff">)</font>
+<br><span id="codenumber"> 4</span>   <font color="#4444ff">{</font>
+<br><span id="codenumber"> 5</span>     string password;
+<br><span id="codenumber"> 6</span>     cout &lt;&lt; "Login: ";
+<br><span id="codenumber"> 7</span>     cin &gt;&gt; password;
+<br><span id="codenumber"> 8</span>     if<font color="#4444ff">(</font> password == "joshua" <font color="#4444ff">)</font>
+<br><span id="codenumber"> 9</span>     <font color="#4444ff">{</font>
+<br><span id="codenumber">10</span>       cout &lt;&lt; "Greetings, Professor Falken." &lt;&lt; endl
+<br><span id="codenumber">11</span>           &lt;&lt; "Shall we play a game?" &lt;&lt; endl;
+<br><span id="codenumber">12</span>     <font color="#4444ff">}</font>
+<br><span id="codenumber">13</span>     <font color="#ff0000">else</font>
+<br><span id="codenumber">14</span>     <font color="#4444ff">{</font>
+<br><span id="codenumber">15</span>       cout &lt;&lt; "Access denied." &lt;&lt; endl;
+<br><span id="codenumber">16</span>     <font color="#4444ff">}</font>
+<br><span id="codenumber">17</span>     return 0;
+<br><span id="codenumber">18</span>   <font color="#4444ff">}</font>
+<br></div>
+
+<p>Save and compile this program.  Note that you should <i>not</i> name the program <span id="filename">if.cpp</span>, as the compiled program will be called <span id="filename">if</span>, which is a special command in the Terminal.  It's perfectly fine to call it <span id="filename">if1.cpp</span>.</p>
+
+<p>In any event, let's run the program, giving it the correct password:</p>
+
+<div id="terminal">
+  $ <b>./if1</b>
+  Login: <b>joshua</b>
+  Greetings, Professor Falken.
+  Shall we play a game?
+  $ 
+</div>
+
+<p>Now we'll run it again, giving it the wrong password:</p>
+
+<div id="terminal">
+  $ <b>./if1</b>
+  Login: <b>james</b>
+  Access denied.
+  $ 
+</div>
+
+<div id="sectiontext">A Complete Example</div>
+
+<p>Let's write a simple number guessing game. It will ask the player
+for a number, which it will then perform a series of calculations on,
+to get out of it a number between 1 and 10. The user can then guess
+that number.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>   #include &lt;iostream&gt;
+<br><span id="codenumber"> 2</span>   int main<font color="#4444ff">(</font> void <font color="#4444ff">)</font>
+<br><span id="codenumber"> 3</span>   <font color="#4444ff">{</font>
+<br><span id="codenumber"> 4</span>     /* ----- A number guessing game.
+<br><span id="codenumber"> 5</span>       Ask for the seed number.
+<br><span id="codenumber"> 6</span>       Calculate the computer's number from the seed.
+<br><span id="codenumber"> 7</span>       Report on whether the computer's number is more or less than 5.
+<br><span id="codenumber"> 8</span>       Ask for the player's guess.
+<br><span id="codenumber"> 9</span>       Tell the player if s/he won or lost.
+<br><span id="codenumber">10</span>     */
+<br><span id="codenumber">11</span>     int seedNumber;
+<br><span id="codenumber">12</span>     int computerNumber;
+<br><span id="codenumber">13</span>     int guessedNumber;
+<br><span id="codenumber">14</span>     cout &lt;&lt; "Guess a number from 1 to 10!  Impress your friends!" &lt;&lt; endl &lt;&lt; endl;
+<br><span id="codenumber">15</span>     /* Ask for the seed number. */
+<br><span id="codenumber">16</span>     cout &lt;&lt; "Enter any integer number: ";
+<br><span id="codenumber">17</span>     cin &gt;&gt; seedNumber;
+<br><span id="codenumber">18</span>     /* Calculate the computer's number from the seed. */
+<br><span id="codenumber">19</span>     computerNumber = <font color="#4444ff">(</font>seedNumber + 97<font color="#4444ff">)</font> / 3;
+<br><span id="codenumber">20</span>     computerNumber = computerNumber % 10 + 1;
+<br><span id="codenumber">21</span>     /* Report on whether the computer's number is more or less than 5. */
+<br><span id="codenumber">22</span>     if<font color="#4444ff">(</font> computerNumber &gt; 5 <font color="#4444ff">)</font> <font color="#4444ff">{</font>
+<br><span id="codenumber">23</span>       cout &lt;&lt; "The number I picked is more than five." &lt;&lt; endl;
+<br><span id="codenumber">24</span>     <font color="#4444ff">}</font> else <font color="#4444ff">{</font>
+<br><span id="codenumber">25</span>       cout &lt;&lt; "The number I picked is no more than five." &lt;&lt; endl;
+<br><span id="codenumber">26</span>     <font color="#4444ff">}</font>
+<br><span id="codenumber">27</span>     /* Ask for the player's guess. */
+<br><span id="codenumber">28</span>     cout &lt;&lt; endl &lt;&lt; "Guess the number <font color="#4444ff">(</font>it's between 1 and 10<font color="#4444ff">)</font>: ";
+<br><span id="codenumber">29</span>     cin &gt;&gt; guessedNumber;
+<br><span id="codenumber">30</span>     /* Tell the player if s/he won or lost. */
+<br><span id="codenumber">31</span>     if<font color="#4444ff">(</font> computerNumber == guessedNumber <font color="#4444ff">)</font>
+<br><span id="codenumber">32</span>     <font color="#4444ff">{</font>
+<br><span id="codenumber">33</span>       cout &lt;&lt; "Congratulations!  You were right!" &lt;&lt; endl;
+<br><span id="codenumber">34</span>     <font color="#4444ff">}</font>
+<br><span id="codenumber">35</span>     else
+<br><span id="codenumber">36</span>     <font color="#4444ff">{</font>
+<br><span id="codenumber">37</span>       cout &lt;&lt; "Sorry!  I had picked the number " &lt;&lt; computerNumber &lt;&lt; endl;
+<br><span id="codenumber">38</span>     <font color="#4444ff">}</font>
+<br><span id="codenumber">39</span>     return 0;
+<br><span id="codenumber">40</span>   <font color="#4444ff">}</font>
+<br></div>
+
+<p>OK, let's give the game a whirl.  Save the above source code in a file, compile it, and execute it as usual.</p>
+
+<div id="terminal">
+  $ <b>./ifgame</b>
+  Guess a number from 1 to 10!  Impress your friends!
+  Enter any integer number: <b>90</b>
+  The number I picked is no more than five.
+  Guess the number (it's between 1 and 10): <b>2</b>
+  Sorry!  I had picked the number 3
+  $ 
+</div>
+
+<div id="sectiontext">Loops</div>
+
+<p>Today we'll talk about making your program do something over and over again.  Welcome to the wonderful world of loops.</p>
+
+<p>There are two main kinds of loops in C++; <code>while()</code> loops and <code>for()</code> loops.  <code>while()</code> loops are general-purpose loops, whereas <code>for()</code> loops can be seen as a special kind of <code>while()</code> loop that is especially for counting.  You'll see what I mean.</p>
+
+<div id="sectiontext"><i>While</i> You're At It</div>
+
+<p>OK, we have this particular loop called <code>while</code>, which will make your program do the same thing over and over.  The first thing you should worry about is how to <i>stop</i> the loop.  That's easy; you put an expression within the parentheses of the <code>while()</code> loop; say, <code>i == 10</code>.  Once that expression is false, the <code>while()</code> loop will stop.  Let's see an example.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>   #include &lt;iostream&gt;
+<br><span id="codenumber"> 2</span>   int main<font color="#4444ff">(</font> void <font color="#4444ff">)</font>
+<br><span id="codenumber"> 3</span>   <font color="#4444ff">{</font>
+<br><span id="codenumber"> 4</span>     int counter;
+<br><span id="codenumber"> 5</span>     counter = 1;
+<br><span id="codenumber"> 6</span>     <font color="#ff0000">while<font color="#4444ff">(</font> counter &lt;= 3 <font color="#4444ff">)</font></font>
+<br><span id="codenumber"> 7</span>     <font color="#4444ff">{</font>
+<br><span id="codenumber"> 8</span>       cout &lt;&lt; "The counter is " &lt;&lt; counter &lt;&lt; endl;
+<br><span id="codenumber"> 9</span>       counter = counter + 1;
+<br><span id="codenumber">10</span>     <font color="#4444ff">}</font>
+<br><span id="codenumber">11</span>     cout &lt;&lt; "All done." &lt;&lt; endl;
+<br><span id="codenumber">12</span>     return 0;
+<br><span id="codenumber">13</span>   <font color="#4444ff">}</font>
+<br></div>
+
+<p>Let's take this step-by-step.</p>
+
+<ol>
+<li> We create a variable named <code>counter</code>, and set it equal to 1.
+</li><li> We start the loop.
+  <ol>
+  <li> The first thing we do is test the expression in the loop.  <code>counter</code> is less than 3, so we continue into the loop.
+  </li><li> We print out a message, containing the value of <code>counter</code>, which will be 1.
+  </li><li> We <i>increment</i> <code>counter</code> by 1 (e.g., we take the value of <code>counter</code>, add 1 to it, then put the result back into counter, effectively increasing its value by 1).  <code>counter</code> now equals 2.
+  </li><li> We hit the end of the loop, which causes us to go back up to the top.
+  </li></ol>
+</li><li> Back into the loop again
+  <ol>
+  <li> First, we re-test the expression.  <code>counter</code> is still less than 3, so we continue through the loop.
+  </li><li> We print out a message again; this time announcing that <code>counter</code> is 2.
+  </li><li> We increment <code>counter</code> again; this time, <code>counter</code> will equal 3.
+  </li><li> We've hit the end of the loop.
+  </li></ol>
+</li><li> Back to the top of the loop
+  <ol>
+  <li> Let's re-test the expression.  <code>counter</code> equals 3, which means it is less than or equal to 3, which means we go into the loop once again.
+  </li><li> We print out another message, saying that <code>counter</code> is 3.
+  </li><li> We increment <code>counter</code>; it now equals 4.
+  </li><li> The end of the loop.
+  </li></ol>
+</li><li> We jump back up to the top of the loop.  This time, <code>counter</code> is greater than 3, so we jump down to after the end of the loop.
+</li><li> We print out "<code>All done.</code>"
+</li></ol>
+
+<p>Save the above program as <code>while1.cpp</code>, compile it, and execute it.  Here's what you should see:</p>
+
+<div id="terminal">
+  $ <b>./while1</b>
+  The counter is 1
+  The counter is 2
+  The counter is 3
+  All done.
+  $ 
+</div>
+
+<p>A <code>while()</code> loop can have any expression you'd like, including Boolean expressions.  The following is a perfectly valid <code>while()</code> loop expression:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>   while<font color="#4444ff">(</font> <font color="#4444ff">(</font> i &lt;= 100 &amp;&amp; name == "George" <font color="#4444ff">)</font> || food == 0.5 <font color="#4444ff">)</font>
+<br></div>
+
+<div id="sectiontext"><i>For</i> He's A Jolly Good Loop</div>
+
+<p>Since a lot of loops are concerned with counting in one way or
+another (do this ten times, or go through all of the elements in a
+list, or whatever), a special kind of loop was developed, one that is
+especially for counting. This new kind of loop is called a <code>for()</code> loop.  It looks like a <code>while()</code> loop, but the expression has three parts:</p>
+
+<ol>
+<li> An initialization section, which is used to set the starting value of the counter (e.g., <code>cnt = 1</code>)
+</li><li> A condition section, which is used to test when to stop counting (e.g., <code>cnt &lt; 10</code>)
+</li><li> A movement section, which is used to change the counter (e.g., <code>cnt = cnt + 1</code>)
+</li></ol>
+
+<p>Let's re-write the above example (<span id="filename">while1.cpp</span>) to use a <code>for()</code> loop.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>   #include &lt;iostream&gt;
+<br><span id="codenumber"> 2</span>   int main<font color="#4444ff">(</font> void <font color="#4444ff">)</font>
+<br><span id="codenumber"> 3</span>   <font color="#4444ff">{</font>
+<br><span id="codenumber"> 4</span>     int counter;
+<br><span id="codenumber"> 5</span>     <font color="#0000ff">for<font color="#4444ff">(</font> counter = 1; counter &lt;= 3; counter = counter + 1 <font color="#4444ff">)</font></font>
+<br><span id="codenumber"> 6</span>     <font color="#4444ff">{</font>
+<br><span id="codenumber"> 7</span>       cout &lt;&lt; "The counter is " &lt;&lt; counter &lt;&lt; endl;
+<br><span id="codenumber"> 8</span>     <font color="#4444ff">}</font>
+<br><span id="codenumber"> 9</span>     cout &lt;&lt; "All done." &lt;&lt; endl;
+<br><span id="codenumber">10</span>     return 0;
+<br><span id="codenumber">11</span>   <font color="#4444ff">}</font>
+<br></div>
+
+<p>See how much shorter that is than using a <code>while()</code> loop?</p>
+
+<p>Of course, the <code>for()</code> loop has its disadvantages; it's meant for counting.  Complex loops (like one that tests if <code>name == "George"</code>) deserve the <code>while()</code> command.</p>
+
+<div id="sectiontext">A Fun Example</div>
+
+<p>Let's take the number-guessing game from the "If Statements"
+tutorial, and expand it using loops. We'll make it so that the game
+will continue until the user guesses the correct answer. While (ha!)
+we're at it, after every incorrect guess, we'll tell the user if that
+guess was too low or too high.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>   #include &lt;iostream&gt;
+<br><span id="codenumber"> 2</span>   int main<font color="#4444ff">(</font> void <font color="#4444ff">)</font>
+<br><span id="codenumber"> 3</span>   <font color="#4444ff">{</font>
+<br><span id="codenumber"> 4</span>     /* ----- A number guessing game.
+<br><span id="codenumber"> 5</span>       Ask for the seed number.
+<br><span id="codenumber"> 6</span>       Calculate the computer's number from the seed.
+<br><span id="codenumber"> 7</span>       Report on whether the computer's number is more or less than 5.
+<br><span id="codenumber"> 8</span>       <font color="#0000ff">While the user hasn't guessed the correct answer,</font>
+<br><span id="codenumber"> 9</span>         Ask for the player's guess.
+<br><span id="codenumber">10</span>         Tell the player if s/he was correct.
+<br><span id="codenumber">11</span>         <font color="#0000ff">If the player lost, tell if guess was high or low.</font>
+<br><span id="codenumber">12</span>     */
+<br><span id="codenumber">13</span>     int seedNumber;
+<br><span id="codenumber">14</span>     int computerNumber;
+<br><span id="codenumber">15</span>     int guessedNumber;
+<br><span id="codenumber">16</span>     cout &lt;&lt; "Guess a number from 1 to 10!  Impress your friends!" &lt;&lt; endl &lt;&lt; endl;
+<br><span id="codenumber">17</span>     /* Ask for the seed number. */
+<br><span id="codenumber">18</span>     cout &lt;&lt; "Enter any integer number: ";
+<br><span id="codenumber">19</span>     cin &gt;&gt; seedNumber;
+<br><span id="codenumber">20</span>     /* Calculate the computer's number from the seed. */
+<br><span id="codenumber">21</span>     computerNumber = <font color="#4444ff">(</font>seedNumber + 97<font color="#4444ff">)</font> / 3;
+<br><span id="codenumber">22</span>     computerNumber = computerNumber % 10 + 1;
+<br><span id="codenumber">23</span>     /* Report on whether the computer's number is more or less than 5. */
+<br><span id="codenumber">24</span>     if<font color="#4444ff">(</font> computerNumber &gt; 5 <font color="#4444ff">)</font> <font color="#4444ff">{</font>
+<br><span id="codenumber">25</span>       cout &lt;&lt; "The number I picked is more than five." &lt;&lt; endl;
+<br><span id="codenumber">26</span>     <font color="#4444ff">}</font> else <font color="#4444ff">{</font>
+<br><span id="codenumber">27</span>       cout &lt;&lt; "The number I picked is no more than five." &lt;&lt; endl;
+<br><span id="codenumber">28</span>     <font color="#4444ff">}</font>
+<br><span id="codenumber">29</span>     <font color="#0000ff">/* While the user hasn't guessed the correct answer, */
+<br><span id="codenumber">30</span>     guessedNumber = 0;
+<br><span id="codenumber">31</span>     while<font color="#4444ff">(</font> guessedNumber != computerNumber <font color="#4444ff">)</font>
+<br><span id="codenumber">32</span>     <font color="#4444ff">{</font></font>
+<br><span id="codenumber">33</span>       /* Ask for the player's guess. */
+<br><span id="codenumber">34</span>       cout &lt;&lt; endl &lt;&lt; "Guess the number <font color="#4444ff">(</font>it's between 1 and 10<font color="#4444ff">)</font>: ";
+<br><span id="codenumber">35</span>       cin &gt;&gt; guessedNumber;
+<br><span id="codenumber">36</span>       /* Tell the player if s/he was correct. */
+<br><span id="codenumber">37</span>       if<font color="#4444ff">(</font> computerNumber == guessedNumber <font color="#4444ff">)</font>
+<br><span id="codenumber">38</span>       <font color="#4444ff">{</font>
+<br><span id="codenumber">39</span>         cout &lt;&lt; "Congratulations!  You were right!" &lt;&lt; endl;
+<br><span id="codenumber">40</span>       <font color="#4444ff">}</font>
+<br><span id="codenumber">41</span>       else
+<br><span id="codenumber">42</span>       <font color="#4444ff">{</font>
+<br><span id="codenumber">43</span>         <font color="#0000ff">/* If the player lost, tell if guess was high or low. */
+<br><span id="codenumber">44</span>         if<font color="#4444ff">(</font> guessedNumber &lt; computerNumber <font color="#4444ff">)</font> <font color="#4444ff">{</font>
+<br><span id="codenumber">45</span>           cout &lt;&lt; "Nope; too low." &lt;&lt; endl;
+<br><span id="codenumber">46</span>         <font color="#4444ff">}</font> else <font color="#4444ff">{</font>
+<br><span id="codenumber">47</span>           cout &lt;&lt; "Nope; too high." &lt;&lt; endl;
+<br><span id="codenumber">48</span>         <font color="#4444ff">}</font></font>
+<br><span id="codenumber">49</span>       <font color="#4444ff">}</font> <font color="#0000ff">/* End if guess was correct */</font>
+<br><span id="codenumber">50</span>     <font color="#0000ff"><font color="#4444ff">}</font> /* end main loop */</font>
+<br><span id="codenumber">51</span>     return 0;
+<br><span id="codenumber">52</span>   <font color="#4444ff">}</font>
+<br></div>
+
+<p>Now save this as <span id="filename">guess-a-num.cpp</span>, compile it, and execute it.  Here's a sample run:</p>
+
+<div id="terminal">
+  $ <b>./guess_a_num</b>
+  Guess a number from 1 to 10!  Impress your friends!
+  Enter any integer number: <b>20</b>
+  The number I picked is more than five.
+  Guess the number (it's between 1 and 10): <b>7</b>
+  Nope; too low.
+  Guess the number (it's between 1 and 10): <b>9</b>
+  Nope; too low.
+  Guess the number (it's between 1 and 10): <b>10</b>
+  Congratulations!  You were right!
+  $ 
+</div>
+
+<div id="sectiontext">Functions</div>
+
+<p>One of the biggest problems in programming today is code
+maintenance. The larger your program becomes, the harder it is to track
+down errors in the program. Even if a program compiles, that doesn't
+mean that it will work properly.</p>
+
+<p>So, today we'll talk about splitting programs up into separate <i>functions</i>.  Functions are just named chunks of code, with a few special properties:</p>
+
+<ul>
+<li> Functions can have <i>parameters</i>, which are special variables that are sent to the function when the function is run.
+</li><li> Functions can return a value, usually indicating whether the operation performed by the function was successful.
+</li></ul>
+
+<p>The good news is that you've been using functions all this time!  You know <code>main()</code>?  That's a function!  Let's look at how we use <code>main()</code>:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>   int main<font color="#4444ff">(</font> void <font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span>   <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>     /* stuff happens */
+<br><span id="codenumber"> 4</span>     return 0;
+<br><span id="codenumber"> 5</span>   <font color="#4444ff">}</font>
+<br></div>
+
+<p>OK, the above code says that <code>main()</code> returns an integer value (<code>int</code>); this is the <i>return type</i> of the function.  The list of parameters is included in the parentheses; in this case, we use the keyword <code>void</code> to say that we don't want any parameters.  We could also use <code>void</code>
+for the return type, to say that the function won't return anything. We
+then put the contents of the function between a set of <code>{ }</code> brackets.  The last line in the function specifies the integer value that we want to return (<code>0</code>, in this case).</p>
+
+<div id="sectiontext">Parameters</div>
+
+<p>Let's take a closer look at parameters; they are what gives functions most of their power.  But first, we need to talk about <i>local variables</i>.</p>
+
+<p>A local variable is a variable that only exists for part of a
+program's execution. Once execution leaves that part of the code, the
+local variable ceases to exist; if that piece of code is run later on,
+the local variable is re-created.</p>
+
+<p>We can create variables that are local to a particular function.
+Thus, whenever that function is run, the variables will be created, and
+when the function finishes running, the variables will be cleaned up.</p>
+
+<p>OK, so what are parameters? A parameter is kind of like a special
+local variable, one that is given a value by code that asks to run the
+function. This lets you send data into a function.</p>
+
+<p>Confused?  Let's see an example.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>   #include &lt;iostream&gt;
+<br><span id="codenumber"> 2</span>   <font color="#ff0000">float square<font color="#4444ff">(</font> float in <font color="#4444ff">)</font>
+<br><span id="codenumber"> 3</span>   <font color="#4444ff">{</font>
+<br><span id="codenumber"> 4</span>     return in * in;
+<br><span id="codenumber"> 5</span>   <font color="#4444ff">}</font></font>
+<br><span id="codenumber"> 6</span>   int main<font color="#4444ff">(</font> void <font color="#4444ff">)</font>
+<br><span id="codenumber"> 7</span>   <font color="#4444ff">{</font>
+<br><span id="codenumber"> 8</span>     float num;
+<br><span id="codenumber"> 9</span>     cout &lt;&lt; "Enter any number: ";
+<br><span id="codenumber">10</span>     cin &gt;&gt; num;
+<br><span id="codenumber">11</span>     cout &lt;&lt; num &lt;&lt; " squared is " &lt;&lt; <font color="#ff0000">square<font color="#4444ff">(</font>num<font color="#4444ff">)</font></font> &lt;&lt; endl;
+<br><span id="codenumber">12</span>     return 0;
+<br><span id="codenumber">13</span>   <font color="#4444ff">}</font>
+<br></div>
+
+<p>As you can see from this code, we create a function named <code>square()</code>, that has one parameter: <code>in</code>, which is a <code>float</code> (floating-point number).  <code>square()</code> returns the parameter times itself; or the square of the parameter.  The main program asks for a number, then calls the <code>square</code> function, giving it the number that the user entered, and printing out whatever is returned.</p>
+
+<p>When <code>square()</code> is called, its <code>in</code> parameter is given the value of the variable that was used to call the function.  So, if <code>num</code> was 2.3, then when <code>square()</code> was called, <code>in</code> would be given the value 2.3.</p>
+
+<p>Let's run this program, and see what we get.</p>
+
+<div id="terminal">
+  $ <b>./square_it</b>
+  Enter any number: <b>3</b>
+  3 squared is 9
+  $ 
+</div>
+
+<p>What about a function with no parameters?  That's easy.  Let's augment the above program to include instructions.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>   #include &lt;iostream&gt;
+<br><span id="codenumber"> 2</span>   <font color="#0000ff">void print_instructions<font color="#4444ff">(</font> void <font color="#4444ff">)</font>
+<br><span id="codenumber"> 3</span>   <font color="#4444ff">{</font>
+<br><span id="codenumber"> 4</span>     cout &lt;&lt; "Square Generator" &lt;&lt; endl &lt;&lt; endl
+<br><span id="codenumber"> 5</span>           &lt;&lt; "This program displays the square of any number." &lt;&lt; endl
+<br><span id="codenumber"> 6</span>           &lt;&lt; "Enter any number at the prompt <font color="#4444ff">(</font>e.g., 4.5<font color="#4444ff">)</font>, and" &lt;&lt; endl
+<br><span id="codenumber"> 7</span>           &lt;&lt; "the program will print its square." &lt;&lt; endl &lt;&lt; endl;
+<br><span id="codenumber"> 8</span>   <font color="#4444ff">}</font></font>
+<br><span id="codenumber"> 9</span>   float square<font color="#4444ff">(</font> float in <font color="#4444ff">)</font>
+<br><span id="codenumber">10</span>   <font color="#4444ff">{</font>
+<br><span id="codenumber">11</span>     return in * in;
+<br><span id="codenumber">12</span>   <font color="#4444ff">}</font>
+<br><span id="codenumber">13</span>   int main<font color="#4444ff">(</font> void <font color="#4444ff">)</font>
+<br><span id="codenumber">14</span>   <font color="#4444ff">{</font>
+<br><span id="codenumber">15</span>     float num;
+<br><span id="codenumber">16</span>     <font color="#0000ff">print_instructions<font color="#4444ff">(</font><font color="#4444ff">)</font>;</font>
+<br><span id="codenumber">17</span>     cout &lt;&lt; "Enter any number: ";
+<br><span id="codenumber">18</span>     cin &gt;&gt; num;
+<br><span id="codenumber">19</span>     cout &lt;&lt; num &lt;&lt; " squared is " &lt;&lt; <font color="#ff0000">square<font color="#4444ff">(</font>num<font color="#4444ff">)</font></font> &lt;&lt; endl;
+<br><span id="codenumber">20</span>     return 0;
+<br><span id="codenumber">21</span>   <font color="#4444ff">}</font>
+<br></div>
+
+<p>As you can see, this program now calls the <code>print_instructions()</code> function at the beginning of the program.  <code>print_instructions()</code>
+then prints out instructions for using the program. It takes no
+parameters, and doesn't return anything. Let's run it and see what we
+get:</p>
+
+<div id="terminal">
+  $ <b>./square_generator</b>
+  Square Generator
+  This program displays the square of any number.
+  Enter any number at the prompt (e.g., 4.5), and
+  the program will print its square.
+  Enter any number: <b>5</b>
+  5 squared is 25
+  $ 
+</div>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+
+
+<hr>
+
+
+<hr>
+With gcc3, you must use 'using namespace std;" or std::whatever...  should be changed in tutorial
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+awesome
+
+<hr>
+for all that is sacred, please fix the indentation!!!
+what kinda habits is this supposed to be teaching?
+
+<hr>
+Please do not use red on grey, it's rather painful on the ole eyeballs :(.
+
+</div>
+
+<p id="tutorialname">Hello World</p>
+
+<p>So you want to program for Syllable.  Well, first off you need a compiler; download and install the Syllable port of gcc.</p>
+
+<p>To compile a C++ app for Syllable, you can either compile it on the
+command line, or you can create a Makefile to automate the process. For
+this tutorial, we'll use the command line. The general model is as
+follows:</p>
+
+<div id="terminal">
+  $ <b>g++ <i>filename</i> -lsyllable -o CompiledAppName</b>
+</div>
+
+<div id="sectiontext">The structure of a Syllable Program, or, How It All Hangs Together</div>
+
+<p>Syllable programs are a bit complicated in structure, but sensible.
+Because the Syllable API is so aggressively object-oriented, things
+tend to be compartmentalized more than in other systems.</p>
+
+<p>All window-based Syllable programs (and by "all" I mean "all except
+for rare, weird cases") have three basic components: Application,
+Window, and View. The Application object is the main control engine of
+the program. You create a Window for every Syllable window you want to
+have in your application. Windows don't do much GUI work in and of
+themselves, however, so every functional area in your window has to be
+created as a new View (a menubar is a View, a text input field is a
+View, etc.).</p>
+
+<p>OK, now that you're familiar with the basic concepts, let's write a
+Hello World app. Each piece of code will go in different places, so
+stay sharp!</p>
+
+<div id="sectiontext">Hello World - the Application, or, How To Write A Job Application</div>
+
+<p>This section will go sequentially in the file, in the order in which
+it appears here. We're starting off with the application object, which
+controls the rest of the app.</p>
+
+<div id="filetext">
+  class MyApplication : public Application<br>
+  {<br>
+    public:<br>
+      MyApplication( void ); /* constructor */<br>
+    private:<br>
+      TestWindow *myTestWindow;<br>
+  };<br>
+</div>
+
+<p>This will be used to create the main Application object, which will
+in turn create the program's window. Note the creation of a pointer to
+a TestWindow, which will be our main Window object.</p>
+
+<div id="filetext">
+  MyApplication :: MyApplication( void )<br>
+      : Application( <font color="#ff0000">"application/x-vnd.Tutorial-HelloWorld"</font> )<br>
+  {<br>
+    myTestWindow = new TestWindow( Rect(20,20,300,200) );<br>
+    myTestWindow-&gt;Show();<br>
+  }
+</div>
+
+<p>All right, this creates our application. First off, it calls the
+Application's constructor, and passes that weird string,
+"application/x-vnd.Tutorial-HelloWorld". That's the unique signature of
+this particular application, which Syllable will use to keep track of
+it. You can put anything after the "x-vnd."; the convention is company
+name followed by product name, without spaces.</p>
+
+<p>We want to create a Window object, and to do that we have to define
+its position. We create a new Window and pass a new Rect (rectangle
+object) in, which holds the size and position of the main window. The
+upper-left corner of the window will be at position 20,20, and the
+lower-right corner will be at position 300,200.</p>
+
+<p>After we create the new window, we call its <code>Show()</code> method, which actually displays the window on the screen.</p>
+
+<div id="sectiontext">Hello World - the Window, or, No, Not That Kind Of Windows</div>
+
+<p>OK, now that we've seen what an application looks like, add in the following code <i>above</i> the MyApplication code.</p>
+
+<div id="filetext">
+  class TestWindow : public Window<br>
+  {<br>
+    public:<br>
+      TestWindow( const Rect &amp; r ); /* constructor */<br>
+      bool <font color="#ff0000">OkToQuit</font>();<br>
+    private:<br>
+      TestView *view;<br>
+  };
+</div>
+
+<p>Here we have a simple Window class. Note that the Window also
+declares a view; we'll see what that's for in a minute. The only thing
+of real interest is the <code>OkToQuit()</code> function, which is called when the user closes the Window.</p>
+<p>Let's look at the constructor for this Window.  Put this code right after the code above.</p>
+
+<div id="filetext">
+  TestWindow :: TestWindow( const Rect &amp; r )<br>
+      : Window( r, "TestWindow", "Hello World", 0, CURRENT_DESKTOP )<br>
+  {<br>
+    /* Set up "view" as the main view for the window, filling up the entire */<br>
+    /* window (thus the call to GetBounds()). */<br>
+    view = new TestView( GetBounds() );<br>
+    AddChild( view );<br>
+  }<br>
+</div>
+
+<p>All right, we call the default constructor for Window, then create a
+new TestView as a View for this window, filling this entire Window with
+it (with the <code>GetBounds()</code>).  Then we call <code>AddChild();</code> to actually add the new TestView onto the window.</p>
+<p>Now we'll look at the OkToQuit() function, which should go just below the code we just entered.
+
+</p><div id="filetext">
+  bool TestWindow :: OkToQuit( void )<br>
+  {<br>
+    <font color="#ff0000">Application::GetInstance()</font>-&gt;PostMessage( M_QUIT );<br>
+    return( true );<br>
+  }
+</div>
+
+<p>Hmmmmm, not very exciting.  <code>Application::GetInstance()</code>
+returns a pointer to the current application, so we use that for
+convenience. This function is called whenever the user tries to close
+the window. So, what we do is we send a message to the application
+itself, asking it to completely exit, and then return <code>true</code>, indicating that we can indeed close down the window.  We'd return <code>false</code> if, for example, the user had unsaved changes to his/her work, and we wanted to prevent the user from closing the window.</p>
+
+<div id="sectiontext">Hello World - the View, or, What A Nice View You Have From This Window</div>
+
+<p>Now we've looked at the Application and the Window, let's look at
+the View itself. This should go above the code we've already entered
+(at the top of the file).</p>
+
+<div id="filetext">
+  class TestView : public View<br>
+  {<br>
+    public:<br>
+      TestView( const Rect &amp; r ); /* constructor */<br>
+  };
+</div>
+
+<p>Again, nothing surprising.  This next chunk of code should go below the code we just put in.</p>
+
+<div id="filetext">
+  TestView :: TestView( cosnt Rect &amp; r )<br>
+      : View( r, "TestView", CF_FOLLOW_LEFT | CF_FOLLOW_TOP, WID_WILL_DRAW | WID_CLEAR_BACKGROUND )<br>
+  {<br>
+    /* Just let the View construtor do its thing */<br>
+  }
+</div>
+
+<p>Boy, this is boring.</p>
+
+<p>Quick side note: You might be tempted to just create a standard View
+within the Window class and add that. While that would certainly
+compile, a View is basically just a dumb class that's only useful if
+you sub-class. So if you plan to do anything with the View, you have to
+subclass it like we're doing here.</p>
+
+<!-- <p><CODE>
+  void MainView :: Draw( BRect rectUpdate )<br />
+  {<br />
+  &nbsp; MovePenTo( BPoint( 20, 50 ) );<br />
+  &nbsp; DrawString( "Hello, World!" ); /* Phew!  Finally draw our message! */<br />
+  }<br />
+</CODE></p>
+
+<p>All right, now we move the current cursor position to 20,50 within the View (e.g., 20 pixels across from the left edge of the View, and 50 pixels down from the top edge of the View), and draw "Hello, World!" there.</p> -->
+
+<p>OK, now all we have remaining to add are <code>main()</code> and the header files.  Here's <code>main()</code>, which should go at the very bottom of the file.</p>
+
+<div id="filetext">
+  int main( void )<br>
+  {<br>
+    MyApplication *thisApp;<br>
+    thisApp = new MyApplication();<br>
+    thisApp-&gt;Run();<br>
+    return 0;<br>
+  }<br>
+</div>
+
+<p>This is straightforward C++; create a pointer to the Application
+object, then create a new Application, then run it. The Application
+object will create the Window, which will create the View. When the
+application's done running, it will return "0" (success).</p>
+
+<p><b>NOTE: You should <i>never</i> delete the application object.</b>
+This could cause both the app and the OS itself to crash. To quote
+Kurt: "All os::Looper derived objects will delete themselves when the
+message loop is terminated. Deleting it will most likely cause it to
+crash since the object will be deleted twice."</p>
+
+<p>The header files are easy enough, and go at the very tip-top of the file.</p>
+
+<div id="filetext">
+  #include &lt;gui/window.h&gt;<br>
+  #include &lt;gui/view.h&gt;<br>
+  #include &lt;gui/rect.h&gt;<br>
+  #include &lt;util/application.h&gt;<br>
+  <br>
+  <font color="#ff0000">using namespace os;</font><br>
+</div>
+
+<p>Wait; what's that line saying <code>using namespace os;</code>?  All of the Syllable components are in the "os" namespace.  If we didn't call <code>using namespace os;</code>, we'd have to prepend every reference to Application, Window, View, or Rect with <code>os::</code>.  So, this makes our coding life a little easier.</p>
+
+<p>All right!  We've got a complete Syllable Hello World program coded!  Here's how the code should look:</p>
+
+<div id="filetext">
+  #include &lt;gui/window.h&gt;<br>
+  #include &lt;gui/view.h&gt;<br>
+  #include &lt;gui/rect.h&gt;<br>
+  #include &lt;util/application.h&gt;<br>
+  <br>
+  using namespace os;<br>
+<br>
+<br>
+  class TestView : public View<br>
+  {<br>
+    public:<br>
+      TestView( const Rect &amp; r ); /* constructor */<br>
+  };<br>
+<br>
+  TestView :: TestView( const Rect &amp; r )<br>
+      : View( r, "TestView", CF_FOLLOW_LEFT | CF_FOLLOW_TOP, WID_WILL_DRAW | WID_CLEAR_BACKGROUND )<br>
+  {<br>
+    /* Just let the View construtor do its thing */<br>
+  }<br>
+<!-- <br />
+  void MainView :: Draw( BRect rectUpdate )<br />
+  {<br />
+  &nbsp; MovePenTo( BPoint( 20, 50 ) );<br />
+  &nbsp; DrawString( "Hello, World!" ); /* Phew!  Finally draw our message! */<br />
+  }<br /> -->
+<br>
+<br>
+  class TestWindow : public Window<br>
+  {<br>
+    public:<br>
+      TestWindow( const Rect &amp; r ); /* constructor */<br>
+      bool OkToQuit();<br>
+    private:<br>
+      TestView *view;<br>
+  };<br>
+<br>
+  TestWindow :: TestWindow( const Rect &amp; r )<br>
+      : Window( r, "TestWindow", "Hello World", 0, CURRENT_DESKTOP )<br>
+  {<br>
+    /* Set up "view" as the main view for the window, filling up the entire */<br>
+    /* window (thus the call to GetBounds()). */<br>
+    view = new TestView( GetBounds() );<br>
+    AddChild( view );<br>
+  }<br>
+<br>
+  bool TestWindow :: OkToQuit( void )<br>
+  {<br>
+    Application::GetInstance()-&gt;PostMessage( M_QUIT );<br>
+    return( true );<br>
+  }<br>
+<br>
+<br>
+  class MyApplication : public Application<br>
+  {<br>
+    public:<br>
+      MyApplication( void ); /* constructor */<br>
+    private:<br>
+      TestWindow *myTestWindow;<br>
+  };<br>
+<br>
+  MyApplication :: MyApplication( void )<br>
+      : Application( "application/x-vnd.Tutorial-HelloWorld" )<br>
+  {<br>
+    myTestWindow = new TestWindow( Rect(20,20,300,200) );<br>
+    myTestWindow-&gt;Show();<br>
+  }<br>
+<br>
+<br>
+  int main( void )<br>
+  {<br>
+    MyApplication *thisApp;<br>
+    thisApp = new MyApplication();<br>
+    thisApp-&gt;Run();<br>
+    return( 0 );<br>
+  }<br>
+</div>
+
+<p>To compile the program, save the above code as "HelloWorld.cpp" and type the following in the terminal window (without the "$"):</p>
+
+<div id="terminal">
+  $ <b>g++ HelloWorld.cpp -lsyllable -o HelloWorld</b><br>
+</div>
+
+<hr>
+
+<div id="sectiontext">Optional Modifications</div>
+<ul>
+<li> Change the size of the displayed window.</li>
+<li> Change the message displayed, from "Hello, World!" to "Thank you, come again."  Make sure it fits.</li>
+</ul>
+
+</div>
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+"download the source as one file" hyperlink is broken
+
+</div>
+
+<p id="tutorialname">Double-Buffering</p>
+<h2>Introduction</h2>
+
+<p>Any application that makes use of graphics will probably want to implement <b>double buffering</b>. This tutorial will explain what double buffering is and how to implement it in an application.</p>
+
+<p>The simplest method for drawing graphics is to use a View directly.
+However, when updating the View it is likely that some kind of
+flickering will occur. This is because for a fraction of a second the
+View is displayed when only part way through the drawing process. The
+way to eliminate this is to do the drawing in an off screen buffer.
+That way all the drawing can be done in the buffer and, once finished,
+can be copied all in one go to the View.
+</p><p>This system is perfectly good if the application has complete
+control over when the screen is redrawn. Unfortunately, this is not the
+case; because Syllable uses a window system the View may need to be
+redrawn due to the user moving windows around. To eliminate this
+problem a second buffer is introduced. Drawing is done in this second
+buffer. When the drawing is complete it is copied to the first buffer.
+This means the first buffer <i>always</i> has a completely drawn image
+in it. Now it doesn't matter when the graphics are being drawn or when
+repaint requests come in, the first buffer can be directly copied to
+the View.
+</p><p>The above explanation is a little hard to follow, hopefully the
+following C++ code will help make it clearer, as well as showing how
+double buffering can be done in practice.
+</p><h2>Coding Double Buffering</h2>
+
+<h3>Custom View class definition</h3>
+
+<p>In the definition of the application's custom View class add the following three data members:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> class CustomView : public View
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    ...
+<br><span id="codenumber"> 4</span> 
+<br><span id="codenumber"> 5</span>    View* m_pcDrawView;
+<br><span id="codenumber"> 6</span>    Bitmap* m_pcDrawBitmap;
+<br><span id="codenumber"> 7</span>    Bitmap* m_pcBufferBitmap;
+<br><span id="codenumber"> 8</span> 
+<br><span id="codenumber"> 9</span>    ...
+<br><span id="codenumber">10</span> <font color="#4444ff">}</font>;
+<br></div>
+
+<ul>
+<li> <b>m_pcDrawView</b> will be used to do off screen drawing.</li>
+<li> <b>m_pcDrawBitmap</b> is the Bitmap where the off screen drawing will occur.</li>
+<li> <b>m_pcBufferBitmap</b> is the Bitmap which will be the buffer used to redraw the View.</li>
+</ul>
+
+<h3>Custom View class constructor</h3>
+
+<p>The three objects defined above need to be created in the constructor like so:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> CustomView::CustomView<font color="#4444ff">(</font>Rect&amp; cRect, ... <font color="#4444ff">)</font> : View <font color="#4444ff">(</font>cRect, ... <font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    ...
+<br><span id="codenumber"> 4</span> 
+<br><span id="codenumber"> 5</span>    m_pcDrawView = new View<font color="#4444ff">(</font>Rect<font color="#4444ff">(</font>0, 0, cRect.Width<font color="#4444ff">(</font><font color="#4444ff">)</font>, cRect.Height<font color="#4444ff">(</font><font color="#4444ff">)</font><font color="#4444ff">)</font>, "DrawView"<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 6</span>    m_pcDrawBitmap = new Bitmap<font color="#4444ff">(</font>cRect.Width<font color="#4444ff">(</font><font color="#4444ff">)</font> + 1, cRect.Height<font color="#4444ff">(</font><font color="#4444ff">)</font> + 1, CS_RGB32, Bitmap::ACCEPT_VIEWS | Bitmap::SHARE_FRAMEBUFFER<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 7</span>    m_pcDrawBitmap-&gt;AddChild<font color="#4444ff">(</font>m_pcDrawView<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 8</span>    m_pcBufferBitmap = new Bitmap<font color="#4444ff">(</font>cRect.Width<font color="#4444ff">(</font><font color="#4444ff">)</font> + 1, cRect.Height<font color="#4444ff">(</font><font color="#4444ff">)</font> + 1, CS_RGB32<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 9</span> 
+<br><span id="codenumber">10</span>    ...
+<br><span id="codenumber">11</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p>Logically, all three items are created the same size as the custom
+View. In the example the Bitmaps use a 32 bit colourspace but you may
+change this if you wish, but both must be the same. <b>m_pcDrawBitmap</b>
+has an extra parameter which sets two flags: ACCEPT_VIEWS and
+SHARE_FRAMEBUFFER. The ACCEPT_VIEWS allows a View to be attached to the
+Bitmap for drawing purposes. SHARE_FRAMEBUFFER allows the application
+to access the Bitmap's raw data, this is the default setting and so
+applies to <b>m_pcBufferBitmap</b> also. <b>m_pcDrawView</b> is attached to <b>m_pcDrawBitmap</b> so that it can be drawn to.</p>
+
+<h3>Custom View Paint method</h3>
+
+<p>This is the easiest part. To repaint any part of the View the appropriate part of the buffer is drawn:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> void CustomView::Paint<font color="#4444ff">(</font>const Rect&amp; cUpdateRect<font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    DrawBitmap<font color="#4444ff">(</font>m_pcBufferBitmap, cUpdateRect, cUpdateRect<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 4</span> <font color="#4444ff">}</font>
+<br></div>
+
+<h3>Drawing</h3>
+
+<p>Drawing to the View is done by first drawing to the second buffer (<b>m_pcDrawBitmap</b>), then when the drawing is complete copying it across to the first buffer (<b>m_pcBufferBitmap</b>). Again this is copied to the View. All subsequent repaints will draw this new image. The code to do this is below:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> void CustomView::SomeMethod<font color="#4444ff">(</font><font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    //drawing code using m_pcDrawView e.g.
+<br><span id="codenumber"> 4</span>    //m_pcDrawView-&gt;DrawLine<font color="#4444ff">(</font>Point<font color="#4444ff">(</font>0, 0<font color="#4444ff">)</font>, Point<font color="#4444ff">(</font>100, 100<font color="#4444ff">)</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span> 
+<br><span id="codenumber"> 6</span>    ...
+<br><span id="codenumber"> 7</span> 
+<br><span id="codenumber"> 8</span>    m_pcDrawView-&gt;Sync<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 9</span>    memcpy<font color="#4444ff">(</font>m_pcBufferBitmap-&gt;LockRaster<font color="#4444ff">(</font><font color="#4444ff">)</font>,
+<br><span id="codenumber">10</span>          m_pcDrawBitmap-&gt;LockRaster<font color="#4444ff">(</font><font color="#4444ff">)</font>,
+<br><span id="codenumber">11</span>          m_pcBufferBitmap-&gt;GetBytesPerRow<font color="#4444ff">(</font><font color="#4444ff">)</font> *
+<br><span id="codenumber">12</span>          <font color="#4444ff">(</font><font color="#4444ff">(</font>int<font color="#4444ff">)</font>m_pcBufferBitmap-&gt;GetBounds.Height<font color="#4444ff">(</font><font color="#4444ff">)</font> + 1<font color="#4444ff">)</font><font color="#4444ff">)</font>;
+<br><span id="codenumber">13</span> 
+<br><span id="codenumber">14</span>    Invalidate<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber">15</span>    Sync<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber">16</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p>All the drawing is done with <b>m_pcDrawView</b> which is attached to <b>m_pcDrawBitmap</b>.
+The call to m_pcDrawView-&gt;Sync() ensures this is complete. The
+Bitmap data is then directly copied across to the buffer Bitmap. The
+call to Invalidate() and Sync() gets the View to update itself from the
+buffer.</p>
+
+<p>Once all of the above has been implemented the View will be double-buffered!</p>
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+</div>
+
+<p id="tutorialname">Drag and Drop</p>
+
+<p>We are going to drag <code>os::ListViewStringRow</code>s between two <code>os::ListView</code>s.</p>
+
+<p>First we need to subclass <code>os::ListView</code> and provide the following methods:</p>
+
+<ul>
+<li> <code>virtual void MouseUp(const os::Point&amp; position, uint32 buttons, os::Message* data);</code></li>
+<li> <code>virtual bool DragSelection(const os::Point&amp; point);</code></li>
+</ul>
+
+<p>In <code>DragSelection()</code>, the following code will start the drag and drop:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> bool MyListView::DragSelection<font color="#4444ff">(</font>const os::Point&amp; point<font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    ListViewStringRow* row = static_cast<listviewstringrow *=""><font color="#4444ff">(</font>GetRow<font color="#4444ff">(</font>point<font color="#4444ff">)</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 4</span>    Message* msg = new Message<font color="#4444ff">(</font>YOUR_MESSAGE_CODE<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span>    msg-&gt;AddString<font color="#4444ff">(</font>"label", row.GetString<font color="#4444ff">(</font>1<font color="#4444ff">)</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 6</span> 
+<br><span id="codenumber"> 7</span>    // This call starts the drag and drop
+<br><span id="codenumber"> 8</span>    BeginDrag<font color="#4444ff">(</font>msg, point, Rect<font color="#4444ff">(</font>0,0,row-&gt;GetWidth<font color="#4444ff">(</font>this,1<font color="#4444ff">)</font>,row-&gt;GetHeight<font color="#4444ff">(</font>this<font color="#4444ff">)</font><font color="#4444ff">)</font>, NULL<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 9</span> 
+<br><span id="codenumber">10</span>    // BeginDrag<font color="#4444ff">(</font><font color="#4444ff">)</font> makes a copy of the Message so this is safe
+<br><span id="codenumber">11</span>    delete msg;
+<br><span id="codenumber">12</span> 
+<br><span id="codenumber">13</span>    return true;
+<br><span id="codenumber">14</span> <font color="#4444ff">}</font>
+<br></listviewstringrow></div>
+
+<p>Note: <code>DragSelection()</code> will only be called on columns
+&gt;= 1, i.e. add a dummy column of width 1 and label "" to let your
+actual string be dragged-and-dropped.</p>
+
+<p><code>BeginDrag()</code> takes 3 required arguments:</p>
+
+<ol>
+<li> <code>os::Message *</code> &#8211; The message to deliver to the drop protion of the drag and drop</li>
+<li> <code>os::Point &amp;</code> &#8211; Where the mouse cursor is relative to the dragged object</li>
+<li> <code> os::Rect &amp;</code> &#8211; The bounds of the dragged-and-dropped object
+  <b>or</b>
+  <code>os::Bitmap *</code> &#8211; The image to display while dragging (have yet to try this version)</li>
+<li> <code>os::Handler *</code> <i>(optional)</i> &#8211; Which handler to recieve replies sent by the receiver of the message</li>
+</ol>
+
+<p>Next, we implement <code>MouseUp()</code>:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> void MyListView::MouseUp<font color="#4444ff">(</font>const os::Point&amp; position, uint32 buttons, os::Message* data<font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    if<font color="#4444ff">(</font>data<font color="#4444ff">)</font> // only DnD provide os::Message*
+<br><span id="codenumber"> 4</span>    <font color="#4444ff">{</font>
+<br><span id="codenumber"> 5</span>       if<font color="#4444ff">(</font>data-&gt;GetCode<font color="#4444ff">(</font><font color="#4444ff">)</font> == YOUR_MESSAGE_CODE<font color="#4444ff">)</font>
+<br><span id="codenumber"> 6</span>       <font color="#4444ff">{</font>
+<br><span id="codenumber"> 7</span>          std::string label;
+<br><span id="codenumber"> 8</span>          msg-&gt;FindString<font color="#4444ff">(</font>"label", &amp;label<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 9</span>          ListViewStringRow* row = new ListViewStringRow<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber">10</span>          row-&gt;AppendString<font color="#4444ff">(</font>""<font color="#4444ff">)</font>;
+<br><span id="codenumber">11</span>          row-&gt;AppendString<font color="#4444ff">(</font>label<font color="#4444ff">)</font>;
+<br><span id="codenumber">12</span>          InsertRow<font color="#4444ff">(</font>row<font color="#4444ff">)</font>;
+<br><span id="codenumber">13</span>       <font color="#4444ff">}</font>
+<br><span id="codenumber">14</span>    <font color="#4444ff">}</font>
+<br><span id="codenumber">15</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p>After you have your MyListView built, add 2 of them to a window. Add
+a few entries into one of the MyListViews, compile, and run.</p>
+
+<p>You should be able to select a row, then click and drag that row into the other MyListView.</p>
+
+<p>Quick notes:</p>
+<ul>
+<li> You can actually call <code>BeginDrag</code> anywhere; my suggestion would be in <code>MouseMoved()</code>.</li>
+<li> Another feature of Drag and Drop in Syllable is that <code>MouseMoved()</code> can actually look at the os::Message to try and show the user what might happen.</li>
+<li> I have not tried, but I believe that you are unable to Drag and Drop between applications.  If I'm wrong let me know :)</li>
+</ul>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+</div>
+
+<p id="tutorialname">FileRequester</p>
+
+<p>This tutorial covers the creation and use of a FileRequester, which
+is a standard GUI file chooser window. In fact, here's one now!</p>
+
+<center><img src="../files/FileRequester.png" alt="[A File Requester]" align="middle"></center>
+
+<p>To display a FileRequester, you have to create one. Find the spot in
+your code where you want the FileRequester to be launched, and insert
+something like this:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> FileRequester *fileRequester;
+<br><span id="codenumber"> 2</span> fileRequester = new FileRequester<font color="#4444ff">(</font> FileRequester::LOAD_REQ, 
+<br><span id="codenumber"> 3</span>                                                    new Messenger<font color="#4444ff">(</font> this <font color="#4444ff">)</font>, 
+<br><span id="codenumber"> 4</span>                                                    "/",  /* Starting directory */ 
+<br><span id="codenumber"> 5</span>                                                    FileRequester::NODE_FILE, 
+<br><span id="codenumber"> 6</span>                                                    false, NULL, NULL, false, true, 
+<br><span id="codenumber"> 7</span>                                                    "OK", "Cancel" <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 8</span> fileRequester-&gt;Show<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br></div>
+
+<p>This will create a standard FileRequester.  <code>FileRequester::LOAD_REQ</code> tells the FileRequester to open the window as a Load window (as opposed to a Save window, in which case you'd use <code>FileRequester::SAVE_REQ</code>).  <code>FileRequester::NODE_FILE</code> tells the FileRequester to look for files, as opposed to <code>FileRequester::NODE_DIR</code>
+which would tell the FileRequester to look for directories. You can
+also specify a whole bunch of other options, like whether the
+FileRequester allows multiple selections, but we won't get into that.</p>
+
+<p>The final two strings in that constructor contain the names of the OK and Cancel button, respectively.</p>
+
+<p>You'll also need to include the appropriate include file, at the top of the file that contains the above code:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> #include &lt;gui/filerequester.h&gt;
+<br></div>
+
+<p>This will launch a standard GUI file chooser window. When the user
+has selected a file and clicked the "OK" button, the Window that
+launched the FileRequester will get a new Message with the code set as <code>M_LOAD_REQUESTED</code>.  This Message will contain a string named "file/path"; extract it using <code>FindString()</code>, and that'll contain the full filename (including path) of the file chosen by the user.</p>
+
+<p>Here's an example of the code needed to handle an <code>M_LOAD_REQUESTED</code> message:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> void MyWindow :: HandleMessage<font color="#4444ff">(</font> Message *pcMessage <font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    switch<font color="#4444ff">(</font> pcMessage-&gt;GetCode<font color="#4444ff">(</font><font color="#4444ff">)</font> <font color="#4444ff">)</font>
+<br><span id="codenumber"> 4</span>    <font color="#4444ff">{</font>
+<br><span id="codenumber"> 5</span>       case M_LOAD_REQUESTED:
+<br><span id="codenumber"> 6</span>          <font color="#4444ff">{</font>
+<br><span id="codenumber"> 7</span>             const char *fileNameString;
+<br><span id="codenumber"> 8</span>             pcMessage-&gt;FindString<font color="#4444ff">(</font> "file/path", &amp;fileNameString <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 9</span>             /* Do what you want to with fileNameString */
+<br><span id="codenumber">10</span>          <font color="#4444ff">}</font>
+<br><span id="codenumber">11</span>    <font color="#4444ff">}</font>
+<br><span id="codenumber">12</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p>That's it!</p>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+</div>
+
+<p id="tutorialname">Layout Classes</p>
+
+<h2>Introduction</h2>
+The Syllable API has a set of classes to aid the layout of GUI
+components. One of the most common uses is to lay out the controls in a
+dialog box, but equally these classes can be used within any window or
+view. This tutorial introduces some of these layout classes and
+demonstrates their use with a simple Stop Clock program. The program
+binary and source for StopClock can be downloaded from its <a href="http://kamidake.other-space.com/display_entry.php?id=253">entry at Kamidake</a>.
+
+<p>The main layout classes are as follows:
+
+</p><ul>
+<li><b>LayoutView</b> - A view that is designed to contain LayoutNodes.</li>
+<li><b>LayoutNode</b> - Arranges components either in a row or a
+column, more complex schemes can be devised by using a number of these
+nodes in conjunction.</li>
+<li><b>LayoutSpacer</b> - Spacers can be used to ensure there is adequate spacing between items.</li>
+</ul>
+
+<h2>Layout design</h2>
+
+<p>The diagram below shows how the StopClock GUI is laid out:</p>
+
+<p><img src="../files/layout.png" border="0" height="268" width="461">
+
+</p><p>The VLayoutNode (green area) lays out its children vertically,
+in this case the StringView showing the time and a HLayoutNode. The
+HLayoutNode (blue area) lays out is children horizontally, in this case
+three buttons and two HLayoutSpacers (grey areas). Layout spacers
+simply ensure a minimum gap is kept between items.</p>
+
+<p>As can be seen above, a system for laying out components can be
+derived by identifying horizontal and vertical groups of items. Note
+that a LayoutNode itself can be counted as an item. It may be useful to
+draw out a diagram similar to the above before coding, especially in
+the case of more complicated designs.</p>
+
+<h2>The Code</h2>
+
+<p>This tutorial assumes that you know how to create simple Syllable applications. If you don't you may wish to try the <a href="http://www.other-space.com/sub/?section=Programming&amp;tutorial=Hello_World">Hello World tutorial</a>.
+This section will cover the constructor of the custom LayoutView used
+in StopClock, which is where the laying out of components is done.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> StopClockView::StopClockView<font color="#4444ff">(</font><font color="#4444ff">)</font> : LayoutView<font color="#4444ff">(</font>Rect<font color="#4444ff">(</font>0, 0, 220, 80<font color="#4444ff">)</font>, "StopClockView"<font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    //initialise clock
+<br><span id="codenumber"> 4</span>    m_bStart = false;
+<br><span id="codenumber"> 5</span>    m_nDeciSeconds = 0;
+<br><span id="codenumber"> 6</span>    m_nSeconds = 0;
+<br><span id="codenumber"> 7</span>    m_nMinutes = 0;
+<br><span id="codenumber"> 8</span>    m_nHours = 0;
+<br><span id="codenumber"> 9</span> 
+<br><span id="codenumber">10</span>    ...
+<br></div>
+
+<p>The StopClock program uses a custom LayoutView class to layout out
+it's GUI components. It is also possible to use the standard class and
+use it's public methods from within the Window's constructor.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>    ...
+<br><span id="codenumber"> 2</span> 
+<br><span id="codenumber"> 3</span>    //create the vertical root layout node
+<br><span id="codenumber"> 4</span>    LayoutNode* pcRootNode = new VLayoutNode<font color="#4444ff">(</font>"Root"<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span> 
+<br><span id="codenumber"> 6</span>    ...
+<br></div>
+
+<p>Every LayoutView has a Root Node. In this case, it is a VLayoutNode (see diagram).</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>    ...
+<br><span id="codenumber"> 2</span> 
+<br><span id="codenumber"> 3</span>    //create and add the time
+<br><span id="codenumber"> 4</span>    m_pcTime = new StringView<font color="#4444ff">(</font>Rect<font color="#4444ff">(</font>0, 0, 0, 0<font color="#4444ff">)</font>, "Time", "00:00:00.0", ALIGN_CENTER<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span>    m_pcTime-&gt;GetFont<font color="#4444ff">(</font><font color="#4444ff">)</font>-&gt;SetSize<font color="#4444ff">(</font>20<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 6</span>    pcRootNode-&gt;AddChild<font color="#4444ff">(</font>m_pcTime<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 7</span> 
+<br><span id="codenumber"> 8</span>    ...
+<br></div>
+
+<p>Referring to the diagram, the first item to be added to the Root
+VLayoutNode is the time. The time is displayed using a StringView
+object which is created and then added to the RootNode via the <code>AddChild()</code> method.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>    ...
+<br><span id="codenumber"> 2</span> 
+<br><span id="codenumber"> 3</span>    //create the horizontal layout node containing the buttons
+<br><span id="codenumber"> 4</span>    LayoutNode* pcButtonNode = new HLayoutNode<font color="#4444ff">(</font>"Buttons"<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span> 
+<br><span id="codenumber"> 6</span>    ...
+<br></div>
+
+<p>The next item to add to the Root Node is the HLayoutNode containing the three buttons that control the timer.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>    ...
+<br><span id="codenumber"> 2</span> 
+<br><span id="codenumber"> 3</span>    m_pcStart = new Button<font color="#4444ff">(</font>Rect<font color="#4444ff">(</font>0, 0, 0, 0<font color="#4444ff">)</font>, "Start", "Start", new Message<font color="#4444ff">(</font>MSG_START<font color="#4444ff">)</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 4</span>    m_pcStart-&gt;GetFont<font color="#4444ff">(</font><font color="#4444ff">)</font>-&gt;SetSize<font color="#4444ff">(</font>10<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span>    pcButtonNode-&gt;AddChild<font color="#4444ff">(</font>m_pcStart<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 6</span> 
+<br><span id="codenumber"> 7</span>    pcButtonNode-&gt;AddChild<font color="#4444ff">(</font>new HLayoutSpacer<font color="#4444ff">(</font>"Spacer1", 20, 20<font color="#4444ff">)</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 8</span> 
+<br><span id="codenumber"> 9</span>    m_pcStop = new Button<font color="#4444ff">(</font>Rect<font color="#4444ff">(</font>0, 0, 0, 0<font color="#4444ff">)</font>, "Stop", "Stop", new Message<font color="#4444ff">(</font>MSG_STOP<font color="#4444ff">)</font><font color="#4444ff">)</font>;
+<br><span id="codenumber">10</span>    m_pcStop-&gt;GetFont<font color="#4444ff">(</font><font color="#4444ff">)</font>-&gt;SetSize<font color="#4444ff">(</font>10<font color="#4444ff">)</font>;
+<br><span id="codenumber">11</span>    pcButtonNode-&gt;AddChild<font color="#4444ff">(</font>m_pcStop<font color="#4444ff">)</font>;
+<br><span id="codenumber">12</span> 
+<br><span id="codenumber">13</span>    pcButtonNode-&gt;AddChild<font color="#4444ff">(</font>new HLayoutSpacer<font color="#4444ff">(</font>"Spacer2", 20, 20<font color="#4444ff">)</font><font color="#4444ff">)</font>;
+<br><span id="codenumber">14</span> 
+<br><span id="codenumber">15</span>    m_pcReset = new Button<font color="#4444ff">(</font>Rect<font color="#4444ff">(</font>0, 0, 0, 0<font color="#4444ff">)</font>, "Reset", "Reset", new Message<font color="#4444ff">(</font>MSG_RESET<font color="#4444ff">)</font><font color="#4444ff">)</font>;
+<br><span id="codenumber">16</span>    m_pcReset-&gt;GetFont<font color="#4444ff">(</font><font color="#4444ff">)</font>-&gt;SetSize<font color="#4444ff">(</font>10<font color="#4444ff">)</font>;
+<br><span id="codenumber">17</span>    pcButtonNode-&gt;AddChild<font color="#4444ff">(</font>m_pcReset<font color="#4444ff">)</font>;
+<br><span id="codenumber">18</span> 
+<br><span id="codenumber">19</span>    ...
+<br></div>
+
+<p>The three buttons and two spacers are created and added to the
+HLayoutNode. Note that in VLayoutNodes items are added in top to bottom
+order, and in HLayoutNodes items are added in left to right order. The
+first and second numbers in the HLayoutSpacer constructor specify the
+minimum and maximum width of the spacer. If the maximum width is left
+unspecified the spacer takes up as much space as it can.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>    ...
+<br><span id="codenumber"> 2</span> 
+<br><span id="codenumber"> 3</span>    //make the buttons the same size
+<br><span id="codenumber"> 4</span>    pcButtonNode-&gt;SameWidth<font color="#4444ff">(</font>"Start", "Stop", "Reset", NULL<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span> 
+<br><span id="codenumber"> 6</span>    ...
+<br></div>
+
+<p>The <code>SameWidth()</code> function makes the specified items the
+same width. The items are specified by listing their names, as supplied
+in their constructors, and terminating the list with a NULL value.
+There is of course an equivalent <code>SameHeight()</code> function.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>    ...
+<br><span id="codenumber"> 2</span> 
+<br><span id="codenumber"> 3</span>    //add the row of buttons to the vertical layout node
+<br><span id="codenumber"> 4</span>    pcRootNode-&gt;AddChild<font color="#4444ff">(</font>pcButtonNode<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span> 
+<br><span id="codenumber"> 6</span>    //add it all to this layout view
+<br><span id="codenumber"> 7</span>    SetRoot<font color="#4444ff">(</font>pcRootNode<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 8</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p>To finish off the HLayoutNode is added to the Root Node, the Root Node is then added to the LayoutView.</p>
+
+<h2>Creating your own designs</h2>
+
+<p>StopClock is a fairly trivial example, but it demonstrates basic
+usage of the Layout classes. Examining the source code of programs
+which have a layout similar to that which you require is a useful way
+to learn how things are done. Figuring out how to break down a design
+into various LayoutNodes is the most important part, a diagram is often
+helpful. The Syllable API documentation is a useful source of help.
+Often a bit of tweaking or a rethink is important in getting the layout
+you desire.</p>
+
+
+<p id="tutorialname">Menus</p>
+
+<p>In Syllable, menus are implemented using two widgets: Menus and
+MenuItems. Menus act as containers for MenuItems, while MenuItems
+correspond to final, clickable entries in a menu.</p>
+<p>So, to create a full-scale menu bar, you'll start off by creating
+one Menu that will correspond to the menu bar itself. Then you'll
+create extra Menus, which will correspond to the various drop-down
+menus on the menu bar (e.g., "File", "Help", etc.). Then, you'll add
+MenuItems to each of those Menus.</p>
+<p>Let's create a simple menu bar, with one menu ("App"), which will have one item ("Quit"):</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> #include &lt;gui/menu.h&gt;
+<br><span id="codenumber"> 2</span> 
+<br><span id="codenumber"> 3</span> MainWindow :: MainWindow<font color="#4444ff">(</font> const Rect &amp; r <font color="#4444ff">)</font>
+<br><span id="codenumber"> 4</span>       : Window<font color="#4444ff">(</font> r, "MainWindow", "Window", 0, CURRENT_DESKTOP <font color="#4444ff">)</font>
+<br><span id="codenumber"> 5</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 6</span>    Menu *mainMenuBar, *tempMenu;
+<br><span id="codenumber"> 7</span>    mainMenuBar = new Menu<font color="#4444ff">(</font> Rect<font color="#4444ff">(</font>0,0,0,0<font color="#4444ff">)</font>, "mainMenuBar", ITEMS_IN_ROW <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 8</span>    mainMenuBar-&gt;SetFrame<font color="#4444ff">(</font> Rect<font color="#4444ff">(</font>0, 0, GetBounds<font color="#4444ff">(</font><font color="#4444ff">)</font>.Width<font color="#4444ff">(</font><font color="#4444ff">)</font> + 1, mainMenuBar-&gt;GetPreferredSize<font color="#4444ff">(</font>false<font color="#4444ff">)</font>.y + 1<font color="#4444ff">)</font> <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 9</span> 
+<br></div>
+
+<p>OK, first off we declare a few variables. Then we create a new Rect,
+which is the same size as the window, except that the bottom is cropped
+to 18 pixels. This is the perfect place for a menu bar, don't you think?</p>
+<p>We then create a new Menu object named "mainMenuBar", placed on that
+rectangle's location, specifying that entries on this menu should
+appear in a row. The user won't see the name of the object, so we can
+call it whatever we want.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>    tempMenu = new Menu<font color="#4444ff">(</font> Rect<font color="#4444ff">(</font>0,0,0,0<font color="#4444ff">)</font>, "App", ITEMS_IN_COLUMN <font color="#4444ff">)</font>;
+<br></div>
+
+<p>Next, we create another Menu, called "App". This one corresponds to
+the actual "App" entry that will appear on the menu bar. We pass in a
+dummy rectangle (it will be ignored), name the Menu "App", and specify
+that any entries in the menu should appear in a column.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>    tempMenu-&gt;AddItem<font color="#4444ff">(</font> "Quit", NULL <font color="#4444ff">)</font>;
+<br></div>
+
+<p>Now we add a new MenuItem onto the "App" menu. We could explicitly
+create a MenuItem object, but we can use this convenience function,
+which will create a MenuItem object for us based on the parameters we
+pass in. In this case, we name the new MenuItem "Quit". The other
+parameter is the Message that will get sent when this MenuItem is
+invoked; for this example, we just won't pass any message.</p>
+
+<p>Next, a bit of cleanup:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>    mainMenuBar-&gt;AddItem<font color="#4444ff">(</font> tempMenu <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 2</span>    AddChild<font color="#4444ff">(</font> mainMenuBar <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 3</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p>We add the new "App" menu to the menu bar, and then add the menu bar
+to the window. If we were to run this application, we'd see a menu bar
+with a single entry ("App"), and if we clicked on that App menu, a
+drop-down menu would appear, with "Quit" as its only item.</p>
+
+<p>Now that you've seen a simple example, let's finish up the tutorial with a more robust one:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> #include &lt;gui/menu.h&gt;
+<br><span id="codenumber"> 2</span> 
+<br><span id="codenumber"> 3</span> MainWindow :: MainWindow<font color="#4444ff">(</font> const Rect &amp; r <font color="#4444ff">)</font>
+<br><span id="codenumber"> 4</span>       : Window<font color="#4444ff">(</font> r, "MainWindow", "Window", 0, CURRENT_DESKTOP <font color="#4444ff">)</font>
+<br><span id="codenumber"> 5</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 6</span>    Rect r = GetBounds<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 7</span>    r.bottom = 18;
+<br><span id="codenumber"> 8</span>    Menu *mainMenuBar, *tempMenu;
+<br><span id="codenumber"> 9</span>    mainMenuBar = new Menu<font color="#4444ff">(</font> r, "mainMenuBar", ITEMS_IN_ROW <font color="#4444ff">)</font>;
+<br><span id="codenumber">10</span>    // App menu
+<br><span id="codenumber">11</span>    tempMenu = new Menu<font color="#4444ff">(</font> Rect<font color="#4444ff">(</font>0,0,0,0<font color="#4444ff">)</font>, "App", ITEMS_IN_COLUMN <font color="#4444ff">)</font>;
+<br><span id="codenumber">12</span>    tempMenu-&gt;AddItem<font color="#4444ff">(</font> "Settings", NULL <font color="#4444ff">)</font>;
+<br><span id="codenumber">13</span>    tempMenu-&gt;AddItem<font color="#4444ff">(</font> "About", NULL <font color="#4444ff">)</font>;
+<br><span id="codenumber">14</span>    tempMenu-&gt;AddItem<font color="#4444ff">(</font> "Quit", NULL <font color="#4444ff">)</font>;
+<br><span id="codenumber">15</span>    mainMenuBar-&gt;AddItem<font color="#4444ff">(</font> tempMenu <font color="#4444ff">)</font>;
+<br><span id="codenumber">16</span>    // File menu
+<br><span id="codenumber">17</span>    tempMenu = new Menu<font color="#4444ff">(</font> Rect<font color="#4444ff">(</font>0,0,0,0<font color="#4444ff">)</font>, "File", ITEMS_IN_COLUMN <font color="#4444ff">)</font>;
+<br><span id="codenumber">18</span>    tempMenu-&gt;AddItem<font color="#4444ff">(</font> "New", NULL <font color="#4444ff">)</font>;
+<br><span id="codenumber">19</span>    tempMenu-&gt;AddItem<font color="#4444ff">(</font> "Save", NULL <font color="#4444ff">)</font>;
+<br><span id="codenumber">20</span>    tempMenu-&gt;AddItem<font color="#4444ff">(</font> "Open", NULL <font color="#4444ff">)</font>;
+<br><span id="codenumber">21</span>    tempMenu-&gt;AddItem<font color="#4444ff">(</font> "Close", NULL <font color="#4444ff">)</font>;
+<br><span id="codenumber">22</span>    mainMenuBar-&gt;AddItem<font color="#4444ff">(</font> tempMenu <font color="#4444ff">)</font>;
+<br><span id="codenumber">23</span>    // Help menu
+<br><span id="codenumber">24</span>    tempMenu = new Menu<font color="#4444ff">(</font> Rect<font color="#4444ff">(</font>0,0,0,0<font color="#4444ff">)</font>, "Help", ITEMS_IN_COLUMN <font color="#4444ff">)</font>;
+<br><span id="codenumber">25</span>    tempMenu-&gt;AddItem<font color="#4444ff">(</font> "Contents", NULL <font color="#4444ff">)</font>;
+<br><span id="codenumber">26</span>    tempMenu-&gt;AddItem<font color="#4444ff">(</font> "Homepage", NULL <font color="#4444ff">)</font>;
+<br><span id="codenumber">27</span>    mainMenuBar-&gt;AddItem<font color="#4444ff">(</font> tempMenu <font color="#4444ff">)</font>;
+<br><span id="codenumber">28</span>    AddChild<font color="#4444ff">(</font> mainMenuBar <font color="#4444ff">)</font>;
+<br><span id="codenumber">29</span>    mainMenuBar-&gt;SetTargetForItems<font color="#4444ff">(</font> this <font color="#4444ff">)</font>;
+<br><span id="codenumber">30</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p>I hope this tutorial has helped you to understand how to implement Menus in your own Syllable applications.  Good luck!</p>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+</div>
+
+<p id="tutorialname">Messaging</p>
+
+<p>There are three main classes that are used when dealing with Messages, at least on a basic level:</p>
+
+<ol>
+<li> The Message class itself</li>
+<li> Handlers</li>
+<li> Loopers, which are derived from Handlers</li>
+</ol>
+
+<h3>Messages</h3>
+
+<p>First, you have Messages. A Message is an object that contains
+arbitrary data, where that data is stored as a set of names and values.
+Let's construct a quick Message containing some vital statistics for a
+game character:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> /* Create a new message */
+<br><span id="codenumber"> 2</span> Message *myTestMessage;
+<br><span id="codenumber"> 3</span> myTestMessage = new Message<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 4</span> /* Put data into the new message */
+<br><span id="codenumber"> 5</span> myTestMessage-&gt;AddString<font color="#4444ff">(</font> "characterName", "Harry" <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 6</span> myTestMessage-&gt;AddInt<font color="#4444ff">(</font> "health", 0 <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 7</span> myTestMessage-&gt;AddFloat<font color="#4444ff">(</font> "intelligence", 3.5 <font color="#4444ff">)</font>;
+<br></div>
+
+<p>OK, it's pretty simple to add data to a Message, and of course you
+can pass variable data into a Message just as easily as a static value.
+The Message class comes with a whole slew of <code>Add...()</code> functions for a wide variety of data types; there's also an <code>AddData()</code> function which takes an arbitrary <code>(void *)</code>, so you can put pretty much anything into there.</p>
+
+<p>You'll note in the above example that the Message is pretty
+anonymous. It contains interesting data, but the Message above doesn't
+exactly advertise its exact type. Fortunately, Messages have a special
+"code," called...ummmmm...the "code," which is an integer. The "code"
+can be used to uniquely identify a particular type of message, and is
+usually passed to the constructor, like so:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> /* Define a few message types */
+<br><span id="codenumber"> 2</span> unsigned int CHARACTER_INFO_MESSAGE = 10001;
+<br><span id="codenumber"> 3</span> unsigned int CHARACTER_HURT_MSG = 10002;
+<br><span id="codenumber"> 4</span> unsigned int CHARACTER_KILLED_MSG = 10003;
+<br><span id="codenumber"> 5</span> /* Create a new message */
+<br><span id="codenumber"> 6</span> Message *myTestMessage;
+<br><span id="codenumber"> 7</span> myTestMessage = new Message<font color="#4444ff">(</font> CHARCACTER_INFO_MESSAGE <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 8</span> /* Put data into the new message */
+<br><span id="codenumber"> 9</span> ...
+<br></div>
+
+<p>So, you can identify Messages based on that particular constant value that you pass to the constructor.</p>
+
+<p>To get data out of a Message, you use its <code>Find...()</code> methods, like so:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> /* I magically got a message in myMessage.
+<br><span id="codenumber"> 2</span>     Set up the variables */
+<br><span id="codenumber"> 3</span> string charName;
+<br><span id="codenumber"> 4</span> int health;
+<br><span id="codenumber"> 5</span> float intelligence;
+<br><span id="codenumber"> 6</span> /* Get the data out of the message */
+<br><span id="codenumber"> 7</span> if<font color="#4444ff">(</font> myMessage-&gt;GetCode<font color="#4444ff">(</font><font color="#4444ff">)</font> == CHARACTER_INFO_MESSAGE <font color="#4444ff">)</font>
+<br><span id="codenumber"> 8</span>    <font color="#4444ff">{</font>
+<br><span id="codenumber"> 9</span>    myMessage-&gt;FindString<font color="#4444ff">(</font> "characterName", &amp;charName <font color="#4444ff">)</font>;
+<br><span id="codenumber">10</span>    myMessage-&gt;FindInt<font color="#4444ff">(</font> "health", &amp;health <font color="#4444ff">)</font>;
+<br><span id="codenumber">11</span>    myMessage-&gt;FindFloat<font color="#4444ff">(</font> "intelligence", &amp;intelligence <font color="#4444ff">)</font>;
+<br><span id="codenumber">12</span>    ...
+<br></div>
+
+<p>OK, so that's a Message.</p>
+
+<h3>Handlers</h3>
+
+<p>The next obvious question is: How do you move Messages around? Well,
+that's a question that you have to divide into two parts: How do you <i>get</i> messages, and how do you <i>send</i> messages?</p>
+
+<p>To get a message, you use a Handler.  Handlers are great at handling messages; in fact, Handlers have a function called <code>HandleMessage()</code>,
+which is called whenever that Handler receives a Message. You can
+re-implement that function to handle the specific Messages that you're
+interested in. So....</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span>    void MyHandler :: HandleMessage<font color="#4444ff">(</font> Message *pcMessage <font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span>       <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>       /* Figure out what kind of Message I got */
+<br><span id="codenumber"> 4</span>       switch<font color="#4444ff">(</font> pcMessage-&gt;GetCode<font color="#4444ff">(</font><font color="#4444ff">)</font> <font color="#4444ff">)</font>
+<br><span id="codenumber"> 5</span>          <font color="#4444ff">{</font>
+<br><span id="codenumber"> 6</span>          case CHARACTER_INFO_MESSAGE:
+<br><span id="codenumber"> 7</span>             /* Got important character information; grab and store */
+<br><span id="codenumber"> 8</span>             myMessage-&gt;FindString<font color="#4444ff">(</font> "characterName", &amp;charName <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 9</span>             myMessage-&gt;FindInt<font color="#4444ff">(</font> "health", &amp;health <font color="#4444ff">)</font>;
+<br><span id="codenumber">10</span>             myMessage-&gt;FindFloat<font color="#4444ff">(</font> "intelligence", &amp;intelligence <font color="#4444ff">)</font>;
+<br><span id="codenumber">11</span>             break;
+<br><span id="codenumber">12</span>          default:
+<br><span id="codenumber">13</span>             /* Let the parent do whatever it does */
+<br><span id="codenumber">14</span>             Handler :: HandleMessage<font color="#4444ff">(</font> pcMessage <font color="#4444ff">)</font>;
+<br><span id="codenumber">15</span>             break;
+<br><span id="codenumber">16</span>          <font color="#4444ff">}</font> /* end switch */
+<br><span id="codenumber">17</span>       <font color="#4444ff">}</font> /* end HandleMessage<font color="#4444ff">(</font><font color="#4444ff">)</font> function */
+<br></div>
+
+<h3>Loopers</h3>
+
+<p>Now that you know how to get messages, you need to know how to send
+them. There are several ways to send a Message to another object,
+actually, but the most straightforward way is by using a Looper.</p>
+
+<p>You can send Messages directly to a Looper, because Loopers come with a handy function called <code>PostMessage()</code>.  Here's how it works:</p>
+
+<p>Let's say you want to create an object named Flynn, and you want to
+send a message to it. Flynn would be a Looper. You'd create a new
+Message, then call Flynn's <code>PostMessage()</code> function, passing the new Message as the argument to <code>PostMessage()</code>, like so:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> Flynn *flynn; // Flynn inherits from Looper
+<br><span id="codenumber"> 2</span> flynn = new Flynn<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 3</span> Message *msg = new Message<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 4</span> msg-&gt;AddInt<font color="#4444ff">(</font> "age", 32 <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span> flynn-&gt;PostMessage<font color="#4444ff">(</font> msg <font color="#4444ff">)</font>;
+<br></div>
+
+<p>Here's what happens next:  A copy of msg is created (meaning that you can delete msg immediately after calling <code>PostMessage()</code>), and then sent asynchronously to the <code>flynn</code> object.  The <code>flynn</code> object's <code>HandleMessage()</code>
+function will be called, and your new message will be passed in as the
+argument. The code for Flynn would have to override the <code>HandleMessage()</code> function and look for your particular message.</p>
+
+<p>Loopers are also useful because they spawn a separate process to do the looping that gives them their name.  They also don't <i>have</i>
+to be the only objects that respond to the Messages you send them; they
+can also send those messages to other Handlers. So, if you want to
+create a thread which sends Messages to various objects in your system,
+it might be a good idea to use the Looper class.</p>
+
+<p>There's a lot more to the world of Messaging that I won't get into
+here. I can tell you that Messengers are useful because they can send
+messages outside of the application they run in, and that MessageQueues
+are rarely used by application developers (they're convenience classes
+having to do with the implementation of messaging), but anything beyond
+that belongs in another tutorial.</p>
+
+<p>Good luck!</p>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+Please write another tutorial with deeper topics! thanks, very good one!
+
+Tanner
+
+<hr>
+</div>
+
+<p id="tutorialname">Multi-Column ListViews</p>
+
+<p>We're going to create a list with three columns, "First Name," "Last Name," and "Age," which will have three rows in it:</p>
+
+<center><table border="1">
+ <tbody><tr>
+  <th> First Name </th> <th> Last Name </th> <th> Age </th>
+ </tr>
+ <tr>
+  <td> Heero </td> <td> Yui </td> <td> 15 </td>
+ </tr>
+ <tr>
+  <td> Relena </td> <td> Peacecraft </td> <td> 15 </td>
+ </tr>
+ <tr>
+  <td> Treize </td> <td> Kushrenada </td> <td> 22 </td>
+ </tr>
+</tbody></table></center>
+
+<p>First off, create a ListView:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> ListView *myListView;
+<br><span id="codenumber"> 2</span> Rect r = GetBounds<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 3</span> myListView = new ListView<font color="#4444ff">(</font> r, "myListView",
+<br><span id="codenumber"> 4</span>                           ListView::F_RENDER_BORDER,
+<br><span id="codenumber"> 5</span>                           CF_FOLLOW_ALL <font color="#4444ff">)</font>;
+<br></div>
+
+<p>Now, add a few columns. You have to provide the initial size of each
+column in pixels. We'll just make each column the same size, by taking
+the width of the view and dividing it by three for each column.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> myListView-&gt;InsertColumn<font color="#4444ff">(</font> "First Name", Bounds<font color="#4444ff">(</font><font color="#4444ff">)</font>.Width<font color="#4444ff">(</font><font color="#4444ff">)</font> / 3 <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 2</span> myListView-&gt;InsertColumn<font color="#4444ff">(</font> "Last name", Bounds<font color="#4444ff">(</font><font color="#4444ff">)</font>.Width<font color="#4444ff">(</font><font color="#4444ff">)</font> / 3 <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 3</span> myListView-&gt;InsertColumn<font color="#4444ff">(</font> "Age", Bounds<font color="#4444ff">(</font><font color="#4444ff">)</font>.Width<font color="#4444ff">(</font><font color="#4444ff">)</font> / 3 <font color="#4444ff">)</font>;
+<br></div>
+
+<p>All right, the ListView has been set up so that it has three columns.  Now to add some data.</p>
+
+<p>For each row, create a <code>ListViewStringRow</code> &#8211; or, if you need to, a <code>ListViewRow</code> that you've personally subclassed to handle something other than strings &#8211; and call <code>AppendString()</code> for each column of data.  We have three columns, so we'll do that three times for each row:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> ListViewStringRow *row;
+<br><span id="codenumber"> 2</span> row = new ListViewStringRow<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 3</span> row-&gt;AppendString<font color="#4444ff">(</font> "Heero" <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 4</span> row-&gt;AppendString<font color="#4444ff">(</font> "Yui" <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span> row-&gt;AppendString<font color="#4444ff">(</font> "15" <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 6</span> myListView-&gt;InsertRow<font color="#4444ff">(</font> row <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 7</span> 
+<br><span id="codenumber"> 8</span> row = new ListViewStringRow<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 9</span> row-&gt;AppendString<font color="#4444ff">(</font> "Relena" <font color="#4444ff">)</font>;
+<br><span id="codenumber">10</span> row-&gt;AppendString<font color="#4444ff">(</font> "Peacecraft" <font color="#4444ff">)</font>;
+<br><span id="codenumber">11</span> row-&gt;AppendString<font color="#4444ff">(</font> "15" <font color="#4444ff">)</font>;
+<br><span id="codenumber">12</span> myListView-&gt;InsertRow<font color="#4444ff">(</font> row <font color="#4444ff">)</font>;
+<br><span id="codenumber">13</span> 
+<br><span id="codenumber">14</span> row = new ListViewStringRow<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber">15</span> row-&gt;AppendString<font color="#4444ff">(</font> "Treize" <font color="#4444ff">)</font>;
+<br><span id="codenumber">16</span> row-&gt;AppendString<font color="#4444ff">(</font> "Kushrenada" <font color="#4444ff">)</font>;
+<br><span id="codenumber">17</span> row-&gt;AppendString<font color="#4444ff">(</font> "22" <font color="#4444ff">)</font>;
+<br><span id="codenumber">18</span> myListView-&gt;InsertRow<font color="#4444ff">(</font> row <font color="#4444ff">)</font>;
+<br></div>
+
+<p>And there you go.</p>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+There should be a quick note here on the best way to retrive the
+selected row, and the values of that row. (not the index number, but
+the actual string).
+. Knut S.
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+</div>
+
+<p id="tutorialname">Syllable programming links</p>
+
+<p id="section">C++ Documentation</p>
+<div id="sectiontext">
+
+<ul>
+<li> <a href="http://www.mindview.net/Books/TICPP/ThinkingInCPP2e.html">Thinking in C++ 2nd Edition by Bruce Eckel</a> ? A very good book, available online or in print.</li>
+<li> <a href="http://www.parashift.com/c++-faq-lite/">C++ FAQ Lite</a> - Contains many good pieces of advice.</li>
+</ul>
+
+</div>
+
+<p id="section">STL Documentation</p>
+<div id="sectiontext">
+
+<p>Syllable uses the Standard Template Library for container classes such as lists, arrays, and dictionaries.</p>
+
+<ul>
+<li> <a href="http://www.xraylith.wisc.edu/%7Ekhan/software/stl/STL.newbie.html">STL Tutorial</a></li>
+<li> <a href="http://www.sgi.com/tech/stl/table_of_contents.html">STL Reference</a></li>
+</ul>
+
+</div>
+
+<p id="section">High-Level API</p>
+<div id="sectiontext">
+
+<ul>
+<li> <a href="http://www.syllable.org/docs/0.6.0/gui/group__gui.html">Syllable GUI API</a>GUI functions</li>
+<li> <a href="http://www.syllable.org/docs/0.6.0/gui/group__storage.html">Syllable AFS API</a>Utility classes for accessing the file system</li>
+<li> <a href="http://www.syllable.org/docs/0.6.0/gui/group__util.html">Syllable Utility Classes</a></li>
+<li> <a href="http://www.nailchipper.com/syllable/tour/">Source Code Tree</a> ? A Syllable API reference similar to Sun's Java API reference website</li>
+</ul>
+
+</div>
+
+<p id="section">Hardware</p>
+<div id="sectiontext">
+
+<p><a href="http://kxproject.spb.ru/docs.php">Datasheets</a> and info about the EMU10K1 chip (for the Soundblaster Live!)</p>
+
+</div>
+
+<p id="section">Drivers</p>
+<div id="sectiontext">
+
+<ul>
+<li> <a href="http://www.other-space.com/sub/?section=Programming&amp;tutorial=Video_Drivers">Syllable Video Drivers tutorial</a> on this site</li>
+<li> <a href="http://www.xml.com/ldd/chapter/book/">Linux Device Drivers</a> ? Online book</li>
+</ul>
+
+</div>
+
+<p id="section">Translators</p>
+<div id="sectiontext">
+
+<p><a href="http://www.other-space.com/sub/?section=Programming&amp;tutorial=Translators">Syllable Translators Tutorial</a> on this site</p>
+
+</div>
+
+<p id="section">Miscellaneous</p>
+<div id="sectiontext">
+
+<ul>
+<li> <a href="http://maththinking.com/boat/computerbooks.html">Lots of online books</a> about programming languages and computers in general</li>
+<li> <a href="http://www.mega-tokyo.com/os/os-faq.html">FAQ: Write Your Own Operating System</a></li>
+<li> <a href="http://www.gnu.org/manual/glibc-2.2.5/libc.html">GNU libc Documentation</a></li>
+</ul>
+
+</div>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+</div>
+
+<p id="tutorialname">Target a View not a Window</p>
+
+<p>Let's say you're creating a new control that's just a View with a
+bunch of controls on it,a nd you want to re-direct the messages sent by
+the controls on the View to the View itself, rather than the parent
+Window.</p>
+
+<p>You could try doing something like this, <strong>but it will not work</strong>:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> MyNewViewControl::MyNewViewControl<font color="#4444ff">(</font> ... <font color="#4444ff">)</font> : View <font color="#4444ff">(</font> ... <font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    AddChild<font color="#4444ff">(</font> new control1 <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 4</span>    control1-&gt;SetTarget<font color="#4444ff">(</font>this<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span>    AddChild<font color="#4444ff">(</font> new control2 <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 6</span>    control2-&gt;SetTarget<font color="#4444ff">(</font>this<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 7</span>    AddChild<font color="#4444ff">(</font> new control3 <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 8</span>    control3-&gt;SetTarget<font color="#4444ff">(</font>this<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 9</span> <font color="#4444ff">}</font>
+<br><span id="codenumber">10</span> 
+<br><span id="codenumber">11</span> void MyNewViewControl::HandleMessage<font color="#4444ff">(</font> ... <font color="#4444ff">)</font>
+<br><span id="codenumber">12</span> <font color="#4444ff">{</font>
+<br><span id="codenumber">13</span>    ... message handling code, which never gets called ...
+<br><span id="codenumber">14</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p>The quirk here is that, when the View is attached to the Window, the <code>AttachedToWindow()</code> method is called, and the target for all its controls is set to the parent Window.  This overrides the <code>SetTarget()</code> call made earlier in the constructor.</p>
+
+<p>The solution is to override the <code>AttachedToWindow()</code> function in your view, like this:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> void MyNewViewControl::AttachedToWindow<font color="#4444ff">(</font><font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    View::AttachedToWindow<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 4</span>    control1-&gt;SetTarget<font color="#4444ff">(</font>this<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span>    control2-&gt;SetTarget<font color="#4444ff">(</font>this<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 6</span>    control3-&gt;SetTarget<font color="#4444ff">(</font>this<font color="#4444ff">)</font>;
+<br><span id="codenumber"> 7</span> <font color="#4444ff">}</font>
+<br></div>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+</div>
+
+<p id="tutorialname">Translators</p>
+
+<p id="section">Introduction</p>
+<div id="sectiontext">
+
+<p>Here I will attempt to describe how a translator is created, using
+the IconTranslator as an example. The code for the IconTranslator is
+available <a href="http://wiki.isaksson.tk/cgi-bin/zwiki.pl?id=Documentation/Programming/Syllable_Translators/Code&amp;sid=">here</a>.</p>
+
+<p>A translator file is a shared library file that can be loaded at
+run-time by the Translator API functions in libsyllable. The library
+file exports two C functions:</p>
+
+<ul>
+<li> <code>get_translator_count()</code>
+</li><li> <code>get_translator_node()</code>
+</li></ul>
+
+<p><code>get_translator_count()</code> simply returns the number of translators available in the shared library file, while <code>get_translator_node()</code> returns a <em>Translator node</em> object for a given translator number (i.e., a number between 0 and <code>get_translator_count() - 1</code>).  Here's a sample implementation of these functions:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> extern "C" <font color="#4444ff">{</font>
+<br><span id="codenumber"> 2</span> int get_translator_count<font color="#4444ff">(</font><font color="#4444ff">)</font>
+<br><span id="codenumber"> 3</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 4</span>    return<font color="#4444ff">(</font> 2 <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span> <font color="#4444ff">}</font>
+<br><span id="codenumber"> 6</span> 
+<br><span id="codenumber"> 7</span> TranslatorNode* get_translator_node<font color="#4444ff">(</font> int nIndex <font color="#4444ff">)</font>
+<br><span id="codenumber"> 8</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 9</span>    static IconReaderNode sReadingNode;
+<br><span id="codenumber">10</span>    statis IconWriterNode sWritingNode;
+<br><span id="codenumber">11</span>    switch<font color="#4444ff">(</font> nIndex <font color="#4444ff">)</font>
+<br><span id="codenumber">12</span>    <font color="#4444ff">{</font>
+<br><span id="codenumber">13</span>       case 1:
+<br><span id="codenumber">14</span>          return<font color="#4444ff">(</font> &amp;sWritingNode <font color="#4444ff">)</font>;
+<br><span id="codenumber">15</span>       default:
+<br><span id="codenumber">16</span>          return<font color="#4444ff">(</font> &amp;sReadingNode <font color="#4444ff">)</font>;
+<br><span id="codenumber">17</span>    <font color="#4444ff">}</font>
+<br><span id="codenumber">18</span> <font color="#4444ff">}</font>
+<br><span id="codenumber">19</span> <font color="#4444ff">}</font>;
+<br></div>
+
+</div>
+
+<p id="section">TranslatorNode</p>
+<div id="sectiontext">
+
+<p>The translator node object returned by <code>get_translator_node()</code> holds information about a specific available translator.  It has three methods:</p>
+
+<ul>
+<li> <code>GetTranslatorInfo()</code> &#8212; Returns a TranslatorInfo struct, containing MIME-type strings for both source and target file formats.</li>
+<li> <code>CreateTranslator()</code> &#8212; Creates a Translator object for the data formats that are handled by this particular TranslatorNode.</li>
+<li> <code>Identify()</code> &#8212; Lets the TranslatorNode peek at (part
+of) the data to be translated, to decide whether it is a format that
+the node recognizes.</li>
+</ul>
+
+<p>Here's a sample implementation of a TranslatorNode:</p>
+
+<strong>Example TranslatorNode</strong><div id="codelisting">
+<span id="codenumber"> 1</span> class IconReaderNode : public TranslatorNode
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span> public:
+<br><span id="codenumber"> 4</span>    virtual int Identify<font color="#4444ff">(</font> const std::string&amp; cSrcType, const std::string&amp; cDstType, const void* pData, int nLen <font color="#4444ff">)</font>
+<br><span id="codenumber"> 5</span>    <font color="#4444ff">{</font>
+<br><span id="codenumber"> 6</span>       if <font color="#4444ff">(</font> nLen &lt; 4 <font color="#4444ff">)</font>
+<br><span id="codenumber"> 7</span>          return<font color="#4444ff">(</font> TranslatorFactory::ERR_NOT_ENOUGH_DATA <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 8</span>       if<font color="#4444ff">(</font> *<font color="#4444ff">(</font><font color="#4444ff">(</font>int *<font color="#4444ff">)</font>pData<font color="#4444ff">)</font> == ICON_MAGIC <font color="#4444ff">)</font>
+<br><span id="codenumber"> 9</span>          return<font color="#4444ff">(</font> 0 <font color="#4444ff">)</font>;
+<br><span id="codenumber">10</span>       return<font color="#4444ff">(</font> TranslatorFactory::ERR_UNKNOWN_FORMAT <font color="#4444ff">)</font>;
+<br><span id="codenumber">11</span>    <font color="#4444ff">}</font>
+<br><span id="codenumber">12</span> 
+<br><span id="codenumber">13</span>    virtual TranslatorInfo GetTranslatorInfo<font color="#4444ff">(</font><font color="#4444ff">)</font>
+<br><span id="codenumber">14</span>    <font color="#4444ff">{</font>
+<br><span id="codenumber">15</span>       static TranslatorInfo sInfo = <font color="#4444ff">{</font> "image/syllable-icon", TRANSLATOR_TYPE_IMAGE, 1.0f <font color="#4444ff">}</font>;
+<br><span id="codenumber">16</span>       return<font color="#4444ff">(</font> sInfo <font color="#4444ff">)</font>;
+<br><span id="codenumber">17</span>    <font color="#4444ff">}</font>
+<br><span id="codenumber">18</span> 
+<br><span id="codenumber">19</span>    virtual Translator* CreateTranslator<font color="#4444ff">(</font><font color="#4444ff">)</font>
+<br><span id="codenumber">20</span>    <font color="#4444ff">{</font>
+<br><span id="codenumber">21</span>       return<font color="#4444ff">(</font> new IconTrans <font color="#4444ff">)</font>;
+<br><span id="codenumber">22</span>    <font color="#4444ff">}</font>
+<br><span id="codenumber">23</span> <font color="#4444ff">}</font>;
+<br></div>
+
+<p>The <code>Identify()</code> method here looks at the first four
+bytes of the file (that's the first longword), and tries to match it
+against the icon file's magic number. If there is a match, we return 0
+indicating success; otherwise, we return an error.</p>
+
+<p><code>GetTranslatorInfo()</code> fills out a static (remember to
+declare it static!) TranslatorInfo struct with source format,
+destination format, and a number used to specify relative quality loss.
+As the Syllable icon format does not use any kind of lossy encoding, we
+set this number to 1.0.</p>
+
+</div>
+
+<p id="section">The Translator - Overview</p>
+<div id="sectiontext">
+
+<p>This is where the actual translating takes place.  Data in the source format is <em>added</em> to the translator, then data in the destination format can be <em>read</em>
+from the translator object. You can add the contents of a whole file to
+a translator and read the results afterwards, or you can add parts of a
+file (perhaps streamed from a remote location), and incrementally read
+the translated data as it is finished.</p>
+
+<p>The most important methods in the translator are <code>AddData()</code>, <code>AvailableDataSize()</code>, and <code>Read()</code>.  These are the only methods implemented in the Icon Translator, and it works fine.</p>
+
+</div>
+
+<p id="section">AddData()</p>
+<div id="sectiontext">
+
+<p><code>AddData()</code> is called repeatedly until all of the data
+that is to be translated has been added to the translator. Each time it
+is called, it adds data to an internal buffer. The Icon Translator
+works by first adding the data to an <em>in</em> buffer, then translating the data when there is enough data to work on, and finally adding the translated data to an <em>out</em> buffer.  Sometimes it may be possible to translate incoming data directly and place it in the out buffer.</p>
+
+<p>Here's an example of an <code>AddData()</code> method:</p>
+
+<strong>AddData()</strong><div id="codelisting">
+<span id="codenumber"> 1</span> status_t IconTrans::AddData<font color="#4444ff">(</font> const void* pData, size_t nLen, bool bFinal <font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    m_cInBuffer.Write<font color="#4444ff">(</font> pData, nLen <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 4</span> 
+<br><span id="codenumber"> 5</span>    if<font color="#4444ff">(</font> /* Check that enough data is available here. */ <font color="#4444ff">)</font> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 6</span>    <font color="#4444ff">{</font>
+<br><span id="codenumber"> 7</span>       // Do translation here
+<br><span id="codenumber"> 8</span>       m_cOutBuffer.Write<font color="#4444ff">(</font> pTranslatedData, nTranslatedLength <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 9</span>    <font color="#4444ff">}</font>
+<br><span id="codenumber">10</span>    return 0; // Success!
+<br><span id="codenumber">11</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p><code>m_cInBuffer</code> and <code>m_cOutBuffer</code> are both instances of <code>os::CircularBuffer</code>.</p>
+
+<p>The arguments <code>pData</code> and <code>nLen</code> are, respectively, a pointer to the data to be added, and the length of that data.  <code>bFinal</code> is true when the last block of data is added to the translator.</p>
+
+</div>
+
+<p id="section">AvailableDataSize() and Read()</p>
+<div id="sectiontext">
+
+<p><code>AvailableDataSize()</code> should simply return the size of the data that is available for reading with <code>Read()</code>.  In other words, it should return the size of the data in the <em>out</em> buffer.</p>
+
+<strong>AvailableDataSize()</strong><div id="codelisting">
+<span id="codenumber"> 1</span> ssize_t IconTrans::AvailableDataSize<font color="#4444ff">(</font><font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    return<font color="#4444ff">(</font> m_cOutBuffer.size<font color="#4444ff">(</font><font color="#4444ff">)</font> <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 4</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p><code>Read()</code> copies a number of translated bytes from the <em>out</em> buffer to a buffer supplied by the caller (pData).  <code>nLen</code> will hold the size of that buffer.  If you use a <code>CircularBuffer</code>, you can simply pass the arguments to its <code>Read()</code> method.</p>
+
+<strong>Read()</strong><div id="codelisting">
+<span id="codenumber"> 1</span> ssize_t IconTrans::Read<font color="#4444ff">(</font> void* pData, size_t nLen <font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    int nCurLen = m_cOutBuffer.Read<font color="#4444ff">(</font> pData, nLen <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 4</span>    if <font color="#4444ff">(</font> nCurLen == 0  &amp;&amp;  m_bDone == false <font color="#4444ff">)</font>
+<br><span id="codenumber"> 5</span>       return<font color="#4444ff">(</font> ERR_SUSPENDED <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 6</span>    return<font color="#4444ff">(</font> nCurLen <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 7</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p>If there's no data available and the conversion still has not been
+completed, you should (apparently &#8212; I don't know what the Translator
+API functions need this for) return <code>ERR_SUSPENDED</code>.</p>
+
+</div>
+
+<div id="sectiontext">
+
+<p>As you've probably noticed, I have used a boolean named <code>m_bWriteMode</code> to give the IconTranslator class two-way translation capabilities.  In the <code>AddData()</code> method, this variable is used to decided whether the added data is to be translated <em>to</em> icon format, or <em>from</em> icon format.</p>
+
+<p>The TranslatorNodes, IconReaderNode, and IconWriteNode will set this
+variable when they create an IconTranslator. This saves the trouble of
+writing two translator classes; another solution would be to write two
+classes, such as IconTranslatorWrite and IconTranslatorRead.</p>
+
+<p>Also, there is nothing stopping you from having large numbers of
+translators in the same file. Well, except for the loss of
+modularity....</p>
+
+</div>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+</div>
+
+<p id="tutorialname">Localization</p>
+
+<h3>Writing translatable software</h3>
+
+<p>This article will show you how to write native Syllable applications
+that are translatable. It will also explain how the translations are
+dealt with by the operating system.</p>
+
+<h3>Catalogues and Strings</h3>
+
+<p>In order to make your programme translatable, you have to separate
+the text strings from your code. You do this by creating a catalogue
+file, that contains labels for your strings as well as the strings
+themselves.
+The catalogue file itself is in a binary format, but there is also a
+human readable representation, a kind of source file, that I will use
+to illustrate the catalogue:</p>
+
+<div id="filetext">
+MSG_MAINWND_MENU_FILE=100	File<br>
+MSG_MAINWND_MENU_FILE_OPEN	_Open<br>
+MSG_MAINWND_MENU_FILE_SAVE	_Save<br>
+MSG_MAINWND_MENU_FILE_EXIT	E_xit<br>
+</div>
+
+<p>This file can be compiled to binary format using CatComp (available
+from Syllable CVS). Please note that it is also possible to create,
+edit and translate binary catalogues, using CatFish.</p>
+
+<p>As you see in the code listing above, this particular catalogue
+contains four strings, identified by four labels. The first line
+contains a number as well. This number tells the catalogue compiler
+that the first string should have ID 100. The second string will be
+101, the third 102, and so on. The numbers are used by the compiled
+code to indentify the strings inside the catalogue file, but in your
+code you'll refer to the strings by their labels. You can leave the
+numbering entirely up to CatComp if you want to, but there are some
+issues with
+numbering that CatComp cannot handle itself. We'll return to this topic
+later on.</p>
+
+<p>The catalogue file is normally named "<application>.catalog", where <application>
+is the name of your application. The catalogue files can be stored
+either in the application directory or inside the application
+executable.</application></application></p>
+
+<h3>Localised Resources</h3>
+
+<p>So, how will my programme find the catalogues?</p>
+<p>There are currently two ways in which resources (ie. files) can be
+stored, in such a way that they can be selectively retrieved based on
+the user's preferred language(s):</p>
+<ul>
+<li>Embedded in the executable.
+</li><li>In the application's directory, in a sub directory named "resources".
+</li></ul>
+<p>Both of these methods rely on a directory hierarchy to convey the
+language information. For instance, the application HelloWorld might
+have been translated to Hungarian, English, Finnish and Czech. One of
+these languages would have to be the "default" language, that is, a
+language that is assumed unless the user chooses another. In this case,
+we'll choose English. Now we wind up with the following files:</p>
+<ul>
+<li>HelloWorld.catalog - English.
+</li><li>cs/HelloWorld.catalog - Czech.
+</li><li>fi/HelloWorld.catalog - Finnish.
+</li><li>hu/HelloWorld.catalog - Hungarian.
+</li></ul>
+<p>The programmer may now choose to embed these files into the
+executable. She or he may also chose to store some of the files in the
+"resources" directory, but in any event, the default catalogue should
+be embedded, or you may be unable to even produce sensible error
+messages if the user has lost some files. Now, for the sake of this
+example, let's say that this programmer embeds all of the files and
+releases the application as a single executable file.</p>
+<p>Now, somebody in Germany finds this file, says "Warum gibt es keine
+deutsche Übersetzung?", which is German for "What day comes after
+thursday?". Ok, just kidding. ;-) Anyway, he wants to translate this
+essential piece of software to his language. What he would do then, is
+that he would extract one of the catalogues from the executable and
+load it into CatFish. Then it's just a matter of translating the
+strings, and saving the file. Now he has the choice of embedding the
+German file, or storing it in the above mentioned directory. He's a
+lazy guy, so he chooses the latter:</p>
+<ul>
+<li>resources/de/HelloWorld.catalog - German.
+</li></ul>
+<p>And voilà, now it speaks German! He can now send the translation back to the programmer, or distribute the file himself.</p>
+<p>Other resources, such as pictures that contain words or certain
+symbols and sounds that contain speech, can be treated in a similar
+fashion. Remember that all symbols aren't international. For instance,
+on the BBC quiz "The Weakest Link", a red checkmark means "correct" and
+a green cross means "wrong". That's the opposite of what those
+symbols mean to a Swede, whose culture and language isn't all that
+different from a Briton's.</p>
+
+<h3>Hello World!</h3>
+
+<p>Let's have a look at the international Hello World programme.</p>
+
+<p><b>Step 1.</b> Create a directory named "resources" where you keep the source code
+to your application.</p>
+
+<p><b>Step 2.</b> Create a text file in that directory, named HelloWorld.cd. This file
+should contain "mnemonics" and default strings. Example:</p>
+
+<div id="filetext">
+MSG_HELLO_WORLD		Hello World!<br>
+MSG_HELLO_AGAIN		Hello Again!
+</div>
+
+<p><b>Step 3.</b> Run "catcomp -c HelloWorld.cd". This will create two new files,
+HelloWorld.h and HelloWorld.catalog.</p>
+
+<p><b>Step 4.</b> Add these includes to your code:</p>
+
+<div id="filetext">
+#include &lt;util/catalog.h&gt;
+#include "resources/HelloWorld.h"
+</div>
+
+<p>And this should go in your Application constructor (eg. MyApp::MyApp()),
+before you create windows or anything that may require anything from a
+catalog:</p>
+
+<div id="filetext">
+SetCatalog( "HelloWorld.catalog" );
+</div>
+
+<p><b>Step 5.</b> Use the MSG_* mnemonics where you would normally type in a text
+string, eg:</p>
+
+<div id="filetext">
+m_pcHello = new Button( Rect(), "m_pcHello", MSG_HELLO_WORLD, ... );
+</div>
+
+<p><b>Step 6.</b> Add HelloWorld.catalog as a resource to your application executable:</p>
+
+<div id="filetext">
+rescopy -r HelloWorld resources/HelloWorld.catalog
+</div>
+
+<h3>Translating the application - Ahoj Sv&#283;t!</h3>
+
+<p>This section shows how to translate an application to Swedish using the original
+HelloWorld.cd file, and the catcomp tool. Please note that you can also use the GUI
+tool CatFish to translate any program without access to the .cd file.</p>
+
+<p><b>Step 1.</b> Create a directory named "sv" in the resources
+directory. The name is the two-letter ISO code for the language. If
+there is no two-letter for your language, use the three-letter code.</p>
+
+<p><b>Step 2.</b> Copy the HelloWorld.cd file to the new directory./p&gt;
+
+</p><p><b>Step 3.</b> Translate the words in the copied HelloWorld.cd file:</p>
+
+<div id="filetext">
+MSG_HELLO_WORLD		Hej Världen!<br>
+MSG_HELLO_AGAIN		Hej Igen!<br>
+</div>
+
+<p><b>Step 4.</b> Compile the catalog:</p>
+
+<div id="terminal">
+catcomp -t HelloWorld.cd
+</div>
+
+<p><b>Step 5.</b> Add the compiled catalog file as a resource, including the path
+component "sv":</p>
+
+<div id="terminal">
+rescopy -r HelloWorld resources/sv/HelloWorld.catalog=sv/HelloWorld.catalog
+</div>
+
+<h3>Hello World 2.0 - Adding new strings</h3>
+
+<p>Now it's time to release the new and upgraded Hello World. The
+release needs a new string. Let's see what issues are involved with
+this, and how the localisation system will deal with them.</p>
+<p>When you add a new string to you application, you will of course
+have to get all the translators to translate it. This will take a lot
+of time, and it may never be translated to all languages. If it's a
+small change, the programme may be useful to international users, even
+if not all strings are translated. Thus, you may want to use an old
+catalogue with a new programme. In order to make this possible, there's
+one important thing to keep in mind:</p>
+<box>When adding a string, you must ensure that the old string ID's aren't changed.</box>
+<p>This simply means that you add new strings to the end of the file.
+However, in big applications, you may want to keep a logical structure
+in the catalogue file. In that case, you'll want to take control over
+the assignment of ID's. Let's say you have a catalogue like this one:</p>
+<div id="filetext">
+MSG_MAINWND_MENU_FILE=100	File<br>
+MSG_MAINWND_MENU_FILE_OPEN	_Open<br>
+MSG_MAINWND_MENU_FILE_SAVE	_Save<br>
+MSG_MAINWND_MENU_FILE_EXIT	E_xit<br>
+MSG_MAINWND_MENU_EDIT=200	Edit<br>
+MSG_MAINWND_MENU_EDIT_CUT	C_ut<br>
+MSG_MAINWND_MENU_FILE_COPY	_Copy<br>
+MSG_MAINWND_MENU_FILE_PASTE	_Pase
+</div>
+<p>Notice the "=200" ID assignment for MSG_MAINWND_MENU_EDIT.</p>
+<p>Now you can add a new item to the "File" menu:</p>
+<div id="filetext">
+MSG_MAINWND_MENU_FILE=100	File<br>
+MSG_MAINWND_MENU_FILE_OPEN	_Open<br>
+MSG_MAINWND_MENU_FILE_SAVE	_Save<br>
+MSG_MAINWND_MENU_FILE_EXIT	E_xit<br>
+MSG_MAINWND_MENU_FILE_PRINT	_Print<br>
+MSG_MAINWND_MENU_EDIT=200	Edit<br>
+MSG_MAINWND_MENU_EDIT_CUT	C_ut<br>
+MSG_MAINWND_MENU_FILE_COPY	_Copy<br>
+MSG_MAINWND_MENU_FILE_PASTE	_Pase
+</div>
+<p>The string Print will now have a unique ID (in this case, 104). Edit stays at ID 200.
+
+</p><h3>The importance of labels</h3>
+
+<p>So, why all these horribly long string labels?! Why not just write</p>
+<div id="filetext">
+FILE=100	File<br>
+OPEN	_Open<br>
+SAVE	_Save<br>
+EXIT	E_xit<br>
+PRINT	_Print<br>
+...
+</div>
+<p>The string itself ("File", "Open", and so on) is often not enough
+for a translator to be able to make a 100 per cent correct translation.
+Just think about the word "Open". It can mean many things. The
+translator needs to know the context.</p>
+<box>Choose string labels that:
+</box><ul>
+<li>Describe the context of the word. If it's in a menu named "File" in the main window, make sure the label says that.</li>
+<li>Are synonymic, if possible. E.g. if the text says "Open", use LOAD in the label.</li>
+</ul>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+</div>
+
+<p id="tutorialname">Creating a Dock Plugin</p>
+
+<h1>Dock Plugin Tutorial</h1>
+
+<table>
+<tbody><tr><td>Written by:</td><td>William Hoggarth</td></tr>
+<tr><td>Last Updated:</td><td>18th December 2004</td></tr>
+<tr><td>Version:</td><td>0.5.4</td></tr>
+</tbody></table>
+
+<h3>Introduction</h3>
+
+<p>This tutorial explains how to create plugins for the Syllable Dock.
+To create a plugin, you must download dockplugin.h from the Syllable
+CVS repository (or from ViewCVS), in
+syllable/syllable/system/apps/desktop/dock/. This header file is not
+included in the default install.</p>
+
+<p>If you examine dockplugin.h, you will see that there is a DockPlugin
+class from which all plugins inherit, and a typedef for the
+init_dock_plugin() function. This is the function that the dock calls
+to initialise the plugin. Creating a plugin is simply a matter creating
+a DockPlugin class and a corresponding initialisation function.</p>
+
+<p>A plugin is not an ordinary program, but is a module loaded in by
+the dock. This means that the code must be linked with the -shared flag
+indicating that a shared library is to be created. Here's an example
+from the makefile for Meter:</p>
+
+<pre>g++ -o meter.so -shared meter.o -lsyllable
+</pre>
+
+<p>The DockPlugin has three pure virtual methods which must be
+implemented by every plugin in addition to the init_dock_plugin()
+function. This tutorial will consider each in turn.</p>
+
+<h3>GetIdentifier()</h3>
+
+<p>This method is used by the Dock to uniquely identify each plugin.
+This method should return a name and is easy to implement, as seen in
+this example from Meter:</p>
+
+<pre>String Meter::GetIdentifier()
+{
+	return "Meter";
+}
+</pre>
+
+<h3>GetPreferredSize()</h3>
+
+<p>This method is used by the Dock to determine what size the plugin should be.  The method should return the <em>preferred</em>
+size of the plugin; the maximum height and width of the plugin will be
+limited to that of the dock. The size that should be returned depends
+on the nature of the plugin.</p>
+
+<h3>GetPath()</h3>
+
+<p>This method is used by the Dock to determine the path for the plugin
+file. This path is passed to the init_dock_plugin() function, which can
+then pass this information to the plugin constructor. Then, in the
+plugin constructor, the path can be stored in a member variable ready
+to be recalled later. This then makes the implementation of the method
+rather easy, as the code from Meter shows:</p>
+
+<pre>Path Meter::GetPath()
+{
+	return m_cPath;
+}
+</pre>
+
+<h3>init_dock_plugin()</h3>
+
+<p>Once the Dock has loaded the plugin, it calls this function to
+initialise it. The function must create a plugin object and return its
+pointer. This is usually done with the <code>new</code> operator. The
+path of the plugin and a pointer to the Dock are passed to the
+function; normally these are passed straight on to the plugin
+constructor. The path is useful for implementing GetPath() as mentioned
+above. The dock pointer is of the Looper type. This is useful to have
+as it enables the plugin to do things it otherwise could not do, eg set
+up timers. The use of the <b>extern "C"</b> construct to allow C linkage is required, as shown in the example below:</p>
+
+<pre>extern "C"
+{
+	DockPlugin* init_dock_plugin(os::Path cPluginFile, os::Looper* pcDock)
+	{
+		return new Meter(cPluginFile, pcDock);
+	}
+}
+</pre>
+
+<h3>Finishing off</h3>
+
+<p>This tutorial has only covered the bare bones of creating a dock
+plugin. The DockPlugin class is inherited from the standard View class,
+thus a plugin is merely a custom View. The rest of the plugin code must
+be application-specific and depends on the nature of the plugin.</p>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+</div>
+
+<p id="tutorialname">Using Alpha transparency</p>
+
+<div id="sectiontext">Using the Alpha Channel</div>
+
+<ul>
+<li> You must use an RGB32 or CMAP8 Bitmap.  Other colorspaces do not support an alpha byte.</li>
+<li> Your image data must use either TRANSPARENT_CMAP8 or TRANSPARENT_RGB32 as the transparent color.</li>
+<li> You can use the drawing mode DM_OVER to "stamp" your bitmap onto a view, or DM_BLEND to "blend" one image over another.</li>
+</ul>
+
+<div id="sectiontext">Gotchas</div>
+
+<p>The color TRANSPARENT_RGB32 and TRANSPARENT_CMAP8 are pure-white
+(i.e., TRANSPARENT_RGB32 is 0xFFFFFFFF, four bytes of white). The
+downside to this is that your bitmap cannot use pure white as a normal
+color. You can, however, reduce one or more of the bytes by one, e.g.,
+making the red component 0xFE instead of 0xFF. This will look almost
+identical to pure white, and will keep the byte from being treated as
+transparent.</p>
+
+<p>The DM_BLEND mode can only be used with RGB32 data.  DM_OVER can be used for either RGB32 or CMAP8 data.</p>
+
+<div id="sectiontext">Example</div>
+
+<p>Assume we have a class derived from <code>View</code>.  We have overridden the <code>Paint()</code> method, and the class has a valid pointer to an RGB32 bitmap:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> using namespace os;
+<br><span id="codenumber"> 2</span> 
+<br><span id="codenumber"> 3</span> class FooView : public View
+<br><span id="codenumber"> 4</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 5</span>    public:
+<br><span id="codenumber"> 6</span>        FooView<font color="#4444ff">(</font> Bitmap* pcBitmap, const Rect&amp; cBounds <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 7</span>        ~FooView<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 8</span>        virtual void Paint<font color="#4444ff">(</font> const Rect&amp; cUpdateRect <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 9</span>    
+<br><span id="codenumber">10</span>    private:
+<br><span id="codenumber">11</span>        Bitmap* pcViewBitmap;
+<br><span id="codenumber">12</span> <font color="#4444ff">}</font>;
+<br><span id="codenumber">13</span> 
+<br><span id="codenumber">14</span> FooView::FooView<font color="#4444ff">(</font>Bitmap* pcBitmap, const Rect&amp; cBounds<font color="#4444ff">)</font> : View<font color="#4444ff">(</font>cBounds, "foo_view"<font color="#4444ff">)</font>
+<br><span id="codenumber">15</span> <font color="#4444ff">{</font>
+<br><span id="codenumber">16</span>    pcViewBitmap = pcBitmap;
+<br><span id="codenumber">17</span> <font color="#4444ff">}</font>
+<br><span id="codenumber">18</span> 
+<br><span id="codenumber">19</span> FooView::~FooView<font color="#4444ff">(</font><font color="#4444ff">)</font>
+<br><span id="codenumber">20</span> <font color="#4444ff">{</font>
+<br><span id="codenumber">21</span>    delete pcViewBitmap;
+<br><span id="codenumber">22</span> <font color="#4444ff">}</font>
+<br><span id="codenumber">23</span> 
+<br><span id="codenumber">24</span> void FooView::Paint<font color="#4444ff">(</font>const Rect&amp; cUpdateRect<font color="#4444ff">)</font>
+<br><span id="codenumber">25</span> <font color="#4444ff">{</font>
+<br><span id="codenumber">26</span>    SetDrawingMode<font color="#4444ff">(</font>DM_OVER<font color="#4444ff">)</font>;
+<br><span id="codenumber">27</span>    DrawBitmap<font color="#4444ff">(</font> pcViewBitmap, pcViewBitmap-&gt;GetBounds<font color="#4444ff">(</font><font color="#4444ff">)</font>, pcViewBitmap-&gt;GetBounds<font color="#4444ff">(</font><font color="#4444ff">)</font> <font color="#4444ff">)</font>;
+<br><span id="codenumber">28</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p>The important part is the call to <code>SetDrawingMode()</code> in the <code>Paint()</code> method.  If you do not make this call, then <code>DrawBitmap()</code> will assume DM_COPY, which is probably not what you want.</p>
+
+<div id="sectiontext">Help!</div>
+
+<p>If you have image data that does not conform to the
+TRANSPARENT_RGB32 system, you can convert it fairly easily. Below is an
+example of an algorithm to do the conversion:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> for<font color="#4444ff">(</font> uint nCurrentByte = 0; nCurrentByte &lt; nNumBytes; nCurrentByte += 4 <font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    if<font color="#4444ff">(</font> pnData[nCurrentByte] == 0xFF  &amp;&amp;  pnData[nCurrentByte+1] == 0xFF  &amp;&amp;  pnData[nCurrentByte+2] == 0xFF <font color="#4444ff">)</font>
+<br><span id="codenumber"> 4</span>    <font color="#4444ff">{</font>
+<br><span id="codenumber"> 5</span>       pnData[nCurrentByte] = 0xFE;
+<br><span id="codenumber"> 6</span>       pnData[nCurrentByte+1] = 0xFE;
+<br><span id="codenumber"> 7</span>       pnData[nCurrentByte+2] = 0xFE;
+<br><span id="codenumber"> 8</span>       pnData[nCurrentByte+3] = 0xFE;
+<br><span id="codenumber"> 9</span>    <font color="#4444ff">}</font>
+<br><span id="codenumber">10</span> 
+<br><span id="codenumber">11</span>    if<font color="#4444ff">(</font> pnData[nCurrentByte+3] == 0x00 <font color="#4444ff">)</font>
+<br><span id="codenumber">12</span>    <font color="#4444ff">{</font>
+<br><span id="codenumber">13</span>       pnData[nCurrentByte] = 0xFF;
+<br><span id="codenumber">14</span>       pnData[nCurrentByte+1] = 0xFF;
+<br><span id="codenumber">15</span>       pnData[nCurrentByte+2] = 0xFF;
+<br><span id="codenumber">16</span>       pnData[nCurrentByte+3] = 0xFF;
+<br><span id="codenumber">17</span>    <font color="#4444ff">}</font>
+<br></div>
+
+<p>This algorithm loops through each byte in the Bitmap data. For each
+byte, if first checks for a pure-white pixel, and if found, changes
+each byte of that pixel to 0xFE (which is 0xFF - 1). It then checks for
+0x00 in the fourth byte (the alpha is RGBA32). If 0x00 is found, each
+byte in the pixel is changed to 0xFF, which is TRANSPARENT_RGB32
+(0xFFFFFFFF).</p>
+
+<p>You should only need to convert your image data once. You can then
+save the image data in a format which you can use again without
+converting it (e.g., a hex dump, a binary dump of the Bitmap data,
+etc.).</p>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+</div>
+ </div>
+
+
+</body></html

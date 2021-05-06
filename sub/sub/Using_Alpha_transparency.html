@@ -1,0 +1,145 @@
+<html><head>
+
+<title>Syllable User Bible - Using Alpha transparency</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Using Alpha transparency</div>
+</div>
+<div id="pageStats">
+<table border="0">
+<tbody><tr><td valign="top">Last Updated:</td><td>Apr 11, 2007</td></tr>
+</tbody></table>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+
+<div id="sectiontext">Using the Alpha Channel</div>
+
+<ul>
+<li> You must use an RGB32 or CMAP8 Bitmap.  Other colorspaces do not support an alpha byte.</li>
+<li> Your image data must use either TRANSPARENT_CMAP8 or TRANSPARENT_RGB32 as the transparent color.</li>
+<li> You can use the drawing mode DM_OVER to "stamp" your bitmap onto a view, or DM_BLEND to "blend" one image over another.</li>
+</ul>
+
+<div id="sectiontext">Gotchas</div>
+
+<p>The color TRANSPARENT_RGB32 and TRANSPARENT_CMAP8 are pure-white
+(i.e., TRANSPARENT_RGB32 is 0xFFFFFFFF, four bytes of white). The
+downside to this is that your bitmap cannot use pure white as a normal
+color. You can, however, reduce one or more of the bytes by one, e.g.,
+making the red component 0xFE instead of 0xFF. This will look almost
+identical to pure white, and will keep the byte from being treated as
+transparent.</p>
+
+<p>The DM_BLEND mode can only be used with RGB32 data.  DM_OVER can be used for either RGB32 or CMAP8 data.</p>
+
+<div id="sectiontext">Example</div>
+
+<p>Assume we have a class derived from <code>View</code>.  We have overridden the <code>Paint()</code> method, and the class has a valid pointer to an RGB32 bitmap:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> using namespace os;
+<br><span id="codenumber"> 2</span> 
+<br><span id="codenumber"> 3</span> class FooView : public View
+<br><span id="codenumber"> 4</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 5</span>    public:
+<br><span id="codenumber"> 6</span>        FooView<font color="#4444ff">(</font> Bitmap* pcBitmap, const Rect&amp; cBounds <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 7</span>        ~FooView<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 8</span>        virtual void Paint<font color="#4444ff">(</font> const Rect&amp; cUpdateRect <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 9</span>    
+<br><span id="codenumber">10</span>    private:
+<br><span id="codenumber">11</span>        Bitmap* pcViewBitmap;
+<br><span id="codenumber">12</span> <font color="#4444ff">}</font>;
+<br><span id="codenumber">13</span> 
+<br><span id="codenumber">14</span> FooView::FooView<font color="#4444ff">(</font>Bitmap* pcBitmap, const Rect&amp; cBounds<font color="#4444ff">)</font> : View<font color="#4444ff">(</font>cBounds, "foo_view"<font color="#4444ff">)</font>
+<br><span id="codenumber">15</span> <font color="#4444ff">{</font>
+<br><span id="codenumber">16</span>    pcViewBitmap = pcBitmap;
+<br><span id="codenumber">17</span> <font color="#4444ff">}</font>
+<br><span id="codenumber">18</span> 
+<br><span id="codenumber">19</span> FooView::~FooView<font color="#4444ff">(</font><font color="#4444ff">)</font>
+<br><span id="codenumber">20</span> <font color="#4444ff">{</font>
+<br><span id="codenumber">21</span>    delete pcViewBitmap;
+<br><span id="codenumber">22</span> <font color="#4444ff">}</font>
+<br><span id="codenumber">23</span> 
+<br><span id="codenumber">24</span> void FooView::Paint<font color="#4444ff">(</font>const Rect&amp; cUpdateRect<font color="#4444ff">)</font>
+<br><span id="codenumber">25</span> <font color="#4444ff">{</font>
+<br><span id="codenumber">26</span>    SetDrawingMode<font color="#4444ff">(</font>DM_OVER<font color="#4444ff">)</font>;
+<br><span id="codenumber">27</span>    DrawBitmap<font color="#4444ff">(</font> pcViewBitmap, pcViewBitmap-&gt;GetBounds<font color="#4444ff">(</font><font color="#4444ff">)</font>, pcViewBitmap-&gt;GetBounds<font color="#4444ff">(</font><font color="#4444ff">)</font> <font color="#4444ff">)</font>;
+<br><span id="codenumber">28</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p>The important part is the call to <code>SetDrawingMode()</code> in the <code>Paint()</code> method.  If you do not make this call, then <code>DrawBitmap()</code> will assume DM_COPY, which is probably not what you want.</p>
+
+<div id="sectiontext">Help!</div>
+
+<p>If you have image data that does not conform to the
+TRANSPARENT_RGB32 system, you can convert it fairly easily. Below is an
+example of an algorithm to do the conversion:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> for<font color="#4444ff">(</font> uint nCurrentByte = 0; nCurrentByte &lt; nNumBytes; nCurrentByte += 4 <font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    if<font color="#4444ff">(</font> pnData[nCurrentByte] == 0xFF  &amp;&amp;  pnData[nCurrentByte+1] == 0xFF  &amp;&amp;  pnData[nCurrentByte+2] == 0xFF <font color="#4444ff">)</font>
+<br><span id="codenumber"> 4</span>    <font color="#4444ff">{</font>
+<br><span id="codenumber"> 5</span>       pnData[nCurrentByte] = 0xFE;
+<br><span id="codenumber"> 6</span>       pnData[nCurrentByte+1] = 0xFE;
+<br><span id="codenumber"> 7</span>       pnData[nCurrentByte+2] = 0xFE;
+<br><span id="codenumber"> 8</span>       pnData[nCurrentByte+3] = 0xFE;
+<br><span id="codenumber"> 9</span>    <font color="#4444ff">}</font>
+<br><span id="codenumber">10</span> 
+<br><span id="codenumber">11</span>    if<font color="#4444ff">(</font> pnData[nCurrentByte+3] == 0x00 <font color="#4444ff">)</font>
+<br><span id="codenumber">12</span>    <font color="#4444ff">{</font>
+<br><span id="codenumber">13</span>       pnData[nCurrentByte] = 0xFF;
+<br><span id="codenumber">14</span>       pnData[nCurrentByte+1] = 0xFF;
+<br><span id="codenumber">15</span>       pnData[nCurrentByte+2] = 0xFF;
+<br><span id="codenumber">16</span>       pnData[nCurrentByte+3] = 0xFF;
+<br><span id="codenumber">17</span>    <font color="#4444ff">}</font>
+<br></div>
+
+<p>This algorithm loops through each byte in the Bitmap data. For each
+byte, if first checks for a pure-white pixel, and if found, changes
+each byte of that pixel to 0xFE (which is 0xFF - 1). It then checks for
+0x00 in the fourth byte (the alpha is RGBA32). If 0x00 is found, each
+byte in the pixel is changed to 0xFF, which is TRANSPARENT_RGB32
+(0xFFFFFFFF).</p>
+
+<p>You should only need to convert your image data once. You can then
+save the image data in a format which you can use again without
+converting it (e.g., a hex dump, a binary dump of the Bitmap data,
+etc.).</p>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+</div>
+ </div>
+</div>
+
+<br><br>
+
+</body></html

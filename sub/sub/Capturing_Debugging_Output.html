@@ -1,0 +1,103 @@
+<html><head>
+
+<title>Syllable User Bible - Capturing Debugging Output</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Capturing Debugging Output</div>
+</div>
+<div id="pageStats">
+<table border="0">
+<tbody><tr><td valign="top">Written by:</td><td>William Hoggarth</td></tr>
+<tr><td valign="top">Last Updated:</td><td>Apr 11, 2007</td></tr>
+<tr><td valign="top">Version:</td><td>0.5.2 to 0.5.3</td></tr>
+</tbody></table>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+
+<h2>Introduction</h2>
+
+<p>Syllable is undergoing rapid development, which means that sometimes
+things don't work quite as they should. Whether it's unsupported
+hardware or a new feature that's causing problems, debugging output can
+be captured and sent to the syllable developer mailing list. This will
+help the developers improve Syllable and hopefully get your
+installation working properly. To do this you will need a second
+computer and a null-modem serial cable. If you've got this equipment
+then you're ready to start.</p>
+
+<h2>Adding the kernel parameters</h2>
+
+<p>First you will need to enable the debugging output on your Syllable machine. Add the following to the kernel parameters:</p>
+
+<div id="filetext">
+debug_enable debug_port=1 debug_baudrate=19200 debug_plaintext=true
+</div>
+
+<p>You can do this by editing menu.lst (/boot/boot/grub/menu.lst). The kernel line should now look something like this:
+
+</p><div id="filetext">
+kernel /atheos/sys/kernel.so root=/dev/disk/ide/hda/0 debug_enable debug_port=1 debug_baudrate=19200 debug_plaintext=true
+</div>
+
+<h2>Setting up the serial terminal</h2>
+<p>Now you've setup your Syllable machine to output the debugging
+information, you will need to set up the other machine. You will need a
+serial terminal program. You can use the following programs:</p>
+
+<ul>
+<li>Linux - Minicom</li>
+<li>Windows - Teraterm</li>
+</ul>
+
+<p>You will need to setup your terminal to receive at 19200bps (8N1). More details for each terminal program are below.</p>
+
+<h3>Linux - Minicom</h3>
+
+<p>Depending on your distribution the key combination to configure
+Minicom will vary. Once the program is running in the bottom left-hand
+corner it will say "[key / key combination] Z for help". This special
+key or key combination will be called the <b>command key</b> during this tutorial.</p>
+
+<p>Press the command key followed by O to bring up the configuration
+menu. Select "Serial port setup". Press A to set the serial port,
+normally you should set this to "/dev/ttyS0". Now press E to select the
+baud rate and protocol. Set the Speed to "19200", then press Q to set
+the protocol.</p>
+
+<p>Now go back out to the configuration menu. Save the configuration.
+You may find you need to exit (command key followed by Q) and restart
+Minicom for the settings to take effect. Press the command key followed
+by L. Type in the name of the file you wish to log the debugging output
+to. The machine is now ready to receive the data. Simply boot up your
+Syllable machine with the debugging options enabled and hey presto!</p>
+
+<h3>Windows - Teraterm</h3>
+
+<p>At the startup dialog select Serial and COM1. Then go to the "Setup"
+menu and select the "Serial Port..." item. Set the baud rate to 19200
+and check that data is set to 8 bit, parity to none and stop bit to 1.
+Now go to the "File" menu and select the "Log..." item. Select where
+you wish the log to be saved and you are ready to go. Simply boot up
+your Syllable machine with the debugging options enabled and hey presto!</p>
+ </div>
+</div>
+
+<br><br>
+
+</body></html

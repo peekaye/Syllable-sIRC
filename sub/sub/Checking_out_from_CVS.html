@@ -1,0 +1,115 @@
+<html><head>
+
+<title>Syllable User Bible - Checking out from CVS</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Checking out from CVS</div>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+<p>Let's say you want to get syllable/system/sys/kernel and everything
+in it. With Sourceforge, you don't need to use "login" to access the
+repository. You just go ahead and checkout. So: </p>
+<pre>cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/syllable checkout syllable/system/sys/kernel/kernel 
+</pre>
+
+<p>Only the last part, after the "checkout", ever needs to change. Note
+the exact format of the -d argument. No spaces after the -d and the
+first colon is important. </p>
+<p>Once you have a copy checked out, you'll have a local folder in your current directory called "syllable", so if you're in <em>/Source, you'll now have </em>/Source/syllable/system/sys/kernel/kernel/.
+If, in the future, you want to update your local copy to the latest
+version in CVS, just go to the directory you want to update and run </p>
+<pre>cvs update 
+</pre>
+
+<p>CVS will know which repository etc. you used last time, so there is
+no need for the -d argument; it will automatically fetch the latest
+files for you. </p><div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+bla bla bla
+
+<hr>
+wow it works
+
+<hr>
+ja ja ja 
+
+<hr>
+Paris
+
+<hr>
+Troja
+Dur dom na viyezde
+
+<hr>
+CVS stores projects and files in a central repository, but you work
+from a working copy, called a sandbox, in your local directories. You
+create that sandbox with cvs checkout.
+CVS creates the sandbox as a subdirectory of your current working
+directory. I like to create a directory to contain all my CVS
+sandboxes, and I use ~/cvs. From whichever directory you want a sandbox
+created in, run the command:
+cvs -d repository_path checkout project_name
+This command checks out all files for the named project. If your
+repository is on the local machine, the repository path is the full
+pathname of the CVS repository. If your repository is on a remote
+server, see the earlier Section 2.4. Example 2-10 shows a local
+checkout.
+Example 2-10. Local repository checkout
+$ mkdir ~/cvs
+$ cd ~/cvs
+$ cvs -d /var/lib/cvsroot checkout example
+cvs checkout: Updating example
+U example/file1
+U example/file2
+The checkout command puts a copy of the project's files and
+subdirectories into a directory named for the project, created in the
+current working directory. It also puts some administrative files of
+its own in a subdirectory of the project directory, called CVS.
+You can check out an individual file or subdirectory of a project by
+replacing project_name with the pathname to the file or directory, from
+the project's root directory. See Chapter 3 for more information.
+CVS stores the repository path as part of the sandbox, so you should
+never again need to use -d repository_path in commands executed within
+that sandbox.
+If you are checking out a sandbox from a remote repository, the
+repository path is slightly different than the path shown in the
+previous example. Example 2-11 shows a checkout from a remote
+repository.
+Example 2-11. Remote repository checkout
+$ cvs -d :ext:cvs:/home/cvs checkout cvsbook
+cvs server: Updating cvsbook
+U cvsbook/1-introduction.html
+U cvsbook/2-installation.html
+U cvsbook/3-quickstart.html
+U cvsbook/acknowledgements
+U cvsbook/outline_schedule
+U cvsbook/proposal
+U cvsbook/sources
+U cvsbook/template
+<hr>
+byebye
+
+
+</div>
+ </div>
+</div>
+
+<br><br>
+
+</body></html

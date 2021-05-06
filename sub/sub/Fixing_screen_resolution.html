@@ -1,0 +1,87 @@
+<html><head>
+
+<title>Syllable User Bible - Fixing screen resolution</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Fixing screen resolution</div>
+</div>
+<div id="pageStats">
+<table border="0">
+<tbody><tr><td valign="top">Written by:</td><td>Vanders</td></tr>
+<tr><td valign="top">Last Updated:</td><td>Apr 11, 2007</td></tr>
+<tr><td valign="top">Version:</td><td>0.5.2 to 0.5.3</td></tr>
+</tbody></table>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+<p>Problem: In the settings dialog of the Screen I set the resolution
+to 1280x1024, and now there appears a dialog on my monitor that says
+the resolution is out of limit and I can do nothing after booting
+Syllable.</p>
+
+<p><strong>Solution 1:</strong></p>
+
+<p>Press <strong>Alt F12</strong>. If the screen still doesn't display, go to <strong>Solution 2</strong>. If it does, open up the screen preferences, click <strong>Default</strong>, and change <strong>Apply To</strong> to <em>All workspaces</em> and click <strong>Apply</strong>.</p>
+
+<p><strong>Solution 2:</strong></p>
+
+<p>You'll need your Syllable installation CD to hand.</p>
+
+<p>Boot from the CD and quit the installation script.  This will leave you with a shell running in a single ATerm.</p>
+
+<p>Mount your existing Syllable partition. I'll assume that your
+Syllable installation exists on /dev/disk/ata/hda/0, but you'll need to
+change this to suit your system. To mount your Syllable partition, type:</p>
+
+<div id="terminal">
+mkdir /syllable<br>
+mount /dev/disk/ata/hda/0 /syllable
+</div>
+
+<p>You now need to edit a single configuration file to restore your display.  The appserver configuration file can be found at:</p>
+
+<p></p><div id="filetext">/syllable/atheos/sys/config/appserver</div><p></p>
+
+<p>Open it in AEdit and you'll see that the first line of the config file is something like:</p>
+
+<div id="filetext">
+Desktop 00 =  1280  1024 80.00 50.00 70.00 80.00 60.00  RGB16 ""
+</div>
+
+<p>Change that line to match the others, e.g.:</p>
+
+<div id="filetext">
+Desktop 00 =  640  480 80.00 50.00 70.00 80.00 60.00  RGB16 ""
+</div>
+
+<p>Save the file. Now reboot (remove the CD) and Syllable will reboot
+back into a 640x480 display, and you can try changing your display
+settings again.</p>
+
+<strong>Note</strong><div id="note">
+Each line in the file consists of the following fields: Desktop number,
+X, Y, horizontal position, vertical position, horizontal size, vertical
+size, refresh rate, colorspace, and backdrop.
+</div>
+
+ </div>
+</div>
+
+<br><br>
+
+</body></html

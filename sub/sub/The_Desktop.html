@@ -1,0 +1,46 @@
+<html><head>
+
+<title>Syllable User Bible - The Desktop</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">The Desktop</div>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+
+<p>The icons on the desktop are just a collection of shortcuts (in Unix terms, <em>symlinks</em>) to various folders and applications on your Syllable system.
+
+</p>
+<p>These shortcuts all live in the Desktop folder in your Home folder.
+To add an icon to your desktop, just create a symlink by typing the
+following in a terminal window:
+</p>
+<pre>ln -s &lt;application&gt; ~/Desktop/&lt;new icon name&gt;
+</pre>
+
+<p>So, to create an icon for Whisper on your desktop, type the following:
+
+</p>
+<pre>ln -s /Applications/Whisper/bin/Whisper ~/Desktop/Whisper
+</pre>
+<p></p> </div>
+</div>
+
+<br><br>
+
+</body></html

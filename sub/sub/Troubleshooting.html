@@ -1,0 +1,169 @@
+<html><head>
+
+<title>Syllable User Bible - Troubleshooting</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Troubleshooting</div>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+<p></p><h2>Syllable boots from the install floppies and into the GUI,
+but when I try to mount an existing FAT partition or format the AFS
+partition, it appear that Syllable has not detected any of my
+partitions. What can I do?</h2>
+<p></p>
+
+<p>The problem is most likely related to the way your BIOS translates
+disk addresses compared to the OS you normally access the disk from.
+Experiment with the BIOS settings for the disk in question. Most
+BIOS'es provide LBA, and a few CHS modes. Try the various modes and see
+if you can find one that matches the translation your OS is using.
+</p>
+<p></p><h2>It's asking me to log in.  What's the username and password?</h2>
+<p></p>
+
+<p>There are two accounts defined in a standard Syllable installation.
+One account has the username "root" and the password "root". This is
+the "super-user" that give you access to everything. The other account
+has the username "guest" and the password "guest". This is a regular
+user and serves as an example of standard accounts on Syllable.
+</p>
+<p></p><h2>When I try to boot from the CD I get the error 'Cannot exec boot-shell'</h2>
+<p></p>
+
+<p>"Cannot exec boot-shell" probably means that Syllable could not
+detect the CD-ROM drive that you are booting Syllable from. This is a
+known problem with the ATAPI driver &amp; some slow CD-ROM drives; the
+ATAPI driver does not correctly identify when a device is in the
+process of "Becoming Ready" and instead returns a "Not Ready" or
+"Unable to read capacity" error. 0.4.5 is <em>slightly</em> better at dealing with this than 0.4.4 was, but it still may not work.
+
+</p>
+<p>What you need to do is pass the exact path to your boot CD-ROM to
+the Syllable kernel, rather than allowing it to attempt to detect your
+boot device. There are two possible ways to go about this.
+</p>
+<p>1) If you don't mind doing this every time you wish to boot from CD,
+you can simply change the arguments at boot time. Boot from the CD and
+when the Grub boot-menu is displayed, press <strong>E</strong> to enter the Grub editor. Move down to the second line which begins
+
+</p>
+<pre>kernel=
+</pre>
+
+<p>Press <strong>E</strong> again to edit this line. Scroll back along the line until you come to the argument
+
+</p>
+<pre>root=@boot
+</pre>
+
+<p>Delete the "@boot" part of the argument, and instead enter the
+device path for your CD-ROM drive (See below for information on how to
+work out what your CD-ROM drive is called)
+</p>
+<p>Once you have entered the correct path to your CD-ROM drive, press <strong>B</strong>
+to boot with your edited configuration file. Syllable should now boot
+and correctly find your boot CD, and continue to boot into the Syllable
+installation script.
+</p>
+<p>2) If you think you'll need to boot from the CD several times, or
+you do not want to edit the parameters from within Grub, you can create
+a boot floppy and edit the Grub boot menu with any text editor. On the
+CD the boot disk image can be found at
+</p>
+<pre>/boot/boot.img
+</pre>
+
+<p>You can write this to a 1.44MB floppy disk with either "dd" under
+*nix, Syllable or BeOS or with rawwrite under Windows. With "dd" you
+would write the disk with E.g.
+</p>
+<pre>dd if=/mnt/cdrom/boot/boot.img of=/dev/fd0 bs=512
+</pre>
+
+<p>Once dd has finished, mount the floppy disk as a FAT32 disk. On the disk you can find the Grub boot menu configuration file at
+
+</p>
+<pre>/boot/grub/menu.lst
+</pre>
+
+<p>Open this file in your prefered editor and Move down to the second line which begins
+
+</p>
+<pre>kernel=
+</pre>
+
+<p>Edit this line and find the argument
+
+</p>
+<pre>root=@boot
+</pre>
+
+<p>Delete the "@boot" part of the argument, and instead enter the
+device path for your CD-ROM drive (See below for information on how to
+work out what your CD-ROM drive is called)
+</p>
+<p>Once you have entered the correct path to your CD-ROM drive, save
+your edited configuration file. You can now boot from the boot floppy
+disk (With the boot CD in the correct drive) and Syllable should boot
+and correctly find your boot CD, and continue to boot into the Syllable
+installation script. Ensure that you have correctly set your BIOS to
+boot from the floppy disk first, and not from the CD-ROM!
+</p>
+<p>Syllable names the drives as follows:
+
+</p>
+<ul>
+<li> cda - CD or DVD on the Primary Master</li>
+<li> cdb - CD or DVD on the Primary Slave</li>
+<li> cdc - CD or DVD on the Secondary Master</li>
+<li> cdd - CD or DVD on the Secondary Slave</li>
+<p></p></ul>
+
+<p></p>
+<p>Most PCs have the CD-ROM drive on the Secondary Master, which would make the full device path
+
+</p>
+<pre>/dev/disk/ata/cdc/raw
+</pre>
+
+<p>which would make the root= argument
+
+</p>
+<pre>root=/dev/disk/ata/cdc/raw
+</pre>
+
+<p></p><h2>Syllable has detected my network card, but it doesn't work.</h2>
+<p></p>
+
+<p>First of all, ensure that your network settings are correct. Run the
+command ifconfig in an ATerm, which will show you your current network
+configuration. Also check the kernel log in /var/log/kernel for errors.
+</p>
+<p>If there are no obvious errors and your network configuration is
+correct, ensure that "Plug and Play OS" is disabled in your computer's
+BIOS. This option is only useful if you are running an old versions of
+Microsoft Windows and can cause all sorts of strange errors with modern
+operating systems.
+</p>
+<p></p> </div>
+</div>
+
+<br><br>
+
+</body></html

@@ -1,0 +1,983 @@
+<html><head>
+
+<title>Syllable User Bible - Basic Programming</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Basic Programming</div>
+</div>
+<div id="pageStats">
+<table border="0">
+<tbody><tr><td valign="top">Written by:</td><td>Brent P. Newhall</td></tr>
+<tr><td valign="top">Last Updated:</td><td>Apr 11, 2007</td></tr>
+</tbody></table>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+
+<p>OK, today we're going to write a ridiculously simple program, one which will print the sentence <code>Hello, world!</code>
+on the screen. It won't teach you the Syllable API, and it won't even
+teach you much of C++; it will teach you the basics of how programming
+works.</p>
+
+<p>We'll start off by creating a directory to store our developmental
+programs in. Open up your home directory in a terminal window, and type
+the following:</p>
+
+<div id="terminal">
+  $ <b>mkdir development</b><br>
+  $ <b>cd development</b><br>
+</div>
+
+<p>OK, it's time to write our first program. Using a text editor,
+create a simple plain-text file. No formatting. Add the following to
+the file:</p>
+
+<div id="filetext">
+  #include &lt;iostream&gt;<br><br>
+  int main( void )<br>
+  {<br>
+  std::cout &lt;&lt; "Hello, world!" &lt;&lt; std::endl;<br>
+  return 0;<br>
+  }<br>
+</div>
+
+<div id="sectiontext">A Closer Look At The Program</div>
+
+<p>That's a complete C++ program. Let's go through it line-by-line.
+Don't worry if you don't understand everything here; again, the point
+of this tutorial is more to get you used to the programming process,
+rather than teach you all the particulars of how this particular
+program works.</p>
+
+<p>The C++ programming specification actually defines only the very
+basic layout of the language. In order to actually do useful things
+with C++, you need to add special files called <i>libraries</i> to
+your program. A library is just a file which defines special commands.
+Thus, the first line of our program uses the special <code>#include</code> command to pull in a particular library file, namely, <code>iostream</code>.   <code>iostream</code> contains commands for <b>i</b>nput and <b>o</b>utput <b>stream</b>s; thus the name of the file.</p>
+
+<p>Then, every program needs a block of code named <code>main</code>.  The program always starts executing here, no matter where the <code>main</code> block is located in the program.  The <code>int</code>
+word says that this block will end up with a number value when it's
+done processing &#8211; don't worry about exactly why we're bothering with
+this right now.</p>
+
+<p>(Actually, the proper term for these blocks is a "function," but we won't worry about that right now either.)</p>
+
+<p>OK, then we use a special command that's part of the <code>iostream</code> library; namely, the <code>cout</code> command.  <code>cout</code> is used to print things on the screen.  We then use the <code>&lt;&lt;</code>
+operator (a kind of command), to say that we're not done cout'ing yet,
+then we have the special string that we want to print out. This string
+must be surrounded with double-quote marks; otherwise, the C++ compiler
+won't know where the string begins and ends. Then we put another <code>&lt;&lt;</code> operator, and end the <code>cout</code> statement with the <code>endl</code>
+operator, which means that this is the end of this line on the screen,
+which will move the cursor on the screen to the next line. We end the
+line with a <code>;</code>, because all complete lines of code (except those starting with <code>#</code>) must end with a <code>;</code>.</p>
+
+<p>Now, remember how I said that this block will end up with a number
+value when it's done processing? Well, we have to say which number
+value that is, which is why we finish up this function with <code>return 0;</code>.  We end the program with a <code>}</code>, which finishes up the <code>main</code> function.</p>
+
+<div id="sectiontext">Compiling</div>
+
+<p>All right!  You've written your first program!  Now, save the file as <code>helloworld.cpp</code>, in the <code>development</code> directory of your home directory.</p>
+
+<p>OK, now we get to use the C++ <i>compiler</i>. A compiler is a
+program that takes commands in a particular programming language, and
+translates them to a whole bunch of commands that the operating system
+itself can recognize. Syllable can't directly interpret C++ commands;
+you have to compile each C++ program into a Syllable program.</p>
+
+<p>To compile your application, type the following in the terminal window (without the "$"):</p>
+
+<div id="terminal">
+  $ <b>gcc -lsyllable -lstdc++ helloworld.cpp -o helloworld</b><br>
+</div>
+
+<p>This will start the <code>gcc</code> program (which is the C++ compiler), telling it to load in the <code>syllable</code> and <code>stdc++</code> compiler libraries, compiling your <code>helloworld.cpp</code> program, and writing out the actual finished program as <code>helloworld</code>.</p>
+
+<p><code>gcc</code> may come back with a bunch of errors. If you get
+any errors, go back and make sure that you typed in your code exactly
+as it's listed above. If you find any errors, change your code, save
+it, and re-type the line above to re-compile your program.</p>
+
+<p>Once you compile without errors, enter the following in the terminal window:</p>
+
+<div id="terminal">
+  $ <b>./helloworld</b><br>
+  Hello, world!<br>
+  $ <br>
+</div>
+
+<p>You should immediately get back a line saying <code>Hello, world!</code>.  If so, congratulations!  You've successfully written, compiled, and executed your first Syllable program!</p>
+
+<div id="sectiontext">Variables</div>
+
+<p>It's time to start doing vaguely useful things with C++.  This tutorial will familiarize you with <i>variables</i>.</p>
+
+<p>Variables are simply containers that you can use to store a little
+data. You can think of a variable as being like a mug; you can fill it
+with water, or you can put a slip of paper into it, or whatever.</p>
+
+<p>However, unlike mugs, variables have to have a particular <i>type</i>.
+Whenever you create a variable, you have to say exactly what sort of
+thing you want to put into it. Thus, you could create a variable that
+will only be able to store one integer number at any given time, or
+that will only store text. This would be like declaring that your blue
+Hawaii mug is only to be used for drinking out of; nobody should store
+pencils in it.</p>
+
+<p>The syntax for creating a variable is simple: First comes the type
+of the variable, followed by the name that you want to use for the
+variable, followed by a semi-colon ("<code>;</code>").  To put a number in the variable, you just type the name of the variable, followed by an equals sign ("<code>=</code>"), followed by whatever value you want for the variable, followed by a <code>;</code>.</p>
+
+<p>What types are available?  Here's a quick list:</p>
+
+<table border="1">
+  <tbody><tr>
+    <td><b>Type</b></td>
+    <td><b>Examples</b></td>
+    <td><b>Notes</b></td>
+  </tr><tr>
+    <td><code>int</code></td>
+    <td>4, 102</td>
+    <td>Integer &#8211; a number with no decimal or fraction part</td>
+  </tr><tr>
+    <td><code>float</code></td>
+    <td>3.8, 40.10039, 6</td>
+    <td>Floating-point number &#8211; any sort of real number, with or without a decimal place</td>
+  </tr><tr>
+    <td><code>char</code></td>
+    <td>'a', '%', '2'</td>
+    <td>Character &#8211; a single character</td>
+  </tr><tr>
+    <td><code>string</code></td>
+    <td>"Hello", "5"</td>
+    <td>String &#8211; contains text; must use <code>#include <string></string></code></td>
+  </tr>
+</tbody></table>
+
+<p><strong>A Quick Example</strong></p>
+
+<p>Let's write an example before we go any farther. We'll write a
+simple program that stores a number, then displays it on the screen.</p>
+
+<div id="filetext">
+  #include &lt;iostream&gt;<br><br>
+  int main( void )<br>
+  {<br>
+    int num;<br>
+    num = 5;<br>
+    cout &lt;&lt; "The number is " &lt;&lt; num &lt;&lt; endl;<br>
+    return 0;<br>
+  }
+</div>
+
+<p>OK.  The first thing we did was define a variable, named <code>num</code>, as an <code>int</code>
+(integer). We then assign the value of 5 to the variable, and then we
+print out a short message which also prints out whatever's in that
+variable.</p>
+
+<p>Save this program as <code>variables.cpp</code> in the <code>~/development</code> directory, then open a terminal window and type the following (type everything that comes after a "$"):</p>
+
+<div id="terminal">
+  $ <b>cd ~/development</b><br>
+  $ <b>gcc -lstdc++ variables.cpp -o variables</b><br>
+  $ <b>./variables</b><br>
+  The number is 5<br>
+  $ <br>
+</div>
+
+<div id="sectiontext">Some Simple Math Operations</div>
+
+<p>So, let's review. We've seen how to create variables, and how to
+assign a value to them, and how to print that out. Not very exciting.</p>
+
+<p>But wait! We can do math with our variables! We just use that
+"variable = value" syntax shown above, and add in mathematical symbols.
+Thus, you can do this:</p>
+
+<div id="filetext">
+  num = 5 + 9;<br>
+</div>
+
+<p>After that command is executed, <code>num</code> will have the value
+of 14. This wouldn't be very powerful, except that you can also use
+variables in there too. Let's write another example.</p>
+
+<div id="filetext">
+  #include <iostream><br><br>
+  int main( void )<br>
+  {<br>
+    <font color="#ff0000">/*  ----- Performs various mathematical operations on 8 and 3.<br><br>
+      Perform the math.<br>
+      Print out the result.  */</font><br><br>
+    float number1;<br>
+    float number2;<br>
+    float add_result, subtract_result, multiply_result, divide_result;<br>
+    number1 = 8;<br>
+    number2 = 3;<br><br>
+    <font color="#ff0000">/*  Perform the math.  */</font><br>
+    add_result     = number1 + number2;<br>
+    subtract_result = number1 - number2 - 2;<br>
+    multiply_result = number1 * number2;<br>
+    divide_result   = number1 / number2;<br><br>
+    <font color="#ff0000">/*  Print out the result.  */</font><br>
+    cout &lt;&lt; number1 &lt;&lt; " + " &lt;&lt; number2<br>
+        &lt;&lt; " = " &lt;&lt; add_result &lt;&lt; endl<br>
+        &lt;&lt; number1 &lt;&lt; " - " &lt;&lt; number2<br>
+        &lt;&lt; " - 2 = " &lt;&lt; subtract_result &lt;&lt; endl<br>
+        &lt;&lt; number1 &lt;&lt; " * " &lt;&lt; number2<br>
+        &lt;&lt; " = " &lt;&lt; multiply_result &lt;&lt; endl<br>
+        &lt;&lt; number1 &lt;&lt; " / " &lt;&lt; number2<br>
+        &lt;&lt; " = " &lt;&lt; divide_result &lt;&lt; endl;<br>
+    return 0;<br>
+  }<br>
+</iostream></div>
+
+<p>The first thing you'll notice is a bunch of English sentences, surrounded by <code>/*</code> and <code>*/</code>.  These are <i>comments</i>,
+which are completely ignored by the compiler. Comments let you make
+notes to yourself (and other developers). What I did in the program
+above is my standard commenting scheme; I start out with a one-line
+description of this function (that is, <code>main</code>), followed by
+an outline of what the code does. I then insert each step of the
+outline wherever the code itself starts performing that step.
+</p><p>You'll also notice a special method of declaring our variables;
+rather than listing the type for each one, we listed the type, then a
+bunch of variables, separated by commas. This is perfectly legal C++,
+and is a convenient, quick way to set up a few variables.
+Unfortunately, this particular syntax makes it difficult to read and
+find variables, so I don't like to use it often.</p>
+
+<p>We then perform a few mathematical functions, and store the results
+in our four result variables. Finally, we print the results out. Note
+that we made the <code>cout</code> command work over a number of lines; since the <code>;</code> doesn't appear until after the last <code>endl</code> operator, the C++ compiler will know to treat it all as one <code>cout</code> command.</p>
+
+<p>OK, save the above code as <code>variables1.cpp</code>, and compile it and run it as usual.  Here's what you should see:</p>
+
+<div id="terminal">
+  8 + 3 = 11<br>
+  8 - 3 - 2 = 3<br>
+  8 * 3 = 24<br>
+  8 / 3 = 2.666667<br>
+</div>
+
+<p>Remember that variables are, well, variable; you can change them at any time during your program.  Thus, this is perfectly OK:</p>
+
+<div id="filetext">
+  int var;<br>
+  var = 3 + 8;<br>
+  cout &lt;&lt; var &lt;&lt; endl;<br>
+  var = 100;<br>
+  cout &lt;&lt; var &lt;&lt; endl;<br>
+</div>
+
+<div id="sectiontext">String Theory</div>
+
+<p>Before we leave, let's write one final example, one that uses chars and strings, just for completeness.</p>
+
+<div id="filetext">
+  #include &lt;iostream&gt;<br>
+  <font color="#ff0000">#include <string></string></font><br><br>
+  int main( void )<br>
+  {<br>
+    string firstName;<br>
+    char   middleInitial;<br>
+    string lastName;<br>
+    string fullName;<br><br>
+    firstName = "George";<br>
+    middleInitial = 'C';<br>
+    lastName = "Scott";<br><br>
+    cout &lt;&lt; "The person's name is: ";<br>
+    fullName = firstName + " " + middleInitial + ". " + lastName;<br>
+    cout &lt;&lt; fullName &lt;&lt; endl;<br>
+    return 0;<br>
+  }<br>
+</div>
+
+<p>(By the way, variable names can contain any letters (upper- or
+lower-case), numbers, and underscores, as long as they don't start with
+a number. Thus, <code>health</code>, <code>a1</code>, and <code>Speaker_System</code> are all valid variable names; <code>2a</code>, <code>health!</code>, and <code>George'C'</code> are not.  Also, variable names are case-sensitive, so <code>health</code> and <code>Health</code> are completely different variables.)</p>
+
+<p>The above should be fairly straightforward; only note that we had to include the <code>string</code>
+library, so that we would have string variables. We just stored the
+first name, last name, and middle initial of someone into three
+variables, then stuffed all of that into <code>fullName</code> (formatted with a few spaces), and printed that out.  Save this program as <code>variables2.cpp</code>, compile it, and run it.  Here's what you should get:</p>
+
+<div id="terminal">
+  The person's name is: George C. Scott<br>
+</div>
+
+<div id="sectiontext">Text Input</div>
+
+<p>How many programs do you have that don't need any input from you at
+all to do anything useful? Not many, I'll bet. Today we'll look at
+reading input from the keyboard, so that we can write some really
+useful C++ programs.</p>
+
+<p>Keyboard input is accomplished using <code>cout</code>'s lesser sibling, <code>cin</code>.  <code>cin</code> uses very similar syntax to <code>cout</code>; you simply put in a list of variables that you want to read in.  Let's see an example:</p>
+
+<div id="sectiontext">Number Input</div>
+
+<div id="filetext">
+  #include &lt;iostream&gt;<br><br>
+  int main( void )<br>
+  {<br>
+    float number1;<br>
+    float number2;<br><br>
+    cout &lt;&lt; "Enter any number: ";<br>
+    <font color="#ff0000">cin &gt;&gt; number1;</font><br>
+    cout &lt;&lt; endl;<br>
+    cout &lt;&lt; "Enter another number: ";<br>
+    <font color="#ff0000">cin &gt;&gt; number2;</font><br>
+    cout &lt;&lt; endl;<br><br>
+    cout &lt;&lt; number1 &lt;&lt; " + " &lt;&lt; number2 &lt;&lt; " = " &lt;&lt; number1 + number2 &lt;&lt; endl;<br>
+    return 0;<br>
+  }<br>
+</div>
+
+<p>This program should be fairly obvious. It prompts the user to enter
+two numbers, then prints out the sum of the two numbers. Notice how <code>cin</code> works:  You use the command <code>cin</code>, followed by the <code>&gt;&gt;</code> operator (the reverse of <code>cout</code>'s <code>&lt;&lt;</code> operator), followed by the name of the variable that you want to put the user's input into.</p>
+
+<p>Let's run through the program once.  Save the above code as <code>input.cpp</code>, compile it, and run it.  The stuff that you're supposed to type in is in <b>bold</b>:</p>
+
+<div id="terminal">
+  $ <b>./input</b><br>
+  Enter any number: <b>30</b><br>
+  Enter another number: <b>5.5</b><br>
+  30 + 5.5 = 35.5<br>
+  $ <br>
+</div>
+
+<p>Pretty simple, huh?  Let's try this with strings.</p>
+
+<p><strong>String Input</strong></p>
+
+<div id="filetext">
+  #include &lt;iostream&gt;<br>
+  #include &lt;string&gt;<br><br>
+  int main( void )<br>
+  {<br>
+    string name;<br><br>
+    cout &lt;&lt; "What is your name? ";<br>
+    cin &gt;&gt; name;<br><br>
+    cout &lt;&lt; "Hello, " &lt;&lt; name &lt;&lt; "." &lt;&lt; endl;<br>
+    return 0;<br>
+  }<br>
+</div>
+
+<p>Save this as <code>input1.cpp</code> and compile it.  Let's run through it once.</p>
+
+<div id="terminal">
+  $ <b>./input1</b><br>
+  What is your name? <b>Lain</b><br>
+  Hello, Lain.<br>
+</div>
+
+<div id="sectiontext">If Statements</div>
+
+<p>Thus far, our programs have been pretty linear; they start, they do
+some stuff, and then they stop. Our programs haven't made any sort of
+decision-making. They're about to.</p>
+
+<p>Let's look at the wonderful world of <code>if()</code> statements.  <code>if()</code>
+statements are special commands that make a comparison (or a bunch of
+comparisons), and make a yes/no decision based on those comparisons.
+There are no "maybe's" when you're using <code>if</code>; the result is either true or false.</p>
+
+<p>The syntax of the <code>if()</code> statement looks a lot like the syntax of the <code>main()</code> function.  You start out with <code>if</code>, followed by an opening parentheses ("<code>(</code>"), followed by an <i>expression</i> (more on that in a moment), then a closing parentheses ("<code>)</code>"), an opening curly bracket ("<code>{</code>"), the code that you want to execute if the expression is true, and finally, a closing curly bracket ("<code>}</code>}).  Here's a quick example:</p>
+
+<div id="filetext">
+  int i;<br>
+  i = 5;<br>
+  if( i &gt; 1 )<br>
+  {<br>
+    i = 1;<br>
+  }<br>
+</div>
+
+<p>The above declares a variable named <code>i</code>, puts 5 into it, then sees if the value of <code>i</code> is greater than 1.  If <code>i</code> is greater than 1, then <code>i</code> is set to 1.  Simple enough.  Yes, it's silly; we'll see some more useful examples in a little bit.</p>
+
+<p>Note that you can have any number of spaces between the <code>if</code>, the parentheses, and the values of the expression (or no spaces, if you prefer); the following is perfectly legal C++:</p>
+
+<div id="filetext">
+  if(i &gt;1)<br>
+  {<br>
+    i = 1;<br>
+  }<br>
+</div>
+
+<p>This is OK, too:</p>
+
+<div id="filetext">
+  if   (   i &gt; 1   )<br>
+  {<br>
+    i = 1;<br>
+  }<br>
+</div>
+
+<p>I just prefer my own little syntax ("<code>if( i &gt; 1 )</code>"); you can format it however you want.</p>
+
+<div id="sectiontext">Expressionism</div>
+
+<p>So, what are these expressions?  An expression is composed of one or more comparisons (e.g., "<code>health &lt; 100</code>", separated by <i>Boolean operators</i>.  Let's see exactly what I mean.</p>
+
+<p>Comparisons are simply a matter of comparing one thing to another;
+is the value of this variable greater than this number? Is the value of
+this variable equal to the value of this other variable? Here's a quick
+list of the operators that you can use:</p>
+
+<table border="1">
+  <tbody><tr>
+    <td><b>Operator</b></td>
+    <td><b>Meaning</b></td>
+    <td><b>Example</b></td>
+    <td><b>Sample value</b></td>
+  </tr>
+  <tr>
+    <td align="center"><code>&lt;</code></td>
+    <td>Less than</td>
+    <td><code>if( i &lt; j )</code></td>
+    <td><code>1 &lt; 5</code> will be <i>true</i></td>
+  </tr>
+  <tr>
+    <td align="center"><code>&gt;</code></td>
+    <td>Greater than</td>
+    <td><code>if( i &gt; j )</code></td>
+    <td><code>1 &gt; 5</code> will be <i>false</i></td>
+  </tr>
+  <tr>
+    <td align="center"><code>&lt;=</code></td>
+    <td>Less than or equal to</td>
+    <td><code>if( i &lt;= j )</code></td>
+    <td><code>1 &lt;= 5</code> will be <i>true</i></td>
+  </tr>
+  <tr>
+    <td align="center"><code>&gt;=</code></td>
+    <td>Greater than or equal to</td>
+    <td><code>if( i &gt;= j )</code></td>
+    <td><code>1 &gt;= 5</code> will be <i>false</i></td>
+  </tr>
+  <tr>
+    <td align="center"><code>==</code></td>
+    <td>Equal to</td>
+    <td><code>if( i == j )</code></td>
+    <td><code>1 == 5</code> will be <i>false</i></td>
+  </tr>
+  <tr>
+    <td align="center"><code>!=</code></td>
+    <td>Not equal to</td>
+    <td><code>if( i != j )</code></td>
+    <td><code>1 != 5</code> will be <i>true</i></td>
+  </tr>
+</tbody></table>
+
+<p>OK, that makes sense. What about these Boolean operators? Well,
+they're a way to put a bunch of comparisons all in one if statement.
+For example, what if your program had to check to see if a variable was
+within a valid range, say from 1 to 100? You could write it like this:
+</p><div id="filetext">
+  if( num &gt;= 1 )<br>
+  {<br>
+    if( num &lt;= 100 )<br>
+    {<br>
+      /*  Do whatever  */<br>
+    }<br>
+  }<br>
+</div>
+
+<p>Fortunately, there's an easier way! You can combine conditions
+together using Boolean operators. Here are the two main Boolean
+operators:</p>
+
+<table border="1">
+  <tbody><tr>
+    <td><b>Operator</b></td>
+    <td><b>Meaning</b></td>
+    <td><b>Example</b></td>
+    <td><b>Sample value</b></td>
+  </tr>
+  <tr>
+    <td><code>&amp;&amp;</code></td>
+    <td>And</td>
+    <td><code>if( a &gt;= 1 &amp;&amp; a &lt;= 100 )</code></td>
+    <td><code>5 &gt;= 1 &amp;&amp; 5 &lt;= 100</code> will be <i>true</i></td>
+  </tr>
+  <tr>
+    <td><code>||</code></td>
+    <td>Or</td>
+    <td><code>if( a &lt;= 100 || b &lt;= 100 )</code></td>
+    <td><code>5 &lt;= 100 || 219 &lt;= 100</code> will be <i>true</i></td>
+  </tr>
+</tbody></table>
+
+<p>So, we could compress the above code like this:</p>
+
+<div id="filetext">
+  if( num &gt;= 1 &amp;&amp; num &lt;= 100 )<br>
+  {<br>
+    /*  Do whatever  */<br>
+  }<br>
+</div>
+
+<div id="sectiontext">What Else?</div>
+
+<p>OK, what happens if you want to do something when the condition is <i>not</i>
+satisfied? For example, let's say we want to protect our program with a
+password prompt. If the user enters the correct password, they should
+be able to use the rest of the program, but if they don't enter the
+right password, they should get an error message.</p>
+
+<p>We can do this with the secret other half of the <code>if()</code> statement; the <code>else</code> clause.  Let's just see it in action:</p>
+
+<div id="filetext">
+  #include &lt;iostream&gt;<br>
+  #include &lt;string&gt;<br><br>
+  int main( void )<br>
+  {<br>
+    string password;<br>
+    cout &lt;&lt; "Login: ";<br>
+    cin &gt;&gt; password;<br>
+    if( password == "joshua" )<br>
+    {<br>
+      cout &lt;&lt; "Greetings, Professor Falken." &lt;&lt; endl<br>
+          &lt;&lt; "Shall we play a game?" &lt;&lt; endl;<br>
+    }<br>
+    <font color="#ff0000">else</font><br>
+    {<br>
+      cout &lt;&lt; "Access denied." &lt;&lt; endl;<br>
+    }<br>
+    return 0;<br>
+  }<br>
+</div>
+
+<p>Save and compile this program.  Note that you should <i>not</i> name the program <span id="filename">if.cpp</span>, as the compiled program will be called <span id="filename">if</span>, which is a special command in the Terminal.  It's perfectly fine to call it <span id="filename">if1.cpp</span>.</p>
+
+<p>In any event, let's run the program, giving it the correct password:</p>
+
+<div id="terminal">
+  $ <b>./if1</b><br>
+  Login: <b>joshua</b><br>
+  Greetings, Professor Falken.<br>
+  Shall we play a game?<br>
+  $ <br>
+</div>
+
+<p>Now we'll run it again, giving it the wrong password:</p>
+
+<div id="terminal">
+  $ <b>./if1</b><br>
+  Login: <b>james</b><br>
+  Access denied.<br>
+  $ <br>
+</div>
+
+<div id="sectiontext">A Complete Example</div>
+
+<p>Let's write a simple number guessing game. It will ask the player
+for a number, which it will then perform a series of calculations on,
+to get out of it a number between 1 and 10. The user can then guess
+that number.</p>
+
+<div id="filetext">
+  #include &lt;iostream&gt;<br><br>
+  int main( void )<br>
+  {<br>
+    /* ----- A number guessing game.<br><br>
+      Ask for the seed number.<br>
+      Calculate the computer's number from the seed.<br>
+      Report on whether the computer's number is more or less than 5.<br>
+      Ask for the player's guess.<br>
+      Tell the player if s/he won or lost.<br>
+    */<br><br>
+    int seedNumber;<br>
+    int computerNumber;<br>
+    int guessedNumber;<br><br>
+    cout &lt;&lt; "Guess a number from 1 to 10!  Impress your friends!" &lt;&lt; endl &lt;&lt; endl;<br><br>
+    /* Ask for the seed number. */<br>
+    cout &lt;&lt; "Enter any integer number: ";<br>
+    cin &gt;&gt; seedNumber;<br>
+    /* Calculate the computer's number from the seed. */<br>
+    computerNumber = (seedNumber + 97) / 3;<br>
+    computerNumber = computerNumber % 10 + 1;<br><br>
+    /* Report on whether the computer's number is more or less than 5. */<br>
+    if( computerNumber &gt; 5 ) {<br>
+      cout &lt;&lt; "The number I picked is more than five." &lt;&lt; endl;<br>
+    } else {<br>
+      cout &lt;&lt; "The number I picked is no more than five." &lt;&lt; endl;<br>
+    }<br><br>
+    /* Ask for the player's guess. */<br>
+    cout &lt;&lt; endl &lt;&lt; "Guess the number (it's between 1 and 10): ";<br>
+    cin &gt;&gt; guessedNumber;<br><br>
+    /* Tell the player if s/he won or lost. */<br>
+    if( computerNumber == guessedNumber )<br>
+    {<br>
+      cout &lt;&lt; "Congratulations!  You were right!" &lt;&lt; endl;<br>
+    }<br>
+    else<br>
+    {<br>
+      cout &lt;&lt; "Sorry!  I had picked the number " &lt;&lt; computerNumber &lt;&lt; endl;<br>
+    }<br>
+    return 0;<br>
+  }<br>
+</div>
+
+<p>OK, let's give the game a whirl.  Save the above source code in a file, compile it, and execute it as usual.</p>
+
+<div id="terminal">
+  $ <b>./ifgame</b><br>
+  Guess a number from 1 to 10!  Impress your friends!<br><br>
+  Enter any integer number: <b>90</b><br>
+  The number I picked is no more than five.<br><br>
+  Guess the number (it's between 1 and 10): <b>2</b><br>
+  Sorry!  I had picked the number 3<br>
+  $ <br>
+</div>
+
+<div id="sectiontext">Loops</div>
+
+<p>Today we'll talk about making your program do something over and over again.  Welcome to the wonderful world of loops.</p>
+
+<p>There are two main kinds of loops in C++; <code>while()</code> loops and <code>for()</code> loops.  <code>while()</code> loops are general-purpose loops, whereas <code>for()</code> loops can be seen as a special kind of <code>while()</code> loop that is especially for counting.  You'll see what I mean.</p>
+
+<div id="sectiontext"><i>While</i> You're At It</div>
+
+<p>OK, we have this particular loop called <code>while</code>, which will make your program do the same thing over and over.  The first thing you should worry about is how to <i>stop</i> the loop.  That's easy; you put an expression within the parentheses of the <code>while()</code> loop; say, <code>i == 10</code>.  Once that expression is false, the <code>while()</code> loop will stop.  Let's see an example.</p>
+
+<div id="filetext">
+  #include &lt;iostream&gt;<br><br>
+  int main( void )<br>
+  {<br>
+    int counter;<br>
+    counter = 1;<br>
+    <font color="#ff0000">while( counter &lt;= 3 )</font><br>
+    {<br>
+      cout &lt;&lt; "The counter is " &lt;&lt; counter &lt;&lt; endl;<br>
+      counter = counter + 1;<br>
+    }<br>
+    cout &lt;&lt; "All done." &lt;&lt; endl;<br>
+    return 0;<br>
+  }<br>
+</div>
+
+<p>Let's take this step-by-step.</p>
+
+<ol>
+<li> We create a variable named <code>counter</code>, and set it equal to 1.
+</li><li> We start the loop.
+  <ol>
+  <li> The first thing we do is test the expression in the loop.  <code>counter</code> is less than 3, so we continue into the loop.
+  </li><li> We print out a message, containing the value of <code>counter</code>, which will be 1.
+  </li><li> We <i>increment</i> <code>counter</code> by 1 (e.g., we take the value of <code>counter</code>, add 1 to it, then put the result back into counter, effectively increasing its value by 1).  <code>counter</code> now equals 2.
+  </li><li> We hit the end of the loop, which causes us to go back up to the top.
+  </li></ol>
+</li><li> Back into the loop again
+  <ol>
+  <li> First, we re-test the expression.  <code>counter</code> is still less than 3, so we continue through the loop.
+  </li><li> We print out a message again; this time announcing that <code>counter</code> is 2.
+  </li><li> We increment <code>counter</code> again; this time, <code>counter</code> will equal 3.
+  </li><li> We've hit the end of the loop.
+  </li></ol>
+</li><li> Back to the top of the loop
+  <ol>
+  <li> Let's re-test the expression.  <code>counter</code> equals 3, which means it is less than or equal to 3, which means we go into the loop once again.
+  </li><li> We print out another message, saying that <code>counter</code> is 3.
+  </li><li> We increment <code>counter</code>; it now equals 4.
+  </li><li> The end of the loop.
+  </li></ol>
+</li><li> We jump back up to the top of the loop.  This time, <code>counter</code> is greater than 3, so we jump down to after the end of the loop.
+</li><li> We print out "<code>All done.</code>"
+</li></ol>
+
+<p>Save the above program as <code>while1.cpp</code>, compile it, and execute it.  Here's what you should see:</p>
+
+<div id="terminal">
+  $ <b>./while1</b><br>
+  The counter is 1<br>
+  The counter is 2<br>
+  The counter is 3<br>
+  All done.<br>
+  $ <br>
+</div>
+
+<p>A <code>while()</code> loop can have any expression you'd like, including Boolean expressions.  The following is a perfectly valid <code>while()</code> loop expression:</p>
+
+<div id="filetext">
+  while( ( i &lt;= 100 &amp;&amp; name == "George" ) || food == 0.5 )<br>
+</div>
+
+<div id="sectiontext"><i>For</i> He's A Jolly Good Loop</div>
+
+<p>Since a lot of loops are concerned with counting in one way or
+another (do this ten times, or go through all of the elements in a
+list, or whatever), a special kind of loop was developed, one that is
+especially for counting. This new kind of loop is called a <code>for()</code> loop.  It looks like a <code>while()</code> loop, but the expression has three parts:</p>
+
+<ol>
+<li> An initialization section, which is used to set the starting value of the counter (e.g., <code>cnt = 1</code>)
+</li><li> A condition section, which is used to test when to stop counting (e.g., <code>cnt &lt; 10</code>)
+</li><li> A movement section, which is used to change the counter (e.g., <code>cnt = cnt + 1</code>)
+</li></ol>
+
+<p>Let's re-write the above example (<span id="filename">while1.cpp</span>) to use a <code>for()</code> loop.</p>
+
+<div id="filetext">
+  #include &lt;iostream&gt;<br><br>
+  int main( void )<br>
+  {<br>
+    int counter;<br>
+    <font color="#0000ff">for( counter = 1; counter &lt;= 3; counter = counter + 1 )</font><br>
+    {<br>
+      cout &lt;&lt; "The counter is " &lt;&lt; counter &lt;&lt; endl;<br>
+    }<br>
+    cout &lt;&lt; "All done." &lt;&lt; endl;<br>
+    return 0;<br>
+  }<br>
+</div>
+
+<p>See how much shorter that is than using a <code>while()</code> loop?</p>
+
+<p>Of course, the <code>for()</code> loop has its disadvantages; it's meant for counting.  Complex loops (like one that tests if <code>name == "George"</code>) deserve the <code>while()</code> command.</p>
+
+<div id="sectiontext">A Fun Example</div>
+
+<p>Let's take the number-guessing game from the "If Statements"
+tutorial, and expand it using loops. We'll make it so that the game
+will continue until the user guesses the correct answer. While (ha!)
+we're at it, after every incorrect guess, we'll tell the user if that
+guess was too low or too high.</p>
+
+<div id="filetext">
+  #include &lt;iostream&gt;<br><br>
+  int main( void )<br>
+  {<br>
+    /* ----- A number guessing game.<br><br>
+      Ask for the seed number.<br>
+      Calculate the computer's number from the seed.<br>
+      Report on whether the computer's number is more or less than 5.<br>
+      <font color="#0000ff">While the user hasn't guessed the correct answer,</font><br>
+        Ask for the player's guess.<br>
+        Tell the player if s/he was correct.<br>
+        <font color="#0000ff">If the player lost, tell if guess was high or low.</font><br>
+    */<br><br>
+    int seedNumber;<br>
+    int computerNumber;<br>
+    int guessedNumber;<br><br>
+    cout &lt;&lt; "Guess a number from 1 to 10!  Impress your friends!" &lt;&lt; endl &lt;&lt; endl;<br><br>
+    /* Ask for the seed number. */<br>
+    cout &lt;&lt; "Enter any integer number: ";<br>
+    cin &gt;&gt; seedNumber;<br>
+    /* Calculate the computer's number from the seed. */<br>
+    computerNumber = (seedNumber + 97) / 3;<br>
+    computerNumber = computerNumber % 10 + 1;<br><br>
+    /* Report on whether the computer's number is more or less than 5. */<br>
+    if( computerNumber &gt; 5 ) {<br>
+      cout &lt;&lt; "The number I picked is more than five." &lt;&lt; endl;<br>
+    } else {<br>
+      cout &lt;&lt; "The number I picked is no more than five." &lt;&lt; endl;<br>
+    }<br><br>
+    <font color="#0000ff">/* While the user hasn't guessed the correct answer, */<br>
+    guessedNumber = 0;<br>
+    while( guessedNumber != computerNumber )<br>
+    {</font><br>
+      /* Ask for the player's guess. */<br>
+      cout &lt;&lt; endl &lt;&lt; "Guess the number (it's between 1 and 10): ";<br>
+      cin &gt;&gt; guessedNumber;<br><br>
+      /* Tell the player if s/he was correct. */<br>
+      if( computerNumber == guessedNumber )<br>
+      {<br>
+        cout &lt;&lt; "Congratulations!  You were right!" &lt;&lt; endl;<br>
+      }<br>
+      else<br>
+      {<br>
+        <font color="#0000ff">/* If the player lost, tell if guess was high or low. */<br>
+        if( guessedNumber &lt; computerNumber ) {<br>
+          cout &lt;&lt; "Nope; too low." &lt;&lt; endl;<br>
+        } else {<br>
+          cout &lt;&lt; "Nope; too high." &lt;&lt; endl;<br>
+        }</font><br>
+      } <font color="#0000ff">/* End if guess was correct */</font><br>
+    <font color="#0000ff">} /* end main loop */</font><br>
+    return 0;<br>
+  }<br>
+</div>
+
+<p>Now save this as <span id="filename">guess-a-num.cpp</span>, compile it, and execute it.  Here's a sample run:</p>
+
+<div id="terminal">
+  $ <b>./guess_a_num</b><br>
+  Guess a number from 1 to 10!  Impress your friends!<br><br>
+  Enter any integer number: <b>20</b><br>
+  The number I picked is more than five.<br><br>
+  Guess the number (it's between 1 and 10): <b>7</b><br>
+  Nope; too low.<br><br>
+  Guess the number (it's between 1 and 10): <b>9</b><br>
+  Nope; too low.<br><br>
+  Guess the number (it's between 1 and 10): <b>10</b><br>
+  Congratulations!  You were right!<br>
+  $ <br>
+</div>
+
+<div id="sectiontext">Functions</div>
+
+<p>One of the biggest problems in programming today is code
+maintenance. The larger your program becomes, the harder it is to track
+down errors in the program. Even if a program compiles, that doesn't
+mean that it will work properly.</p>
+
+<p>So, today we'll talk about splitting programs up into separate <i>functions</i>.  Functions are just named chunks of code, with a few special properties:</p>
+
+<ul>
+<li> Functions can have <i>parameters</i>, which are special variables that are sent to the function when the function is run.
+</li><li> Functions can return a value, usually indicating whether the operation performed by the function was successful.
+</li></ul>
+
+<p>The good news is that you've been using functions all this time!  You know <code>main()</code>?  That's a function!  Let's look at how we use <code>main()</code>:</p>
+
+<div id="filetext">
+  int main( void )<br>
+  {<br>
+    /* stuff happens */<br>
+    return 0;<br>
+  }<br>
+</div>
+
+<p>OK, the above code says that <code>main()</code> returns an integer value (<code>int</code>); this is the <i>return type</i> of the function.  The list of parameters is included in the parentheses; in this case, we use the keyword <code>void</code> to say that we don't want any parameters.  We could also use <code>void</code>
+for the return type, to say that the function won't return anything. We
+then put the contents of the function between a set of <code>{ }</code> brackets.  The last line in the function specifies the integer value that we want to return (<code>0</code>, in this case).</p>
+
+<div id="sectiontext">Parameters</div>
+
+<p>Let's take a closer look at parameters; they are what gives functions most of their power.  But first, we need to talk about <i>local variables</i>.</p>
+
+<p>A local variable is a variable that only exists for part of a
+program's execution. Once execution leaves that part of the code, the
+local variable ceases to exist; if that piece of code is run later on,
+the local variable is re-created.</p>
+
+<p>We can create variables that are local to a particular function.
+Thus, whenever that function is run, the variables will be created, and
+when the function finishes running, the variables will be cleaned up.</p>
+
+<p>OK, so what are parameters? A parameter is kind of like a special
+local variable, one that is given a value by code that asks to run the
+function. This lets you send data into a function.</p>
+
+<p>Confused?  Let's see an example.</p>
+
+<div id="filetext">
+  #include &lt;iostream&gt;<br><br>
+  <font color="#ff0000">float square( float in )<br>
+  {<br>
+    return in * in;<br>
+  }</font><br><br>
+  int main( void )<br>
+  {<br>
+    float num;<br><br>
+    cout &lt;&lt; "Enter any number: ";<br>
+    cin &gt;&gt; num;<br><br>
+    cout &lt;&lt; num &lt;&lt; " squared is " &lt;&lt; <font color="#ff0000">square(num)</font> &lt;&lt; endl;<br>
+    return 0;<br>
+  }<br>
+</div>
+
+<p>As you can see from this code, we create a function named <code>square()</code>, that has one parameter: <code>in</code>, which is a <code>float</code> (floating-point number).  <code>square()</code> returns the parameter times itself; or the square of the parameter.  The main program asks for a number, then calls the <code>square</code> function, giving it the number that the user entered, and printing out whatever is returned.</p>
+
+<p>When <code>square()</code> is called, its <code>in</code> parameter is given the value of the variable that was used to call the function.  So, if <code>num</code> was 2.3, then when <code>square()</code> was called, <code>in</code> would be given the value 2.3.</p>
+
+<p>Let's run this program, and see what we get.</p>
+
+<div id="terminal">
+  $ <b>./square_it</b><br>
+  Enter any number: <b>3</b><br>
+  3 squared is 9<br>
+  $ <br>
+</div>
+
+<p>What about a function with no parameters?  That's easy.  Let's augment the above program to include instructions.</p>
+
+<div id="filetext">
+  #include &lt;iostream&gt;<br><br><br>
+  <font color="#0000ff">void print_instructions( void )<br>
+  {<br>
+    cout &lt;&lt; "Square Generator" &lt;&lt; endl &lt;&lt; endl<br>
+          &lt;&lt; "This program displays the square of any number." &lt;&lt; endl<br>
+          &lt;&lt; "Enter any number at the prompt (e.g., 4.5), and" &lt;&lt; endl<br>
+          &lt;&lt; "the program will print its square." &lt;&lt; endl &lt;&lt; endl;<br>
+  }</font><br><br><br>
+  float square( float in )<br>
+  {<br>
+    return in * in;<br>
+  }<br><br>
+  int main( void )<br>
+  {<br>
+    float num;<br><br>
+    <font color="#0000ff">print_instructions();</font><br><br>
+    cout &lt;&lt; "Enter any number: ";<br>
+    cin &gt;&gt; num;<br><br>
+    cout &lt;&lt; num &lt;&lt; " squared is " &lt;&lt; <font color="#ff0000">square(num)</font> &lt;&lt; endl;<br>
+    return 0;<br>
+  }<br>
+</div>
+
+<p>As you can see, this program now calls the <code>print_instructions()</code> function at the beginning of the program.  <code>print_instructions()</code>
+then prints out instructions for using the program. It takes no
+parameters, and doesn't return anything. Let's run it and see what we
+get:</p>
+
+<div id="terminal">
+  $ <b>./square_generator</b><br>
+  Square Generator<br><br>
+  This program displays the square of any number.<br>
+  Enter any number at the prompt (e.g., 4.5), and<br>
+  the program will print its square.<br><br>
+  Enter any number: <b>5</b><br>
+  5 squared is 25<br>
+  $ <br>
+</div>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+
+
+<hr>
+
+
+<hr>
+With gcc3, you must use 'using namespace std;" or std::whatever...  should be changed in tutorial
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+awesome
+
+<hr>
+for all that is sacred, please fix the indentation!!!
+what kinda habits is this supposed to be teaching?
+
+<hr>
+Please do not use red on grey, it's rather painful on the ole eyeballs :(.
+
+</div>
+ </div>
+</div>
+
+<br><br>
+
+</body></html

@@ -1,4 +1,3 @@
-README
 
 ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  
   ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  
@@ -9,32 +8,36 @@ ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALP
 sIRC 0.03 - Syllable Internet Relay Chat Client 
 Copyright (C) 2006 James Coxon jac208@cam.ac.uk
 Yeah its GPL :-D
-Based on various tutorials from Syllable User Bible
-Thanks to:
-Spikeb
-Brent
-Jonas
-Vanders
-Rick
+Based on various tutorials from Syllable User Bible http://www.other-space.com/sub/index.html
+Thanks to: Spike Burch, Brent P. Newhall, Jonas Jarvoll, Kristian Van Der Vliet, Rick Caudill
 
 Installation
 
-1)Go into sIRC32.cpp and change the variables near the top to the correct (e.g Nick and Channel)
+1)Edit sIRC32.cpp and change the variables near the top to the correct (e.g Nick and Channel)
+2)Do Make [root@syllable:~]make
+3)Run sIRC [root@syllable:~]./sIRC
 
-2)Do Make
-
-3)Run sIRC
-
-Known Issues/Problems
+Known Issues/Problems - circa 2006
 
 This is a alpha release - I'm worried that i'm not going to get very much done in the next 2 months due to exams at uni.
 Basically sIRC can connect to a single channel (which has to be changed in the source) and can send and receive messages.
 All other functionallity needs to be added!!!!!!!!!
 
-Any errors/problems/criticism/money to me: jac208@cam.ac.uk
+
+List of Resources - circa 2021
+
+MyApplication:- https://web.archive.org/web/20060313061934/http://www.other-space.com/sub/?section=Application_Programming&tutorial=Hello_World
+MainWindow:- https://web.archive.org/web/20060313061934/http://www.other-space.com/sub/?section=Application_Programming&tutorial=Hello_World
+MainView:- https://web.archive.org/web/20060313061934/http://www.other-space.com/sub/?section=Application_Programming&tutorial=Hello_World
+Menus:- https://web.archive.org/web/20060313061513/http://www.other-space.com/sub/?section=Application_Programming&tutorial=Menus
+ButtonNode:- https://web.archive.org/web/20060313061718/http://www.other-space.com/sub/?section=Application_Programming&tutorial=Layout_Classes
+Messaging:- https://web.archive.org/web/20060313061957/http://www.other-space.com/sub/?section=Application_Programming&tutorial=Messaging
+AttachedToWindow:- https://web.archive.org/web/20060313061922/http://www.other-space.com/sub/?section=Application_Programming&tutorial=Target_a_View_not_a_Window
+CommThread:- http://www.jarvoll.se/syllable/files/looper.zip
 
 
 
 ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  
   ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  
 ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  
+

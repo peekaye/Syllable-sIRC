@@ -1,0 +1,222 @@
+body
+	{
+	bbackground-color: #A77F55;
+	background-color: #FFFFFF;
+	font-family: Verdana,Helvetica;
+	margin: 0px;
+	padding: 0px;
+	}
+
+td
+	{
+	font-family: Verdana,Helvetica;
+	}
+
+a:link { color: #124A8D; }
+a:visited { color: #124A8D; }
+a:active { color: #AAAAFF; }
+aa:link { color: #885533; }
+aa:visited { color: #442200; }
+aa:active { color: #AAAAFF; }
+a.unusual { color: #FFFFBB; }
+
+#mainContainer
+	{
+	padding-top: 5px;
+	padding-left: 10px;
+	margin-right: 15px;
+	}
+
+#top
+	{
+	text-align: center;
+	height: 40px;
+	ccolor: white;
+	}
+
+#pageTitleContainer
+	{
+	bbackground-color: #FFCC66;
+	background-color: #CCCCFF;
+	height: 30px;
+	border: 1px solid black;
+	padding-top: 5px;
+	padding-left: 10px;
+	padding-right: 10px;
+	}
+
+#pageTitle
+	{
+	float: left;
+	text-align: left;
+	font-size: 16;
+	}
+
+#pageName
+	{
+	float: right;
+	text-align: right;
+	font-size: 14;
+	}
+
+#pageStats
+	{
+	background-color: #FFFFBB;
+	border-left: 1px solid black;
+	border-right: 1px solid black;
+	border-bottom: 1px solid black;
+	}
+
+#mainContent
+	{
+	bborder: 1px solid black;
+	background-color: #FFFFFF;
+	padding-left: 10px;
+	padding-right: 10px;
+	}
+
+#sidebarContainer
+	{
+	margin-top: 45px;
+	float: right;
+	}
+
+#sidebarBox
+	{
+	background-color: #FFFFCC;
+	border: 1px solid black;
+	display: box;
+	padding-left: 3px;
+	padding-right: 3px;
+	padding-bottom: 3px;
+	margin-top: 10px;
+	margin-right: 10px;
+	}
+
+#section
+	{
+	font-size: 14px;
+	font-weight: bold;
+	}
+
+#sectiontext
+	{
+	ccolor: red;
+	}
+
+#filename
+	{
+	font-family: Courier New, Courier;
+	font-size: 11;
+	}
+
+#terminal
+	{
+	background: #44BBDD;
+	color: #FFFFFF;
+	border: 1px solid black;
+	margin: 10px 20px 10px 20px;
+	padding: 5px;
+	font-family: Courier New, Courier;
+	font-size: 11;
+	}
+
+#filetext
+	{
+	border: 1px solid black;
+	background: #AAAAAA;
+	margin: 10px 20px 10px 20px;
+	font-family: Courier New, Courier;
+	font-size: 11;
+	font-weight: bold;
+	padding: 3px;
+	}
+
+#codelisting
+	{
+	border: 1px solid black;
+	background: #DDDDDD;
+	font-family: Courier New, Courier;
+	font-size: 80%;
+	padding: 3px;
+	}
+
+#codenumber
+	{
+	color: #888888;
+	}
+
+#filenameheader
+	{
+	background: #000000;
+	color: #FFFFFF;
+	margin-bottom: 15px;
+	padding-left: 3px;
+	font-family: Courier New, Courier;
+	font-size: 11;
+	font-weight: bold;
+	}
+
+#strongwarning
+	{
+	background-color: #FFFF33;
+	border: 1px solid black;
+	margin: 10px 20px 10px 20px;
+	}
+
+#note
+	{
+	background-color: #FFFF33;
+	border: 1px solid black;
+	margin: 10px 20px 10px 20px;
+	}
+
+#tutorialname
+	{
+	font-weight: bold;
+	ffont-size: 16px;
+	font-size: 150%;
+	font-family: Georgia;
+	ttext-align: center;
+	margin-left: 0px;
+	}
+
+h1	{
+	font-family: Georgia;
+	font-size: 130%;
+	margin-left: 20px;
+	}
+
+h2	{
+	font-family: Georgia;
+	font-size: 115%;
+	margin-left: 20px;
+	}
+
+h3	{
+	font-family: Georgia;
+	margin-left: 20px;
+	}
+
+#navbar
+	{
+	font-size: 10px;
+	}
+
+p
+	{
+	margin-left: 20px;
+	}
+
+pre	{
+	margin-left: 40px;
+	}
+
+table
+	{
+	margin-left: 20px;
+	}
+
+li	{
+	margin-left: 7px;
+	}

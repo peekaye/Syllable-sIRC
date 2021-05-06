@@ -1,0 +1,126 @@
+<html><head>
+
+<title>Syllable User Bible - Installing From the Basic CD</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Installing From the Basic CD</div>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+<p>Installing Syllable from the Premium CD or Basic CD is a snap.
+
+</p>
+<p>First, make sure you have a hard drive &#8211; or a partition of a hard drive &#8211; available to install Syllable on.
+
+</p>
+<p>What's a partition? Hard drives can be split up into separate pieces
+called partitions. Each partition can be formatted and used as though
+it were a separate hard drive. So, you could have a 60 GB hard drive
+with three partitions on it; one 20 GB partition for Windows, another
+20 GB partition for Linux, and of course a 20 GB partition for
+Syllable.
+</p>
+<p>Then, insert the CD in the computer's CD-ROM drive and reboot. The
+computer should boot and display the Syllable Installation Menu.
+</p>
+<p>If the CD does not boot, this is likely because the computer does
+not read the CD-ROM before booting from the hard drive. Reboot again
+and press the key or keys to access your BIOS (look on the screen for a
+message that explains how to do this; different BIOS manufacturers use
+different keys, though the most common ones are <strong>Del</strong>, <strong>F8</strong>, and <strong>F10</strong>).
+Once you're viewing the BIOS, navigate until you find the section that
+deals with the boot sequence. Change the boot sequence (again, the
+exact procedure for doing this varies widely by manufacturer) so that
+the CD-ROM drive is booted before the hard drive is booted.
+</p>
+<p><strong>Installing Syllable</strong>
+
+</p>
+<p>Once you're in the Syllable Installation Menu, press any key to bypass the main screen.
+
+</p>
+<p>First, you'll need to choose the hard drive and partition on which
+you want to install Syllable. The Installation Menu will display a list
+of partitions; just type the name of the partition on which you want to
+install Syllable. This partition will then be formatted (all data on it
+will be erased, and it will be set up for Syllable). Syllable will then
+install its files onto the newly formatted partition.
+</p>
+<p>But wait!  You're not done yet.
+
+</p>
+<p><strong>Installing GRUB</strong>
+
+</p>
+<p>Once Syllable is installed, you'll still need to install GRUB, which
+lets you boot into Syllable. To do this, reboot with the CD still in
+the drive. When you get the GRUB boot menu, press the <strong>C</strong> key and you'll be presented with a GRUB menu.
+
+</p>
+<p>To set up GRUB, you'll need to figure out two numbers at this point:
+the hard drive number and the partition number for Syllable. If you
+installed on hda (the first hard drive in the computer), the hard drive
+number is 0. If you installed on hdb, the hard drive number is 1.
+</p>
+<p>Similarly, if you installed on the first partition on the hard
+drive, the partition number is 0. If you installed on the second
+partition, the number is 1, and so on.
+</p>
+<p>To install GRUB, you need to enter the following two commands, which
+assume that you're installing on the first partition of the first hard
+drive (hd0,0). If you were installing on the third partition of the
+second hard drive, you'd use (hd1,2).
+</p>
+<p>Type the following commands at the GRUB menu:
+
+</p>
+<pre>root (hd0,0)
+setup (hd0,0)
+</pre>
+
+<p>You should see something like this:
+
+</p>
+<pre>grub&gt; root (hd0,0)
+Filesystem tyep is afs, partition type 0xeb
+
+grub&gt; setup (hd0,0)
+Checking if "/boot/grub/stage1" exists... yes
+Checking if "/boot/grub/stage2" exists... yes
+Checking if "/boot/grub/afs_stage1_5" exists... yes
+Running "embed /boot/grub/afs_stage1_5 (hd0,0)"...  19 sectors are embedded. succeeded
+Running "install /boot/grub/stage1 (hd0,0) (hd0,0)4+19 p (hd0,0)/boot/grub/stage2 /boot/grub/menu.lst"... succeeded
+Done.
+</pre>
+
+
+<p>Now remove the CD and reboot.  Syllable should boot correctly.
+</p><div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>I had Lilo installed as the boot loader before I installed
+Syllable. The Lilo boot loader is still trying to boot the system (but
+there is no Linux kernel for it to load).
+<hr>Install grub overtop if you can I would geuss.. disable your
+harddrive as a boot option put your CD first,, could be mistaken but if
+you isntall grub overtop this should do it.. (I'm geussing)
+</div>
+ </div>
+</div>
+
+<br><br>
+
+</body></html

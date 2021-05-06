@@ -1,0 +1,77 @@
+<html><head>
+
+<title>Syllable User Bible - Builder</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Builder</div>
+</div>
+<div id="pageStats">
+<table border="0">
+<tbody><tr><td valign="top">Last Updated:</td><td>Apr 11, 2007</td></tr>
+</tbody></table>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+<p>To build a binary package from a package that you have built and installed from source:</p>
+
+<div id="terminal">build distro <package-name></package-name></div>
+
+<p>To add support to Builder for a package that it doesn't know how to
+build yet, you will have to write a build recipe and possibly add
+patches that are needed to make the package work on Syllable. Kaj
+hasn't written documentation for that yet, among other reasons because
+the exact syntax of build recipes is still being changed and added to.
+But he does keep a record of recipe syntax in a file named
+skeleton.recipe, which you can find here:</p>
+
+<p><a href="http://cvs.sourceforge.net/viewcvs.py/syllable/syllable/system/apps/utils/Builder/packages/">http://cvs.sourceforge.net/viewcvs.py/syllable/syllable/system/apps/utils/Builder/packages/</a></p>
+
+<p>You can use skeleton.recipe as an example to pick the options that a
+package needs. You should also look at existing recipes for other
+packages to see how it's done.</p>
+
+<p>If you are rebuilding parts of the system that depend on eachother
+and need guidance, you can consult the build profile for the base
+system:</p>
+
+<p><a href="http://cvs.sourceforge.net/viewcvs.py/syllable/syllable/system/apps/utils/Builder/profiles/base?rev=1.18&amp;view=auto">http://cvs.sourceforge.net/viewcvs.py/syllable/syllable/system/apps/utils/Builder/profiles/base?rev=1.18&amp;view=auto</a></p>
+
+<p>Builder doesn't handle dependencies yet, but the modules list in the
+profile is roughly ordered in the order of dependencies. A crude way to
+rebuild Syllable would be to do:</p>
+
+<div id="terminal">
+cd system<br>
+build base
+</div>
+
+<p>See what breaks and install modules that succeeded but are needed by later modules:</p>
+
+<div id="terminal">build install <path-to-module></path-to-module></div>
+
+<p>Be aware that there may still be bugs in the install targets of makefiles. Then do:</p>
+
+<div id="terminal">build failures</div>
+
+<p>And repeat the process until everything works.</p>
+ </div>
+</div>
+
+<br><br>
+
+</body></html

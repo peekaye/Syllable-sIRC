@@ -1,0 +1,994 @@
+<html><head>
+
+<title>Syllable User Bible - System Programming</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<!-- <center><table border="0" cellpadding="0" cellspacing="0" width="100%">
+ <tr>
+  <td valign="top" width="65%"> -->
+<div id="mainContainer">
+ <div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> | <a href="http://www.other-space.com/sub/requests.php">Request a Tutorial</a>
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">System Programming</div>
+</div>
+
+ <div id="mainContent">
+<p id="tutorialname">Coding Style Guide</p>
+
+<p id="section">Overview</p>
+<div id="sectiontext">
+
+<p>This document explains the coding style that is to be used in
+Syllable. This document should be followed when you submit any new code
+to the core components of the OS, including the kernel, appserver, and
+the various API libraries that is part fo the core distribution.</p>
+
+<strong>Note</strong><div id="note">
+This document is not finished and will change as the code base gets bigger.
+</div>
+<br>
+
+<strong>Note</strong><div id="note">
+Applications that will not be in the base distribution do not have to
+follow these guidelines. However, it is recommended that application
+developers follows these guidelines so that all Syllable code is
+reasonably similar.
+</div>
+
+</div>
+
+<p id="section">Naming</p>
+<div id="sectiontext">
+
+<p>All variable names and struct/class members should be constructed
+from one or more type prefixes, followed by a mixed-case descriptive
+name. The only exception to this rule is counter variables and other
+iterators typically used in loops.</p>
+
+<p>Rationale: The prefixes are a great help when reading others' code
+(and your own a few moments after it is written). It also makes it
+easier to search for members and variables since they tend to be more
+unique.</p>
+
+<p>Counter variables and other iterators don't have to follow the coding standards.  It is legal to write:</p>
+
+<strong>Example</strong><div id="codelisting">
+<span id="codenumber"> 1</span> for <font color="#4444ff">(</font> int i = 0 ; i &lt; 16 ; ++i <font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    DoStuff<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 4</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p>Type prefixes:</p>
+
+<ul>
+<li> <code>n</code> - Any integer type (char, short int, long, long long)</li>
+<li> <code>v</code> - Floating-point types (float, double, long double)</li>
+<li> <code>s</code> - Structures</li>
+<li> <code>c</code> - Classes</li>
+<li> <code>e</code> - Enums</li>
+<li> <code>u</code> - Unions</li>
+<li> <code>h</code> - Handles (variables that are never de-referenced, like file descriptors and message ports)</li>
+<li> <code>f</code> - Functions (only used in conjunction with the <code>p</code> prefix to build function pointers)</li>
+</ul>
+
+<p>Qualifier prefixes:</p>
+
+<ul>
+<li> <code>p</code> - Pointer to</li>
+<li> <code>a</code> - Array of</li>
+</ul>
+
+<p>And, no rule without exceptions:</p>
+
+<ul>
+<li> <code>z</code> - Zero-terminated string</li>
+</ul>
+
+<p>All variables should be prefixed with one of the type prefixesl.  Examples:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> int nSize;
+<br><span id="codenumber"> 2</span> float vScale;
+<br><span id="codenumber"> 3</span> struct stat sStat;
+<br><span id="codenumber"> 4</span> Rect cBoundary;
+<br></div>
+
+<p>If the variable is a pointer or an array, the type prefix should be preixed with a qualifier:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> int anSizes[256];
+<br><span id="codenumber"> 2</span> float* pvScale;
+<br><span id="codenumber"> 3</span> struct stat* psStat;
+<br><span id="codenumber"> 4</span> Rect acRectangles[16];
+<br></div>
+
+<p>In addition to the type prefix(es), all class members should be prefixed with <code>m_</code>
+to distinguish them from local variables in member functions. Structure
+members should normally be prefixed with an abbreviation of the
+structure name. This is not required, but since many structures have
+matching member names, and structure members often match other variable
+names, it is much easier to search for a structure member if it has a
+prefix.</p>
+
+<p>Global variables and module variables should have a <code>g_</code>
+prefix. Global variables should (for obvious reasons) be very rare,
+especially in C++ where there often are better solutions (like
+singleton classes).</p>
+
+<p>Member functions should have mixed-case names, while global function
+names should be all lower-case with words separated by underscores.
+Example:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> int g_my_global_stat_function<font color="#4444ff">(</font> void <font color="#4444ff">)</font>;
+<br></div>
+
+<p>Defines, macros, and enum items should have uppercase-only names with words separated by underscores.  Example:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> #define G_MY_PI_VALUE 3.14159
+<br></div>
+
+</div>
+
+<p id="section">Indentation and Tab Size</p>
+<div id="sectiontext">
+
+<p>We have come up with a good solution for indentation and tab size.
+Indentation of anything is one tab in size, and the tab size is
+whatever you want to make it.</p>
+
+<strong>Example Using Tabs</strong><div id="codelisting">
+<span id="codenumber"> 1</span> if <font color="#4444ff">(</font> a == 2 <font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    printf<font color="#4444ff">(</font> "a is 2\n" <font color="#4444ff">)</font>;  //one tab over
+<br><span id="codenumber"> 4</span> <font color="#4444ff">}</font>
+<br><span id="codenumber"> 5</span> 
+<br><span id="codenumber"> 6</span> if <font color="#4444ff">(</font> a != 2 <font color="#4444ff">)</font>
+<br><span id="codenumber"> 7</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 8</span>    printf<font color="#4444ff">(</font> "a is not 2\n" <font color="#4444ff">)</font>;  //one tab over
+<br><span id="codenumber"> 9</span>    printf<font color="#4444ff">(</font> "it might be 3\n" <font color="#4444ff">)</font>;  // one tab over
+<br><span id="codenumber">10</span> 
+<br><span id="codenumber">11</span>    if <font color="#4444ff">(</font> a != 3 <font color="#4444ff">)</font>
+<br><span id="codenumber">12</span>       printf<font color="#4444ff">(</font> "No, not 3 either\n" <font color="#4444ff">)</font>;  // two tabs over
+<br><span id="codenumber">13</span> <font color="#4444ff">}</font>
+<br></div>
+
+</div>
+
+<p id="section">Brackets</p>
+<div id="sectiontext">
+
+<p>Code blocks start on a new line, and align with the beginning of the
+statement above. The only exception to this rule is a single statement
+when a code block is not required. See the above code listing for
+examples.</p>
+
+</div>
+
+<p id="section">Switch/Case</p>
+<div id="sectiontext">
+
+<p>Brackets should be at the same indentation level as the <code>switch</code> statement.  Each <code>case</code> label should be one indentation level deeper than the <code>switch</code> statement.  The code for each case should be one indentation level deeper than the <code>case</code> label.  Example:</p>
+
+<strong>Example of Switch/Case</strong><div id="codelisting">
+<span id="codenumber"> 1</span> switch<font color="#4444ff">(</font> nAction <font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    case CRASH_AND_BURN:
+<br><span id="codenumber"> 4</span>       SetFire<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span>       Crash<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 6</span>       break;
+<br><span id="codenumber"> 7</span>    default:
+<br><span id="codenumber"> 8</span>       printf<font color="#4444ff">(</font> "Unknown command: %d\n", nAction <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 9</span>       break;
+<br><span id="codenumber">10</span> <font color="#4444ff">}</font>
+<br></div>
+
+</div>
+
+<p id="section">Parentheses</p>
+<div id="sectiontext">
+
+<p>There should NOT be any spaces between a function name and the
+opening parenthesis for the function parameter. For other constructs
+like for/while, switch/case, if, etc., you may include a space if
+desired.</p>
+
+</div>
+
+<p id="section">Comments</p>
+<div id="sectiontext">
+
+<p>Just keep in mind that the API documentation is generated with <a href="http://www.stack.nl/%7Edimitri/doxygen/" title="Doxygen">Doxygen</a>.  Write comments so that as much documentation can be automatically extracted.</p>
+
+</div>
+
+<p id="section">Code Cleanliness</p>
+<div id="sectiontext">
+
+<p>There is no standard for code cleanliness yet, but we suggest you use either <a href="http://www.gnu.org/software/indent/" title="GNU Indent">GNU Indent</a> or <a href="http://astyle.sf.net/">Artistic Style</a> to clean up your code.</p>
+
+</div>
+
+<p id="section">Header Files</p>
+<div id="sectiontext">
+
+<p>The standard format for inclusion safeuards is: __F_(DIRECTORY FILE IS LOCATED IN)_(FILENAME)_H__</p>
+
+<p>Examples:</p>
+
+<ul>
+<li> <code>__F_GUI_WINDOW_H__</code> would be the inclusion guard for <span id="filename">/include/gui/window.h</span></li>
+<li> <code>__F_STORAGE_FSNODE_H__</code> would be the inclusion guard for <span id="filename">/include/storage/fsnode.h</span></li>
+<li> <code>__F_CODEVIEW_CODEVIEW_H__</code> would be the inclusion guard for <span id="filename">/include/codeview/codeview.h</span></li>
+</ul>
+
+</div>
+
+<p id="section">Classes</p>
+<div id="sectiontext">
+
+<p>As Syllable gets bigger and includes more and more classes, changes
+to those classes will inevitably break binary compatibility. Here are a
+couple of guidelines that we have come up with in our Sysiphean fight
+against this inevitability. Hey, every little bit helps.</p>
+
+<p>All classes should have a separate class for private members, like so:</p>
+
+<strong>Example class using Private Member Class</strong><div id="codelisting">
+<span id="codenumber"> 1</span> class Window : public os::Looper
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span> public:
+<br><span id="codenumber"> 4</span>    Window<font color="#4444ff">(</font> const std::string&amp; cTitle <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span>    ~Window<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 6</span> private:
+<br><span id="codenumber"> 7</span>    class Private;
+<br><span id="codenumber"> 8</span>    Private* m;
+<br><span id="codenumber"> 9</span> <font color="#4444ff">}</font>;
+<br><span id="codenumber">10</span> 
+<br><span id="codenumber">11</span> class Window::Private
+<br><span id="codenumber">12</span> <font color="#4444ff">{</font>
+<br><span id="codenumber">13</span> public:
+<br><span id="codenumber">14</span>    Private<font color="#4444ff">(</font><font color="#4444ff">)</font>
+<br><span id="codenumber">15</span>    <font color="#4444ff">{</font>
+<br><span id="codenumber">16</span>       m_cTitle = "";
+<br><span id="codenumber">17</span>    <font color="#4444ff">}</font>
+<br><span id="codenumber">18</span> 
+<br><span id="codenumber">19</span>    std::string m_cTitle; // Holds the title name of the window
+<br><span id="codenumber">20</span> <font color="#4444ff">}</font>;
+<br><span id="codenumber">21</span> 
+<br><span id="codenumber">22</span> Window::Window<font color="#4444ff">(</font> const std::string&amp; cTitle <font color="#4444ff">)</font> : os::Looper<font color="#4444ff">(</font><font color="#4444ff">)</font>
+<br><span id="codenumber">23</span> <font color="#4444ff">{</font>
+<br><span id="codenumber">24</span>    m = new Private;
+<br><span id="codenumber">25</span>    m-&gt;m_cTitle = cTitle;
+<br><span id="codenumber">26</span> <font color="#4444ff">}</font>
+<br><span id="codenumber">27</span> 
+<br><span id="codenumber">28</span> Window::~Window<font color="#4444ff">(</font><font color="#4444ff">)</font>
+<br><span id="codenumber">29</span> <font color="#4444ff">{</font>
+<br><span id="codenumber">30</span>    // Do not forget to delete the private class.
+<br><span id="codenumber">31</span>    delete m;
+<br><span id="codenumber">32</span> <font color="#4444ff">}</font>
+<br></div>
+
+<br>
+
+<strong>Note</strong><div id="note">The above is <strong>not</strong> real code for the <code>Window</code> class.</div>
+
+<p>All classes should have five to ten extra virtual functions, even if
+they are all empty, so that adding a virtual function won't break
+compatibility. When you want to add another virtual method, start with
+the highest reserved method, and rename it to whatever you want. This
+way, you and everyone else will know that you added a new virtual
+method.</p>
+
+<p>Empty virtual functions should be named using the form: <code>__(class abbreviation)_reserved(number)__</code></p>
+
+<p>Example:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> class Window : public os::Looper
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span> public:
+<br><span id="codenumber"> 4</span>    Window<font color="#4444ff">(</font> const std::string&amp; <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span>    virtual void __WI_reserved1__<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 6</span>    virtual void __WI_reserved2__<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 7</span>    virtual void __WI_reserved3__<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 8</span>    virtual void __WI_reserved4__<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 9</span>    virtual void __WI_reserved5__<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber">10</span>    virtual void __WI_reserved6__<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber">11</span>    virtual void __WI_reserved7__<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber">12</span>    virtual void __WI_reserved8__<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber">13</span>    virtual void __WI_reserved9__<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber">14</span>    virtual void __WI_reserved10__<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber">15</span> <font color="#4444ff">}</font>;
+<br></div>
+
+</div>
+
+<p id="section">Other/Miscellaneous Stuff</p>
+<div id="sectiontext">
+
+<p>Using the keyword <strong><code>const</code></strong> is taught early on in C++ programming classes.  It is important because it tells the programmer that the <code>const</code>
+data cannot change. Declaring something constant is usually up to the
+programmer, but the rule of thumb is that if the data shouldn't be
+changed, then it should be declared constant. Examples:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> const float PI = 3.14159
+<br><span id="codenumber"> 2</span> void SetTitle<font color="#4444ff">(</font> const std::string&amp; cTitle <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 3</span> bool GetSelected<font color="#4444ff">(</font><font color="#4444ff">)</font> const;
+<br></div>
+
+<p>GCC 3.0 came with a more strict and more standard-like <strong>standard namespace</strong>, so here are a couple of rules that you <strong>have</strong> to follow.</p>
+
+<p>You can declare the standard namespace completely:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> using namespace std;
+<br></div>
+
+<p>You can declare the parts of the namespace you need:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> using std::cin;
+<br><span id="codenumber"> 2</span> using std::cout;
+<br><span id="codenumber"> 3</span> using std::string;
+<br><span id="codenumber"> 4</span> using std::endl;
+<br></div>
+
+<p>You can put <code>std::</code> in front of anything you need:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> std::cout &lt;&lt; "Hello World" &lt;&lt; std::endl;
+<br><span id="codenumber"> 2</span> std::string cString = "Hello World";
+<br><span id="codenumber"> 3</span> std::vector &lt; std::string &gt; tList;
+<br></div>
+
+</div>
+
+<p id="section">Questions/Comments/Problems</p>
+<div id="sectiontext">
+
+<p>All questions, comments, or problems with this document can be e-mailed to the <a href="mailto:syllable-developer@lists.sourceforge.net" title="Syllable-Developer Mailing List">Syllable Development List</a>.</p>
+
+</div>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+What's the type prefix for bool variables? b?
+
+<hr>
+elias karam elhasrouni
+
+</div>
+
+<p id="tutorialname">Checking out from CVS</p>
+<p>Let's say you want to get syllable/system/sys/kernel and everything
+in it. With Sourceforge, you don't need to use "login" to access the
+repository. You just go ahead and checkout. So: </p>
+<pre>cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/syllable checkout syllable/system/sys/kernel/kernel 
+</pre>
+
+<p>Only the last part, after the "checkout", ever needs to change. Note
+the exact format of the -d argument. No spaces after the -d and the
+first colon is important. </p>
+<p>Once you have a copy checked out, you'll have a local folder in your current directory called "syllable", so if you're in <em>/Source, you'll now have </em>/Source/syllable/system/sys/kernel/kernel/.
+If, in the future, you want to update your local copy to the latest
+version in CVS, just go to the directory you want to update and run </p>
+<pre>cvs update 
+</pre>
+
+<p>CVS will know which repository etc. you used last time, so there is
+no need for the -d argument; it will automatically fetch the latest
+files for you. </p><div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+bla bla bla
+
+<hr>
+wow it works
+
+<hr>
+ja ja ja 
+
+<hr>
+Paris
+
+<hr>
+Troja
+Dur dom na viyezde
+
+<hr>
+CVS stores projects and files in a central repository, but you work
+from a working copy, called a sandbox, in your local directories. You
+create that sandbox with cvs checkout.
+CVS creates the sandbox as a subdirectory of your current working
+directory. I like to create a directory to contain all my CVS
+sandboxes, and I use ~/cvs. From whichever directory you want a sandbox
+created in, run the command:
+cvs -d repository_path checkout project_name
+This command checks out all files for the named project. If your
+repository is on the local machine, the repository path is the full
+pathname of the CVS repository. If your repository is on a remote
+server, see the earlier Section 2.4. Example 2-10 shows a local
+checkout.
+Example 2-10. Local repository checkout
+$ mkdir ~/cvs
+$ cd ~/cvs
+$ cvs -d /var/lib/cvsroot checkout example
+cvs checkout: Updating example
+U example/file1
+U example/file2
+The checkout command puts a copy of the project's files and
+subdirectories into a directory named for the project, created in the
+current working directory. It also puts some administrative files of
+its own in a subdirectory of the project directory, called CVS.
+You can check out an individual file or subdirectory of a project by
+replacing project_name with the pathname to the file or directory, from
+the project's root directory. See Chapter 3 for more information.
+CVS stores the repository path as part of the sandbox, so you should
+never again need to use -d repository_path in commands executed within
+that sandbox.
+If you are checking out a sandbox from a remote repository, the
+repository path is slightly different than the path shown in the
+previous example. Example 2-11 shows a checkout from a remote
+repository.
+Example 2-11. Remote repository checkout
+$ cvs -d :ext:cvs:/home/cvs checkout cvsbook
+cvs server: Updating cvsbook
+U cvsbook/1-introduction.html
+U cvsbook/2-installation.html
+U cvsbook/3-quickstart.html
+U cvsbook/acknowledgements
+U cvsbook/outline_schedule
+U cvsbook/proposal
+U cvsbook/sources
+U cvsbook/template
+<hr>
+byebye
+
+
+</div>
+
+<p id="tutorialname">Compiling the kernel</p>
+<p>Generally you should never need to compile your own kernel unless you wish to hack on the kernel yourself.</p>
+
+<p>First of all you will need to be comfortable using CVS to retrieve the kernel sources.  See <a href="http://syllable.sourceforge.net/modules.php?name=Downloads">the instructions on the Syllable website</a> on how to access the CVS repository.</p>
+
+<p>You will need to retrieve the system headers, the kernel source, and two files which are used by the Makefiles:</p>
+
+<div id="terminal">
+$ cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/syllable checkout syllable/system/sys/include<br>
+$ cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/syllable checkout syllable/system/sys/kernel/kernel<br>
+$ cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/syllable checkout syllable/system/makefile.rules<br>
+$ cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/syllable checkout syllable/system/recurse.rules
+</div>
+
+<p>You must set up the basic build enviroment.  Create <span id="filename">/usr/src</span> and move <span id="filename">makefile.rules</span> and <span id="filename">recurse.rules</span> there.  Now edit <span id="filename">/etc/profile</span> and find the enviroment variable ATHEOS_SRC.  Change the line to the following:</p>
+
+<div id="terminal">
+export ATHEOS_SRC=/usr/src<br>
+export ATHEOS_INCLUDE_PATH=/ainc
+</div>
+
+<p>Save the file.  Close and reopen your ATerm so that the new enviroment variables can take effect.</p>
+
+<p>Now copy all the include files to <span id="filename">/ainc</span>:</p>
+
+<div id="terminal">
+cd syllable/system/sys/include<br>
+cp -dpr * /ainc/
+</div>
+
+<p>You are now ready to build the kernel.  Simply change to the directory with the kernel sources and run "make":</p>
+
+<div id="terminal">
+cd syllable/system/sys/kernel/kernel/<br>
+make
+</div>
+
+<p>You can also run "make install" to install the new <span id="filename">kernel.so</span>, <span id="filename">libkernel.so</span>, and <span id="filename">eth_if</span>
+files, but be warned that should you hack on the source and break
+something, you may find that your Syllable installation is unbootable!</p>
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+I have fixed the bug I mentioned in the forum.
+
+-Mr.Jones
+
+</div>
+
+<p id="tutorialname">Device Drivers</p>
+<div id="sectiontext">Introduction to Various Driver Types</div>
+
+<p>If we speak about writing drivers, we have to divide our attention
+between kernel drivers and appserver drivers. Kernel drivers are used
+for hardware like sound cards, network cards, and file system add-ons.
+Graphics drivers and the high-level part of input drivers are handled
+by the appserver. While kernel drivers are written in C, appserver
+addons are written in C++. Common to both is that they are simple ELF
+modules, which are loaded if necessary. Unlike some UNIX systems,
+Syllable has a defined interface between the drivers and the
+kernel/appserver, which is not changed very often.</p>
+<p>Please note that you have to be careful when writing drivers,
+because a bug in a driver can cause the system to lock up and make it
+completely unusable. If you can, you should have a second Syllable
+installation, which you can use to remove invalid drivers, or <a href="http://www.other-space.com/sub/?section=If_Installation_Goes_Wrong&amp;tutorial=Booting_from_the_Install_CD">boot from the install CD</a>.</p>
+
+<div id="sectiontext">Basic description</div>
+
+<p>Device drivers in Syllable are abstracted through the filesystem in
+much the same way as in UNIX. All device drivers export their
+functionality through special files in the /dev/ directory, or in a
+sub-directory of /dev/. Unlike in traditional UNIXes, the /dev/
+directory in Syllable is hierarchial, and is very dynamic in that
+device drivers can add and remove nodes at runtime if, for example, the
+driver controls a removable device that might be added or removed after
+the driver is initialized.</p>
+
+<div id="sectiontext">Driver initialization</div>
+
+<p>A driver is just an ELF binary built in much the same way as a
+regular DLL. When a driver is loaded by the kernel it will search for a
+exported symbol named "device_init" and call it to allow the driver to
+initialize itself. The <code>device_init()</code> function is passed a
+unique device ID that is dynamically assigned to each driver when
+loaded and used by the kernel to identify the driver later.</p>
+
+<p>Just before the driver is unloaded, the kernel will look for a global function named <code>device_uninit()</code> and, if found, it will be called to allow the driver to clean up.</p>
+
+<p><code>device_init()</code> and <code>device_uninit()</code> are the
+only functions that will be called directly by the kernel. For the
+driver to do any usefull work, it must export one or more device-nodes
+through the Syllable Device FS. This is a logical file system that is
+mounted at <span id="filename">/dev/</span> and controll all devices. Each device is present as a magic file located in <span id="filename">/dev/</span> or a sub-directory of <span id="filename">/dev/</span>. Initially <span id="filename">/dev/</span> only contain <span id="filename">/dev/null</span> and <span id="filename">/dev/zero</span> which is controlled by the Syllable VFS itself. All other directory and device-nodes are created by device drivers.</p>
+
+<p>A device driver can create a device-node with <code>create_device_node()</code> and remove it with <code>delete_device_node()</code>.
+When creating a device node, the driver must provide a function pointer
+table with entry points to the driver's functionality. The functions in
+the table will be called by the Syllable VFS to control the device. The
+most important functions are <code>read()</code>, <code>write()</code>, and <code>ioctl()</code>, but there are also functions to open/close the device, as well as functions called by <code>select()</code> to make it possible for one thread to wait for IO on multiple devices.</p>
+
+<p>A typical device driver will create one node in <code>device_init()</code> and delete it again in <code>device_uninit()</code>.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> int g_nMyDeviceNode = -1;
+<br><span id="codenumber"> 2</span> 
+<br><span id="codenumber"> 3</span> status_t device_init<font color="#4444ff">(</font> int nDeviceID <font color="#4444ff">)</font>
+<br><span id="codenumber"> 4</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 5</span>    struct MyDeviceNode sNode;
+<br><span id="codenumber"> 6</span>    g_nMyDeviceNode = create_device_node<font color="#4444ff">(</font> nDeviceID, -1, "misc/mydevice", &amp;g_sOperations, &amp;sNode <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 7</span>    if <font color="#4444ff">(</font> g_nMyDeviceNode &lt; 0 <font color="#4444ff">)</font>
+<br><span id="codenumber"> 8</span>    <font color="#4444ff">{</font>
+<br><span id="codenumber"> 9</span>       return<font color="#4444ff">(</font> g_nMyDeviceNode <font color="#4444ff">)</font>;
+<br><span id="codenumber">10</span>    <font color="#4444ff">}</font>
+<br><span id="codenumber">11</span>    else
+<br><span id="codenumber">12</span>    <font color="#4444ff">{</font>
+<br><span id="codenumber">13</span>       return<font color="#4444ff">(</font> EOK <font color="#4444ff">)</font>;
+<br><span id="codenumber">14</span>    <font color="#4444ff">}</font>
+<br><span id="codenumber">15</span> <font color="#4444ff">}</font>
+<br><span id="codenumber">16</span> 
+<br><span id="codenumber">17</span> status_t device_uninit<font color="#4444ff">(</font> int nDeviceID <font color="#4444ff">)</font>
+<br><span id="codenumber">18</span> <font color="#4444ff">{</font>
+<br><span id="codenumber">19</span>    delete_device_node<font color="#4444ff">(</font> g_nMyDeviceNode <font color="#4444ff">)</font>;
+<br><span id="codenumber">20</span>    return<font color="#4444ff">(</font> EOK <font color="#4444ff">)</font>;
+<br><span id="codenumber">21</span> <font color="#4444ff">}</font>
+<br></div>
+
+<div id="sectiontext">How a driver is located</div>
+
+<p>Since the nodes inside <code>/dev/</code> are created by the device
+drivers themself and not by the kernel, it is not directly obvious what
+driver should be loaded if an application tries to open, for example, <span id="filename">/dev/video/cpia</span>.</p>
+<p>If this is the first time someone attempts to open the CPiA device, the driver is not loaded and <span id="filename">/dev/video/cpia</span> does not exist. If this is the first time anything inside <span id="filename">/dev/</span> is touched, the <span id="filename">/dev/video</span> directory doesn't exist either.</p>
+<p>To make it possible for the kernel to search for drivers in a
+efficient way, the driver binaries are located in a directory tree
+similar to the resulting tree inside <span id="filename">/dev/</span>. For example, the CPiA driver from the above example whould be located in <span id="filename">/system/drivers/dev/video/cpia</span>.</p>
+<p>If the kernel is asked to open <span id="filename">/dev/video/cpia</span>, it would start by opening the <span id="filename">/dev</span> directory, which would cause the <span id="filename">/system/drivers/dev</span>
+directory to be iterated. During the iteration, all drivers found will
+attempt to load and initiate, and all directories will be replicated
+inside <span id="filename">/dev/</span>. Since <span id="filename">/system/drivers/dev</span> contains a directory named <span id="filename">video</span>, this will cause <span id="filename">/dev/video</span> to be created. When <span id="filename">/dev/</span> is successfully opened, it will attempt to open <span id="filename">/dev/video</span>, which should now exist. Opening <span id="filename">/dev/video</span> will cause the <span id="filename">/system/drivers/dev/video</span> directory to be iterated and the <span id="filename">cpia</span> binary to be loaded. The CPiA driver will then probe for a CPiA device and, if found, will create a device node named <span id="filename">/dev/video/cpia</span>, which will then be found and opened when the kernel descends into the <span id="filename">/dev/video</span> directory.</p>
+<p>In the trivial example above, there was direct match between the name of the driver and the name of the device inside <span id="filename">/dev</span>.
+Since one driver might export more than one device, this is not always
+the case. For example, an IDE disk driver would export one device for
+each disk connected to the bus and one device for each partition found
+on those disks. The device-tree exported by an IDE driver might look
+something like this:</p>
+
+<pre>/dev/disk/hda/raw
+/dev/disk/hda/0
+/dev/disk/hda/1
+/dev/disk/hdb/raw
+/dev/disk/hdc/raw
+/dev/disk/hdc/0
+</pre>
+
+<p>In this case, the IDE driver should be located in <span id="filename">/system/drivers/dev/disk/ide</span>. If someone attempts to open the first partition on the master disk connected to the first controller, it would have to open <span id="filename">/dev/disk/ide/hda/0</span>.</p>
+
+<p>When descending the path, the kernel will first create the <span id="filename">/dev/disk</span> and <span id="filename">/dev/disk/ide</span>
+directories. Then it will load the ide-driver which will detect that
+there are 3 disks connected to the two controllers before decoding the
+partition tables and add all the nodes listed above. At this point, <span id="filename">/dev/disk/ide/hda/0 already exists and no other drivers need to be loaded to fulfill the request.</span></p>
+
+<div id="sectiontext">Using busmanagers</div>
+
+<p>To keep the kernel small and avoid recompiling when adding support
+for new hardware technology, the management code for busses like PCI
+and USB lives in kernel modules called busmanagers. These busmanagers
+are loaded by the bootmanager if they are necessary for loading the
+system (e.g., the PCI busmanager is necessary for the IDE driver) or
+later after the root disk is mounted. Using busmanagers from drivers is
+really easy: You just have to ask the kernel to give you access to a
+busmanager with a specific name and the API version you support. If you
+would like to access the PCI bus, maybe to scan for supported devices,
+you would do something like this:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> PCI_bus_s* psBus = get_busmanager<font color="#4444ff">(</font> PCI_BUS_NAME, PCI_BUS_VERSION <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 2</span> if<font color="#4444ff">(</font> psBus == NULL <font color="#4444ff">)</font>
+<br><span id="codenumber"> 3</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 4</span>         // handle error
+<br><span id="codenumber"> 5</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p>You would now have a pointer to a <code>PCI_bus_s</code> structure,
+which is defined in the PCI busmanager header file and contains
+pointers to the busmanager's functions. Access to the USB bus works
+similar, alhough of course the functions in the <code>USB_bus_s</code> structure are different.</p>
+
+<div id="sectiontext">Device management</div>
+
+<p>Although the Syllable kernel driver interface is easy to use, it has
+one problem: Two device drivers may try to access one device. Also, the
+kernel does not know what devices are supported by the drivers and so
+cannot show a list of supported/unsupported hardware to the user. To
+solve these problems, the kernel contains a special device manager. A
+device can be registered by any device driver or busmanager and is
+later claimed by the driver that wants to access the device. All later
+tries by other drivers to claim the device will fail, and so the driver
+knows that it should not use this device. If you write a PCI or USB
+device driver, the busmanager can give you the handles to the devices
+it knows. All you have to do is to call the <code>claim_device()</code> function:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> int nHandle = sMyDevice.nHandle // get Handle from the busmanager
+<br><span id="codenumber"> 2</span> if<font color="#4444ff">(</font> claim_device<font color="#4444ff">(</font> nDeviceID, // device ID of the driver
+<br><span id="codenumber"> 3</span>                   nHandle,
+<br><span id="codenumber"> 4</span>                   "My device", // name for the device
+<br><span id="codenumber"> 5</span>                   DEVICE_AUDIO <font color="#4444ff">)</font> // type of the device
+<br><span id="codenumber"> 6</span>     != 0 <font color="#4444ff">)</font> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 7</span>         // handle error
+<br><span id="codenumber"> 8</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p>Please note that if you support hardware that can be removed while
+the computer is running (such as USB devices), you have to call <code>release_device( nHandle )</code> if the busmanager informs you about the removal.</p>
+<p>If you want to support hardware which is not managed by any busmanager, you can call <code>register_device()</code> yourself:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> int nHandle = register_device<font color="#4444ff">(</font> "My device", // name
+<br><span id="codenumber"> 2</span>                                <font class="stringliteral">"isa"</font> <font color="#4444ff">)</font>; // busname
+<br><span id="codenumber"> 3</span> claim_device<font color="#4444ff">(</font> nDeviceID, nHandle, "My device", DEVICE_AUDIO <font color="#4444ff">)</font>;
+<br></div>
+
+<p>This will not prevent two drivers to access one device, but it will show some nice information to the user.</p>
+
+<div id="sectiontext">Reducing boottime by disabling PCI device drivers</div>
+
+<p>To avoid unnecessary attempts to load drivers, it is possible to
+disable device drivers. This feature is only available for pure PCI
+device drivers. If you did not find any supported hardware, you should
+call <code>disable_device( nDeviceID )</code>. This will disable the device driver until the PCI busmanager detects a hardware change.</p>
+
+<div id="sectiontext">Busmanager Drivers</div>
+
+<a name="sec_bus_1"><h2>Structure of a busmanager</h2></a>
+
+<p>A busmanager is a normal kernel module that is located in the <span id="filename">/system/drivers/bus</span> directory . Unlike the kernel device drivers, it does not export <span id="filename">device_init()</span> and <span id="filename">device_uninit()</span>. Instead, the following functions need to be implemented:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> status_t bus_init<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 2</span> void     bus_uninit<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 3</span> void*    bus_get_hooks<font color="#4444ff">(</font> <font class="keywordtype">int</font> nVersion <font color="#4444ff">)</font>;
+<br></div>
+
+<p>The <code>bus_init()</code> function should initialize the busmanager and do a device scan on the bus if possible. Then <code>register_device()</code>
+should be called for the found devices. If the bus does not support
+hotplugging, the busmanager should also load a previously saved list of
+the attached devices and compare it with the current configuration. If
+it detects any change, the busmanager should call <code>enable_all_devices()</code> so that device drivers which use this busmanager can safely disable themselves. If the initialization of the bus fails, <code>bus_init()</code> should return a value != 0.</p>
+
+<p><code>bus_uninit()</code> is called during shutdown. The busmanager can save a list of the currently attached devices here using the <code>write_config_entry...()</code> functions of the kernel.</p>
+
+<p>Finally, <code>bus_get_hooks()</code> returns a pointer to a private
+structure that will probably contain pointers to the busmanager's
+functions. The busmanager should respect the <code>nVersion</code> flags to keep backward compatibility with older drivers.</p>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+/ide/ should be replaced with /ata/ 
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+It looks as if the article on video drivers was somehow merged with the
+article on "general" device drivers. If this was intentional, the video
+driver part needs a more noticeable headline - I was quite surprised by
+the sudden change of topic until I realized that there were basically
+two articles lumped together :)
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>Hm, I still don't know how I can do something. I would rewrite
+driver for my ethernet controler (eepro) from Linux, but I don't know
+how.
+</div>
+<p id="tutorialname">Video Drivers</p>
+<div id="sectiontext">Basic description</div>
+
+<p>The Syllable Video Driver API is unique to Syllable, and may at
+first appear to be a little confusing. This guide tries to explain the
+basic structure of a video driver and how the appserver handles video
+drivers and drawing functions.</p>
+
+<div id="sectiontext">The basic driver model</div>
+
+<p>Syllable video drivers are written in C++ and provide methods
+required to open a video framebuffer, accelerated drawing functions and
+video overlay controls.</p>
+<p>The DisplayDriver base class provides unacclerated software
+rendering functions which can draw a line between two points, or blit a
+bitmap into the video framebuffer. The VesaDriver class is a fully
+functional VESA 2.0 display driver, and is the default display driver
+which Syllable will attempt to use if no accelerated display driver can
+be found for the installed hardware. Most video drivers generally
+inherit from the DisplayDriver base class, but some may choose to
+inherit from the VesaDriver class. The VesaDriver provides additional
+VESA mode switching functions which may be used for certain hardware.
+For example, the Mach64 accelerated driver inherits from the VesaDriver
+in order to use the VESA mode switching functions for some chipsets.</p>
+
+<div id="sectiontext">Functionality</div>
+
+<p>Because the DisplayDriver base class provides basic software
+rendering functions, an unaccelerated or partially accelerated video
+driver does not have to offer hardware drawing for all functions. The
+most basic display driver can implement only the required functions to
+detect and initialise the video hardware and allow the appserver to
+handle all of the video drawing in software. A more complete display
+driver can implement hardware accelerated drawing functions by
+overriding the various drawing methods in the DisplayDriver class. This
+generally provides much faster video drawing. A complete video driver
+would also implement the various Video Overlay functions which can be
+used by the Media Framework to display accelerated video playback.</p>
+
+<div id="sectiontext">The basic API</div>
+
+<p>For the purposes of this guide we'll pretend we have some video
+hardware called "Fire", and assume we are writing a display driver for
+that hardware.</p>
+
+<p>The most basic video driver for any hardware must provide the following functions and methods.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> Fire::Fire<font color="#4444ff">(</font> void <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 2</span> Fire::~Fire<font color="#4444ff">(</font> void <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 3</span> bool Fire::IsInitiated<font color="#4444ff">(</font> void <font color="#4444ff">)</font> const;
+<br><span id="codenumber"> 4</span> area_id Fire::Open<font color="#4444ff">(</font> void <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span> int GetFramebufferOffset<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 6</span> int Fire::GetScreenModeCount<font color="#4444ff">(</font> void <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 7</span> bool Fire::GetScreenModeDesc<font color="#4444ff">(</font> int nIndex, os::screen_mode* psMode <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 8</span> int Fire::SetScreenMode<font color="#4444ff">(</font> os::screen_mode sMode <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 9</span> extern "C" DisplayDriver* init_gfx_driver<font color="#4444ff">(</font> void <font color="#4444ff">)</font>;
+<br></div>
+
+<p>The last function in that list is not a C++ method, but instead a C
+style function. This function is called when the display driver is
+initialised. Most display drivers simply implement <code>init_gfx_driver()</code>
+to create a new instance of their display driver class, and then do the
+actual hardware detection and initialisation in the class constructor.
+The constructor and destructor should be fairly obvious. Generally the
+constructor will probe for the video hardware using the usual <code>pci_*</code>
+functions. If supported hardware is found then generally the hardware
+must be initialised, although this is an internal function of the
+display driver and will differ between different video hardware. What
+your initialisation code must do however is create and remap an area
+over the video framebuffer. This area is returned to the appserver
+later in the initialisation process and is the only way in which the
+DisplayDriver base class can access the video framebuffer.</p>
+
+<p>Unless your hardware has a functional VESA BIOS and you have
+inherited from the VesaDriver class, you will have to provide three
+methods which are used by the appserver to set the correct video mode. <code>GetScreenModeCount()</code> should simply return the total number of valid screenmodes. <code>GetScreenModeDesc()</code> returns a structure which  contains the display mode information for the requested display mode. Finally, <code>SetScreenMode()</code> is used to  actually set the desired video mode. <code>GetScreenModeCount()</code> and <code>GetScreenModeDesc()</code> are generally implemented in a  similiar maner in any display driver as they are hardware independent. <code>SetScreenMode()</code> is obviously extremely  hardware dependent, and how you implement this will depend on your hardware.</p>
+
+<p><code>IsInitiated()</code> simply returns true if the driver was able to detect and initialise the video hardware, or false  otherwise.</p>
+
+<p><code>GetFramebufferOffset()</code> should almost always return 0.</p>
+
+<p>The <code>Open()</code> method is the last piece of the puzzle. All
+it does it is return the area ID of the previously created framebuffer
+area. The appserver can then find the video framebuffer base address
+from this area and use it to access the video framebuffer to perform
+drawing functions.</p>
+
+<div id="sectiontext">Accelerated Drawing</div>
+
+<p>An accelerated video driver will also provide methods which override
+the DisplayDriver software rendering methods. There implementation is
+highly hardware dependent, but most drivers implement methods to
+accelerate line drawing, rectangular fills and bitmap blits. The
+methods are:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> bool Fire::DrawLine<font color="#4444ff">(</font>
+SrvBitmap* pcBitMap, const IRect&amp; cClipRect, const IPoint&amp;
+cPnt1, const IPoint&amp; cPnt2, const Color32_s&amp; sColor, int nMode <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 2</span> bool Fire::FillRect<font color="#4444ff">(</font> SrvBitmap* pcBitMap, const IRect&amp; cRect, const Color32_s&amp; sColor <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 3</span> bool Fire::BltBitmap<font color="#4444ff">(</font> SrvBitmap* pcDstBitMap, SrvBitmap* pcSrcBitMap, IRect cSrcRect, IPoint cDstPos, int nMode <font color="#4444ff">)</font>;
+<br></div>
+
+<p>All of these methods receive a pointer to a <code>SrvBitmap</code> class. This class is the internal bitmap which is being  rendered too. <code>SrvBitmap</code>s
+can either be in video memory or user memory, depending on wether they
+are on screen or off screen. Generally, video hardware cannot perform
+rendering operations on memory which is not in its own video
+framebuffer, so you must first check to ensure that the bitmap you are
+rendering to exists in video memory[1]. If not, you should pass the
+rendering request down to your base class, which will use the software
+rendering methods in DisplayDriver.[2]</p>
+
+<p><code>DrawLine()</code> and <code>FillRect()</code> recieve Color
+information, which indicates the color that the line or fill should be
+drawn in. You may need to convert the RGBA information contained in the
+<code>Color32_s</code> class to information which can be  used by your video hardware, but this is hardware dependent.</p>
+
+<p><code>Drawline()</code> and <code>BltBitmap()</code> recieve the <code>nMode</code>
+argument, which indicates the drawing mode which should be used to
+perform the operation. This argument will specify DM_COPY (A stright
+drawing operation), DM_OVER (An alpha transparent "stamp" operation
+where the transparency is either "On" or "Off") or DM_BLEND (An alpha
+blending operation). DM_COPY and DM_OVER operations are the most
+common, and you may choose not to support hardware accelerated DM_OVER
+and DM_BLEND operations. Generally, passing this drawing operations
+down to the DisplayDriver methods does not noticably slow down
+rendering[3].</p>
+
+<div id="sectiontext">Video Overlays</div>
+
+<p>If your hardware supports Video Overlays, you may wish to support
+this functionality in your display driver. There are four methods which
+you must provide in order to support Video Overlays correctly. They are:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> bool Fire::CreateVideoOverlay<font color="#4444ff">(</font> const os::IPoint&amp; cSize, const os::IRect&amp; cDst, os::color_space eFormat, os::Color32_s sColorKey, area_id *pBuffer <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 2</span> bool Fire::RecreateVideoOverlay<font color="#4444ff">(</font> const os::IPoint&amp; cSize, const os::IRect&amp; cDst, os::color_space eFormat, area_id *pBuffer <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 3</span> void Fire::UpdateVideoOverlay<font color="#4444ff">(</font> area_id *pBuffer <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 4</span> void Fire::DeleteVideoOverlay<font color="#4444ff">(</font> area_id *pBuffer <font color="#4444ff">)</font>;
+<br></div>
+
+<p>Unlike the rendering functions, these functions do not have a
+software implementation in the DisplayDriver class. Your video driver
+must either support Video Overlays or the user will not be able to use
+them at all.[4]</p>
+
+<p><code>CreateVideoOverlay()</code> and <code>DeleteVideoOverlay()</code> are self explanitory. <code>UpdateVideoOverlay()</code> is actually not used by  any DisplayDriver at this point, so the implementation of this method will be empty. <code>RecreateVideoOverlay()</code> is  used to resize a current Video Overlay or to change the current color space of a Video Overlay.</p>
+
+<p>All of these functions will be highly hardware&#8211;specific and the
+functionality is complex. You should refer to actual driver
+implementations of these methods if you wish to understand how they
+work.[5]</p>
+
+<div id="sectiontext">Hardware Cursor</div>
+
+<p>Supporting the hardware cursor can be a bit tricky, because you have
+to convert the syllable cursor format into the native hardware format.
+In general these methods need to be implemented:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> void Fire::SetCursorBitmap<font color="#4444ff">(</font> os::mouse_ptr_mode eMode, const os::IPoint&amp; cHotSpot, const void* pRaster, int nWidth, int nHeight <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 2</span> void Fire::MouseOn<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 3</span> void Fire::MouseOff<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 4</span> void Fire::SetMousePos<font color="#4444ff">(</font> os::IPoint cNewPos <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span> bool Fire::IntersectWithMouse<font color="#4444ff">(</font> const os::IRect&amp; cRect <font color="#4444ff">)</font>;
+<br></div>
+
+<p><code>IntersectWithMouse()</code> returns false in all drivers and what <code>MouseOn()</code>, <code>MouseOff()</code>, <code>SetMousePos()</code> do should be obvious. <code>SetCursorBitmap()</code>
+is the most difficult method. At the moment Syllable only supports mono
+cursors, so eMode will be MPTR_MONO ( but you should fall back to
+software cursor if eMode is != MPTR_MONO ). pRaster is a pointer to a
+buffer with 8bit values. The values mean:
+</p><pre>0 - Transparent
+1 - Black
+2 - Black
+3 - White
+</pre>
+
+<p>You should probably look into the drivers that implement hardware cursors to understand everything.[6]</p>
+
+<div id="sectiontext">Footnotes</div>
+
+<p>[1]: SrvBitmap contains a public member called m_bVideoMem which is true if the SrvBitmap exists within the video framebuffer.</p>
+<p>[2]: For example:
+</p><div id="codelisting">
+<span id="codenumber"> 1</span> if<font color="#4444ff">(</font> pcBitMap-&gt;m_bVideoMem == false <font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    return<font color="#4444ff">(</font> DisplayDriver::FillRect<font color="#4444ff">(</font> pcBitMap, cRect, sColor <font color="#4444ff">)</font> <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 4</span> <font color="#4444ff">}</font>
+<br></div>
+<p>[3]: The DisplayDriver class now also supports MMX accelerated
+functions on hardware which supports MMX. This generally provides quite
+fast software rendering on most systems.</p>
+<p>[4]: Users can instead use the slower Bitmap rendering output provided by the Media Framework.</p>
+<p>[5]: At the time of writing, the nVidia, Mach64 and SiS drivers implement Video Overlays.</p>
+<p>[6]: At the time of writing, the Mach64 and SiS drivers implement Hardware Cursors.</p>
+
+<p id="tutorialname">Builder</p>
+<p>To build a binary package from a package that you have built and installed from source:</p>
+
+<div id="terminal">build distro <package-name></package-name></div>
+
+<p>To add support to Builder for a package that it doesn't know how to
+build yet, you will have to write a build recipe and possibly add
+patches that are needed to make the package work on Syllable. Kaj
+hasn't written documentation for that yet, among other reasons because
+the exact syntax of build recipes is still being changed and added to.
+But he does keep a record of recipe syntax in a file named
+skeleton.recipe, which you can find here:</p>
+
+<p><a href="http://cvs.sourceforge.net/viewcvs.py/syllable/syllable/system/apps/utils/Builder/packages/">http://cvs.sourceforge.net/viewcvs.py/syllable/syllable/system/apps/utils/Builder/packages/</a></p>
+
+<p>You can use skeleton.recipe as an example to pick the options that a
+package needs. You should also look at existing recipes for other
+packages to see how it's done.</p>
+
+<p>If you are rebuilding parts of the system that depend on eachother
+and need guidance, you can consult the build profile for the base
+system:</p>
+
+<p><a href="http://cvs.sourceforge.net/viewcvs.py/syllable/syllable/system/apps/utils/Builder/profiles/base?rev=1.18&amp;view=auto">http://cvs.sourceforge.net/viewcvs.py/syllable/syllable/system/apps/utils/Builder/profiles/base?rev=1.18&amp;view=auto</a></p>
+
+<p>Builder doesn't handle dependencies yet, but the modules list in the
+profile is roughly ordered in the order of dependencies. A crude way to
+rebuild Syllable would be to do:</p>
+
+<div id="terminal">
+cd system<br>
+build base
+</div>
+
+<p>See what breaks and install modules that succeeded but are needed by later modules:</p>
+
+<div id="terminal">build install <path-to-module></path-to-module></div>
+
+<p>Be aware that there may still be bugs in the install targets of makefiles. Then do:</p>
+
+<div id="terminal">build failures</div>
+
+<p>And repeat the process until everything works.</p>
+ </div>
+</div>
+
+</body></html

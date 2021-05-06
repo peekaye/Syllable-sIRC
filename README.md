@@ -1,40 +1,60 @@
-README
 
-ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  
-  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  
-ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  
-
-
-
-sIRC 0.03 - Syllable Internet Relay Chat Client 
-Copyright (C) 2006 James Coxon jac208@cam.ac.uk
-Yeah its GPL :-D
-Based on various tutorials from Syllable User Bible
-Thanks to:
-Spikeb
-Brent
-Jonas
-Vanders
-Rick
-
-Installation
-
-1)Go into sIRC32.cpp and change the variables near the top to the correct (e.g Nick and Channel)
-
-2)Do Make
-
-3)Run sIRC
-
-Known Issues/Problems
-
-This is a alpha release - I'm worried that i'm not going to get very much done in the next 2 months due to exams at uni.
-Basically sIRC can connect to a single channel (which has to be changed in the source) and can send and receive messages.
-All other functionallity needs to be added!!!!!!!!!
-
-Any errors/problems/criticism/money to me: jac208@cam.ac.uk
+APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  
+  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  
+APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  
 
 
 
-ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  
-  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  
-ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  ALPHA  
+//--------------------------------------------------------------------------------------------------------
+// NAME: sIRC
+// DESC: Syllable Internet Relay Chat Client can connect to a single channel (change channel in the source)
+// NOTE: Beej's Guide to Network Programming, http://www.ecst.csuchico.edu/~beej/guide/net/ (discontinued)
+// FILE: http://www.srcf.ucam.org/~jac208/sIRC.tar (discontinued)
+// FILE: http://allatheos.free.fr/softs/sources/sIRC.tar (discontinued)
+// SEE ALSO: https://web.archive.org/web/20081213015820/http://allatheos.free.fr/softs/sources/sIRC.tar
+// SEE ALSO: https://web.archive.org/web/20051210035802/http://beej.us/guide/bgnet/output/html/index.html
+// SEE ALSO: https://web.archive.org/web/20060210170921/http://www.other-space.com/sub/
+//--------------------------------------------------------------------------------------------------------
+
+
+//--------------------------------------------------------------------------------------------------------
+// NAME: bsIRC
+// DESC: Syllable Internet Relay Chat Client based on sIRC 0.03
+// NOTE: by Flemming H. Sorensen ( BurningShadow )
+// FILE: 
+// SEE ALSO: https://www.pyro-os.org/?page=./Team/show.php&person=Flemming
+//--------------------------------------------------------------------------------------------------------
+
+
+//--------------------------------------------------------------------------------------------------------
+// NAME: sub
+// DESC: Syllable User's Bible, the primary source for Syllable documentation.
+// NOTE:
+// FILE: http://www.other-space.com/sub/index.html (discontinued)
+// SEE ALSO: https://web.archive.org/web/2006*/www.other-space.com/sub
+//--------------------------------------------------------------------------------------------------------
+
+
+Atheos:
+        http://www.atheos.cx (discontinued)
+        https://atheos.pyro-os.org
+        https://archiveos.org/atheos/
+Syllable:
+        https://www.syllable.org (discontinued)
+        https://sourceforge.net/projects/syllable/files/Syllable/
+        https://archiveos.org/syllable/
+        https://github.com/SyllableOS/Syllable/
+        http://www.cilinder.be/syllable/
+        http://www.jarvoll.se/syllable/
+        http://morphett.info/syllable/syllable.html
+        https://sourceforge.net/p/syllable/mailman/syllable-developer/
+Pyro:
+        https://www.pyro-os.org
+        https://github.com/PyroOS/Pyro/
+
+
+
+APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  
+  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  
+APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  APPS  
+

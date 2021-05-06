@@ -1,0 +1,121 @@
+<html><head>
+
+<title>Syllable User Bible - Multi-Column ListViews</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Multi-Column ListViews</div>
+</div>
+<div id="pageStats">
+<table border="0">
+<tbody><tr><td valign="top">Written by:</td><td>Brent P. Newhall</td></tr>
+<tr><td valign="top">Last Updated:</td><td>Apr 11, 2007</td></tr>
+<tr><td valign="top">Version:</td><td>0.3.4 to 0.5.3</td></tr>
+</tbody></table>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+
+<p>We're going to create a list with three columns, "First Name," "Last Name," and "Age," which will have three rows in it:</p>
+
+<center><table border="1">
+ <tbody><tr>
+  <th> First Name </th> <th> Last Name </th> <th> Age </th>
+ </tr>
+ <tr>
+  <td> Heero </td> <td> Yui </td> <td> 15 </td>
+ </tr>
+ <tr>
+  <td> Relena </td> <td> Peacecraft </td> <td> 15 </td>
+ </tr>
+ <tr>
+  <td> Treize </td> <td> Kushrenada </td> <td> 22 </td>
+ </tr>
+</tbody></table></center>
+
+<p>First off, create a ListView:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> ListView *myListView;
+<br><span id="codenumber"> 2</span> Rect r = GetBounds<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 3</span> myListView = new ListView<font color="#4444ff">(</font> r, "myListView",
+<br><span id="codenumber"> 4</span>                           ListView::F_RENDER_BORDER,
+<br><span id="codenumber"> 5</span>                           CF_FOLLOW_ALL <font color="#4444ff">)</font>;
+<br></div>
+
+<p>Now, add a few columns. You have to provide the initial size of each
+column in pixels. We'll just make each column the same size, by taking
+the width of the view and dividing it by three for each column.</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> myListView-&gt;InsertColumn<font color="#4444ff">(</font> "First Name", Bounds<font color="#4444ff">(</font><font color="#4444ff">)</font>.Width<font color="#4444ff">(</font><font color="#4444ff">)</font> / 3 <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 2</span> myListView-&gt;InsertColumn<font color="#4444ff">(</font> "Last name", Bounds<font color="#4444ff">(</font><font color="#4444ff">)</font>.Width<font color="#4444ff">(</font><font color="#4444ff">)</font> / 3 <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 3</span> myListView-&gt;InsertColumn<font color="#4444ff">(</font> "Age", Bounds<font color="#4444ff">(</font><font color="#4444ff">)</font>.Width<font color="#4444ff">(</font><font color="#4444ff">)</font> / 3 <font color="#4444ff">)</font>;
+<br></div>
+
+<p>All right, the ListView has been set up so that it has three columns.  Now to add some data.</p>
+
+<p>For each row, create a <code>ListViewStringRow</code> &#8211; or, if you need to, a <code>ListViewRow</code> that you've personally subclassed to handle something other than strings &#8211; and call <code>AppendString()</code> for each column of data.  We have three columns, so we'll do that three times for each row:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> ListViewStringRow *row;
+<br><span id="codenumber"> 2</span> row = new ListViewStringRow<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 3</span> row-&gt;AppendString<font color="#4444ff">(</font> "Heero" <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 4</span> row-&gt;AppendString<font color="#4444ff">(</font> "Yui" <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span> row-&gt;AppendString<font color="#4444ff">(</font> "15" <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 6</span> myListView-&gt;InsertRow<font color="#4444ff">(</font> row <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 7</span> 
+<br><span id="codenumber"> 8</span> row = new ListViewStringRow<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber"> 9</span> row-&gt;AppendString<font color="#4444ff">(</font> "Relena" <font color="#4444ff">)</font>;
+<br><span id="codenumber">10</span> row-&gt;AppendString<font color="#4444ff">(</font> "Peacecraft" <font color="#4444ff">)</font>;
+<br><span id="codenumber">11</span> row-&gt;AppendString<font color="#4444ff">(</font> "15" <font color="#4444ff">)</font>;
+<br><span id="codenumber">12</span> myListView-&gt;InsertRow<font color="#4444ff">(</font> row <font color="#4444ff">)</font>;
+<br><span id="codenumber">13</span> 
+<br><span id="codenumber">14</span> row = new ListViewStringRow<font color="#4444ff">(</font><font color="#4444ff">)</font>;
+<br><span id="codenumber">15</span> row-&gt;AppendString<font color="#4444ff">(</font> "Treize" <font color="#4444ff">)</font>;
+<br><span id="codenumber">16</span> row-&gt;AppendString<font color="#4444ff">(</font> "Kushrenada" <font color="#4444ff">)</font>;
+<br><span id="codenumber">17</span> row-&gt;AppendString<font color="#4444ff">(</font> "22" <font color="#4444ff">)</font>;
+<br><span id="codenumber">18</span> myListView-&gt;InsertRow<font color="#4444ff">(</font> row <font color="#4444ff">)</font>;
+<br></div>
+
+<p>And there you go.</p>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+There should be a quick note here on the best way to retrive the
+selected row, and the values of that row. (not the index number, but
+the actual string).
+. Knut S.
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+</div>
+ </div>
+</div>
+
+<br><br>
+
+</body></html

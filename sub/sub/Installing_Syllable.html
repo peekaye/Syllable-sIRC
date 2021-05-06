@@ -1,0 +1,368 @@
+<html><head>
+
+<title>Syllable User Bible - Installing Syllable</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<!-- <center><table border="0" cellpadding="0" cellspacing="0" width="100%">
+ <tr>
+  <td valign="top" width="65%"> -->
+<div id="mainContainer">
+ <div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> | <a href="http://www.other-space.com/sub/requests.php">Request a Tutorial</a>
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Installing Syllable</div>
+</div>
+
+ <div id="mainContent">
+<p id="tutorialname">Installing From the Basic CD</p>
+<p>Installing Syllable from the Premium CD or Basic CD is a snap.
+
+</p>
+<p>First, make sure you have a hard drive &#8211; or a partition of a hard drive &#8211; available to install Syllable on.
+
+</p>
+<p>What's a partition? Hard drives can be split up into separate pieces
+called partitions. Each partition can be formatted and used as though
+it were a separate hard drive. So, you could have a 60 GB hard drive
+with three partitions on it; one 20 GB partition for Windows, another
+20 GB partition for Linux, and of course a 20 GB partition for
+Syllable.
+</p>
+<p>Then, insert the CD in the computer's CD-ROM drive and reboot. The
+computer should boot and display the Syllable Installation Menu.
+</p>
+<p>If the CD does not boot, this is likely because the computer does
+not read the CD-ROM before booting from the hard drive. Reboot again
+and press the key or keys to access your BIOS (look on the screen for a
+message that explains how to do this; different BIOS manufacturers use
+different keys, though the most common ones are <strong>Del</strong>, <strong>F8</strong>, and <strong>F10</strong>).
+Once you're viewing the BIOS, navigate until you find the section that
+deals with the boot sequence. Change the boot sequence (again, the
+exact procedure for doing this varies widely by manufacturer) so that
+the CD-ROM drive is booted before the hard drive is booted.
+</p>
+<p><strong>Installing Syllable</strong>
+
+</p>
+<p>Once you're in the Syllable Installation Menu, press any key to bypass the main screen.
+
+</p>
+<p>First, you'll need to choose the hard drive and partition on which
+you want to install Syllable. The Installation Menu will display a list
+of partitions; just type the name of the partition on which you want to
+install Syllable. This partition will then be formatted (all data on it
+will be erased, and it will be set up for Syllable). Syllable will then
+install its files onto the newly formatted partition.
+</p>
+<p>But wait!  You're not done yet.
+
+</p>
+<p><strong>Installing GRUB</strong>
+
+</p>
+<p>Once Syllable is installed, you'll still need to install GRUB, which
+lets you boot into Syllable. To do this, reboot with the CD still in
+the drive. When you get the GRUB boot menu, press the <strong>C</strong> key and you'll be presented with a GRUB menu.
+
+</p>
+<p>To set up GRUB, you'll need to figure out two numbers at this point:
+the hard drive number and the partition number for Syllable. If you
+installed on hda (the first hard drive in the computer), the hard drive
+number is 0. If you installed on hdb, the hard drive number is 1.
+</p>
+<p>Similarly, if you installed on the first partition on the hard
+drive, the partition number is 0. If you installed on the second
+partition, the number is 1, and so on.
+</p>
+<p>To install GRUB, you need to enter the following two commands, which
+assume that you're installing on the first partition of the first hard
+drive (hd0,0). If you were installing on the third partition of the
+second hard drive, you'd use (hd1,2).
+</p>
+<p>Type the following commands at the GRUB menu:
+
+</p>
+<pre>root (hd0,0)
+setup (hd0,0)
+</pre>
+
+<p>You should see something like this:
+
+</p>
+<pre>grub&gt; root (hd0,0)
+Filesystem tyep is afs, partition type 0xeb
+
+grub&gt; setup (hd0,0)
+Checking if "/boot/grub/stage1" exists... yes
+Checking if "/boot/grub/stage2" exists... yes
+Checking if "/boot/grub/afs_stage1_5" exists... yes
+Running "embed /boot/grub/afs_stage1_5 (hd0,0)"...  19 sectors are embedded. succeeded
+Running "install /boot/grub/stage1 (hd0,0) (hd0,0)4+19 p (hd0,0)/boot/grub/stage2 /boot/grub/menu.lst"... succeeded
+Done.
+</pre>
+
+
+<p>Now remove the CD and reboot.  Syllable should boot correctly.
+</p><div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>I had Lilo installed as the boot loader before I installed
+Syllable. The Lilo boot loader is still trying to boot the system (but
+there is no Linux kernel for it to load).
+<hr>Install grub overtop if you can I would geuss.. disable your
+harddrive as a boot option put your CD first,, could be mistaken but if
+you isntall grub overtop this should do it.. (I'm geussing)
+<hr>My experience is that when installng on a windows hd and using
+grub, is that grub always ruins the win bootrecord, whether grub is
+installed in the mbr or a non-win partition. I'd like to use syllable
+but daren't because of grub.
+<hr>If you are worried about Grub killing your hard drive then install
+Syllable on an Emulator. I use Qemu, but I hear there is a free version
+of VMWare now.
+<hr>I have tried installing from the Premium CD. I get thru to the
+stage where it asks me if I need to create a Syllable partition and I
+select "yes". System then responds and says that I now need to format
+that partition for use with Syllable. It sacns the partitions and file
+systems but then comes back with nothing NADA under the Partition data.
+I have nothing to select.
+What am I doing wrong?
+</div>
+
+<p id="tutorialname">Installing in VMware</p>
+<p></p><h3>Does Syllable run in VMware version x?</h3>
+<p></p>
+<p>Syllable (as of 0.6.0) runs in VMware 3.2 and 4.0 for Linux, and
+VMware 3.0 for Windows. It also runs on Vmware Player for linux and
+windows. This makes it more likely that it also runs in 3.2 and 4.0 for
+Windows and 3.0 for Linux. AtheOS (which Syllable is based on) runs in
+VMware 2.x, so it is likely Syllable also runs in VMware 2.x. If you
+have information about Sylable running or not running in specific
+VMware versions, please mail <a href="mailto:dang@fprintf.net">Daniel</a>
+
+</p>
+<p></p><h3>Where can I get a VMware image with Syllable already installed?</h3>
+<p></p>
+<p>There is a base install Syllable image pre-installed in a Vmware Player image available at <a href="http://www.fprintf.net/atheos/atheosvm.html">fprintf.net</a>.  In addition, there is a Syllable image with developer tools in VMware 4 at <a href="http://syllable.halebob.org/">syllable.halebob.org</a>.  Another place for recent VMware images is <a href="http://www.cilinder.be/syllable/">www.cilinder.be/syllable</a>.
+</p><p></p><h3> is my screen messed up in Syllable?</h3>
+<p></p>
+<p>VMware 3.2 (and possibly other versions) seem to have problems with
+the Syllable VESA driver. The only resolution known to work in all
+situations is 1024x768 with 32 bits per pixel. Some other resolutions
+are reported to work with some video card/driver combinations of the
+host OS.
+</p>
+<p></p><h3>Why won't Syllable boot in VMware? The boot disk does.</h3>
+<p></p>
+<p>VMware assumes that its Guest OSs do not use memory beyond a certain
+address (0xf7ffffff). Ordinarily, Syllable does use this region, which
+causes it to not boot in VMware. There is a kernel parameter (which the
+boot disks already have) work-around for this. The parameter is
+"uspace_end=0xf7ffffff", which needs to be on the end of the kernel
+line in "/afs/boot/grub/menu.lst".
+</p>
+<p>Alternatively, you might need to disable DMA.  To do this, at the GRUB prompt, hit <strong>E</strong>, then move down to the line that starts:
+
+</p>
+<pre>kernel=
+</pre>
+
+<p>Hit <strong>E</strong> again to edit that line and add:
+
+</p>
+<pre>enable_ata_dma=false
+</pre>
+
+<p>Press <strong>Enter</strong>, then <strong>B</strong> to boot with the modified configuration.
+
+</p>
+<p></p><h3>Why is everything so slow?</h3>
+<p></p>
+<p>Recent versions of Syllable have a real ATA driver for hard drives.
+This driver does not work well with VMware, and runs extremely slowly.
+The solution is to use the BIOS driver, rather than the ATA driver.
+Change your GRUB boot menu to something like this (changing partition
+information to match your install):
+</p>
+<pre>kernel /atheos/sys/kernel.so root=/dev/disk/bios/hda/0 hda=bios ata0=disable ata1=nodma uspace_end=0xf7ffffff
+module=/atheos/sys/drivers/fs/afs
+module=/atheos/sys/drivers/dev/disk/bios
+</pre>
+
+<p>Note that this will still allow the CD to work, as long as it's a
+secondary master (which is the default for VMware). The kernel line
+should be one line.
+</p>
+<p>Another approach (tested under VMWare 4.5.2 and Syllable 0.5.4) is to use the ATA driver with this kernel line:
+
+</p>
+<pre>&lt;filename&gt;kernel /atheos/sys/kernel.so root=/dev/disk/ata/hda/0 uspace_end=0xf7ffffff enable_ata_dma=false&lt;/filename&gt;
+</pre>
+
+<p></p><h3>Does Syllable support the AMD PCNET network card in VMware?</h3>
+<p></p>
+<p>Theoretically, yes. There is a driver for this card included with
+Syllable. There are reports that it does not work with VMware 3.2 for
+Linux. There are reports that it does work on VMware 3.x for Windows.
+YMMV.
+</p>
+<p></p><h3>What about NAT?</h3>
+<p></p>
+<p>There are reports that Syllable 0.5.1 that has an Ethernet connection using NAT works in VMware.
+
+</p>
+
+
+
+
+
+
+
+
+
+
+<p></p><div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+the net driver works in vmware 4.0 for syllable 0.5.1
+<hr>If your install hangs because of DMA issues, try to simply add
+"enable_ata_dma=false" at the end of the kernel line in Grub (use the
+'e'dit option). Worked for me, VMWare 4.5.0, Syllable 0.5.4. -jd
+<hr>
+<hr>
+
+<hr>Works on VMWare workstation 5 beta. After installation, Grub hangs
+("GRUB _"). Solution: when you set up the partition, start at sector 63
+(seems like the sectors 0-62 are needed by Grub?)
+<hr>
+Another place for Syllable VMWare images is: http://www.cilinder.be/syllable
+
+Network works in VMWare Player if you use NAT and enable dhcp in Syllable.
+
+</div>
+
+<p id="tutorialname">Installing in Virtual PC</p>
+
+<div id="sectiontext">Q: Does Syllable work in Connectix Virtual PC (version 3, 4, or 5)?</div>
+
+<p>Short answer: Not yet.  The install freezes.</p>
+
+<p>In earlier versions of Syllable, A BIOS limitation seems to halt an untar. Everything else functions correctly and as expected.</p>
+
+<p>All versions of VPC have notable differences, particularly between
+3.x and the others. VPC 3 seems to have the best support for generic PC
+compatability (i.e., not just for Microsoft products). If you want to
+get Syllable to boot from GRUB in the MBR, you will probably end up
+using version 3 to make a final distributable image.</p>
+
+<p>The normal diskette boot to install works great. Get the diskette images for use with VPC from:</p>
+
+<p><a href="http://agentm.perlmonk.org/projects/SyllableVPC/SyllableBootDiskettes.sit.hqx">http://agentm.perlmonk.org/projects/SyllableVPC/SyllableBootDiskettes.sit.hqx</a></p>
+
+<p>Here are some quick instructions to get to the point of failure yourself:</p>
+
+<ol>
+<li> Set up the disks. Make a new "Syllable" configuration and create a
+new hard drive image for it using the Disk Assistance ("Windows, Linux,
+Other, etc." &#8211; the drive type is irrelevant since it will be
+overwritten anyway). At least 500 MB is recommended for a developer's
+installation. VPC comes minimally with DOS (or once long ago, Linux),
+so you can download the <code>base-syllable...tar.gz</code> file onto
+the FAT partition you normally use or you'll have to make one of those,
+too. Syllable will be able to access the FAT partition later. In the
+Settings, set Drive 1 to the new and empty Syllable disk and Drive 2 to
+the FAT drive.</li>
+<li> Boot into the Syllable installation shell &#8211; just like the generic
+install. You'll need, of course, the disk images that I mention above.
+You will not need nor use a real disk drive. You can drag the boot
+diskette images onto the disk icon in the toolbar to "insert" it. You
+pretty much just drag on diskette 1, restart the virtual machine, drag
+on diskette 2 when prompted, dragon on diskette 3 when prompted, then
+click <strong>OK</strong>. The shell will fire up in a matter of seconds.</li>
+<li> See shells. If you've followed the instructions, <span id="filename">/dev/disk/bios/hda/0</span> is the empty Syllable hard drive and <span id="filename">/dev/disk/bios/hdb/0</span> is the hard drive with the FAT partition.</li>
+</ol>
+
+<p>Now,</p>
+
+<div id="terminal">
+$ <b>format /dev/disk/bios/hda/0 afs Syllable</b><br>
+$ <b>mkdir dos</b><br>
+$ <b>mkdir afs</b><br>
+$ <b>mount /dev/disk/bios/hda/0 afs</b><br>
+$ <b>mount /dev/disk/bios/hdb/0 dos</b><br>
+$ <b>cd /afs</b><br>
+$ <b>tar -zvxpf /dos/base-syllable...tar.gz</b> (use the <strong>Tab</strong> key for auto-completion)<br>
+</div>
+
+<p>Now here's the trouble! No matter which version of VPC you'll use,
+kernel options you'll try, or memory adjustments you'll make, the tar
+write will block on 6 MB of hard drive writes (according to VPC 5's
+stats). The untar'ing just blocks forever on <span id="filename">syllable/Documentation/gui/classos_1_1NodeMonitor-members.html</span> (let <a href="mailto:agentm@cmu.edu">agentm@cmu.edu</a>
+know if this is not the case for you). The system does not freeze. You
+can resize the shell window, move the mouse, etc., yet nothing
+progresses beyond this. Obviously, this has something to do with a
+limitation in the BIOS hard drive access.</p>
+
+<p>Send mail to the syllable-developer mailing list if you can get
+beyond this. Currently, AgentM's efforts involve stripping down the <span id="filename">base-syllable...tar.gz</span> for essential components to get beyond the evil NodeMonitor documentation.</p>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+write it so that it accesses things in chunks of less than 6mb's then...
+
+William Ashley
+w_ashley@rogers.com
+
+</div>
+<p id="tutorialname">Installing in QEMU</p>
+<p>Installing in "qemu" [http://fabrice.bellard.free.fr/qemu/] is
+exactly as installing from a basic or premium cd, with one exception:
+you MUST turn off ata dma. To do that:
+</p>
+<ol>
+<li> At the grub menu, press the <strong>E</strong> key.</li>
+<li> Press the down arrow once until the kernel=... line is highlighted.</li>
+<li> Press the <strong>E</strong> key again.</li>
+<li> Type: enable_ata_dma=false</li>
+<li> Press the <strong>Esc</strong> key.</li>
+<li> Press the <strong>B</strong> key to start the boot process.</li>
+<p></p></ol>
+<p></p><div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>I forgot something imporant - When the installer asks if you want
+to view, edit, or install the menu.lst, edit it and turn off dma. </div>
+
+<p id="tutorialname">Installing on VIA Eden Thin Client</p>
+<p>Henrik Isaksson installed Syllable on a "thin client" equipped with a VIA <a href="http://www.via.com.tw/en/products/processors/eden-esp/">Eden ESP</a> running at 300 MHz and a 64 MB Compact Flash card as a hard drive.  Here's how he did it:</p>
+
+<ol>
+<li> Borrow a Flash card to USB adapter, copied all necessary system files to the Flash card from a working Syllable installation.
+</li><li> Put the Flash card in the thin client.
+</li><li> Boot GRUB from an USB memory stick.
+</li><li> Install GRUB on the Flash card:</li>
+<div id="filetext">
+root (hd1,0)<br>
+setup (hd1)
+</div> 
+<li> Remove the USB stick.</li>
+<li> Reboot and change the boot device in BIOS to the Flash card.</li>
+<li> Reboot. Screen says GRUB GRUB GRUB GRUB GRUB GRUB GRUB GRUB GRUB GRUB GRUB... and so on.</li>
+<li> Reboot.  Change boot device to USB.  Reinsert USB memory.</li>
+<li> Reboot.  GRUB loads.</li>
+<li> Edit GRUB menu to boot from the Flash card.  Press <strong>B</strong> for Boot.</li>
+<li> Syllable boots from the Flash card!!!! :o)</li>
+</ol>
+ 
+<p>It seems GRUB doesn't like the Flash card.</p>
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+Are you sure you reserved enough room at the beginning of the partition
+for GRUB to fit? When I've seen that GRUB GRUB GRUB problem that was
+usually the culprit.
+</div>
+ </div>
+</div>
+
+</body></html

@@ -1,0 +1,124 @@
+<html><head>
+
+<title>Syllable User Bible - Changing a Programs Icon</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Changing a Programs Icon</div>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+<p></p><h2>Changing a Program's Icon</h2>
+<p></p>
+
+<p>To change a program's icon, you'll need to use the command-line tool "rescopy".
+
+</p>
+<p>A program can have up to two PNG icons associated with it, one 24x24
+pixels in size, and the other 48x48 pixels. These icons are stored as
+resources within the program's executable file.
+</p>
+<p>To change a program's icon, you first need to know if there are
+icons already associated with it. Type the following in a terminal
+window:
+</p>
+<pre>rescopy -l &lt;application&gt;
+</pre>
+
+<p>A list of all resources associated with the file is displayed. If
+there are no entries for "icon24x24.png" or "icon48x48.png" in the
+listing, the program has no icons associated with it, so you'll need to
+add your icons.
+</p>
+<p></p><h3>Adding an icon</h3>
+<p></p>
+
+<p>To add an icon to a program, name the icon "icon24x24.png" if it's a
+24x24 pixel icon, or "icon48x48.png" if it's a 48x48 pixel icon. To add
+a 24x24 pixel icon, enter the following in the terminal:
+</p>
+<pre>rescopy -a &lt;application&gt; icon24x24.png
+</pre>
+
+<p>For a 48x48 pixel icon, enter the following:
+
+</p>
+<pre>rescopy -a &lt;application&gt; icon48x48.png
+</pre>
+
+<p>You're done!
+
+</p>
+<p></p><h3>Replacing an icon</h3>
+<p></p>
+
+<p>If the program already has associated "icon24x24.png" or
+"icon48x48.png" resourcess, you'll need to replace them by typing the
+following in a terminal window (assuming a 24x24 pixel icon):
+</p>
+<pre>rescopy -r &lt;application&gt; icon24x24.png icon24x24.png
+</pre>
+
+<p>This instructs rescopy to replace the "icon24x24.png" resource with
+the "icon24x24.png" file you created. Replace "24x24" with "48x48" in
+the above example to replace the 48x48 pixel icon.
+</p>
+<p>That's it!
+
+</p>
+<p></p><h3>More Information</h3>
+<p></p>
+
+<p>Syllable uses the Bluecurve icons for many of its icons.  You can <a href="http://msa.section.me.uk/syllable/bluecurve-icons.tar.gz">download the Bluecurve icons</a> for free; anybody can use them in any application.
+
+</p>
+<p>For more information on rescopy, type the following in a terminal window:
+
+</p>
+<pre>rescopy --help
+</pre>
+
+<p>NOTE: If rescopy quits with the error 'sh: objectcopy not found', install the <a href="http://prdownloads.sourceforge.net/syllable/DevelopersDelight.bin.4.tgz?download">Developer's Delight package</a>
+
+</p>
+
+
+<p></p><div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+can u give an example of 24x24 pixel
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>if you have an "sh: objectcopy not found" error when trying to add
+or replace icons, go and install the "Developers' Delight" package.
+<hr>
+Link is out of date.
+
+</div>
+ </div>
+</div>
+
+<br><br>
+
+</body></html

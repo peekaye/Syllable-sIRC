@@ -1,0 +1,71 @@
+<html><head>
+
+<title>Syllable User Bible - Enabling the Telnet Server</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Enabling the Telnet Server</div>
+</div>
+<div id="pageStats">
+<table border="0">
+<tbody><tr><td valign="top">Written by:</td><td>Vanders</td></tr>
+<tr><td valign="top">Last Updated:</td><td>Apr 11, 2007</td></tr>
+<tr><td valign="top">Version:</td><td>0.3.0 to 0.5.3</td></tr>
+</tbody></table>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+
+<p>Telnetd runs, but is not available by default on Syllable. To enable
+telnet connections, type the following in a terminal window:</p>
+
+<div id="terminal">
+$ <b>cd /usr/inetutils/etc/</b><br>
+$ <b>jed inetd.conf</b><br>
+</div>
+
+<p>(Replace "jed" with whichever text editor you prefer.  AEdit for example.)</p>
+
+<p>Now scroll on down and you'll see the line:</p>
+
+<div id="filetext">
+#telnet  stream  tcp    nowait  root   /usr/inetutils/libexec/in.telnetd  in.telnetd
+</div>
+
+<p>Delete the `#` character to uncomment the line, so that it looks like this:</p>
+
+<div id="filetext">
+telnet  stream  tcp    nowait  root   /usr/inetutils/libexec/in.telnetd  in.telnetd
+</div>
+
+<p>Save the file, and then enter the following in the terminal window:</p>
+
+<div id="terminal">
+$ <b>kill_all inetd inetd</b><br>
+$ <b>inetd</b>
+</div>
+
+<p>This restarts inetd. Now telnet to Syllable will work, but be
+warned, there will be no username or password requested, and you will
+always log in as root. So, how about installing sshd instead? <code>;-)</code></p>
+
+ </div>
+</div>
+
+<br><br>
+
+</body></html

@@ -1,0 +1,235 @@
+<html><head>
+
+<title>Syllable User Bible - Translators</title><link rel="stylesheet" href="../files/screen.css" type="text/css" media="screen">
+<link rel="stylesheet" href="../files/print.css" type="text/css" media="print"></head>
+<body>
+
+<div id="mainContainer">
+<div id="top">
+   <font face="Verdana" size="+1"><b>S</b>yllable <b>U</b>ser's <b>B</b>ible</font>
+ </div>
+
+<div id="navbar">
+<a href="../index.html">Table of Contents</a> <!-- | <a href="/sub/requests.php">Requested Tutorials</a> -->
+</div>
+
+<div id="pageTitleContainer">
+<div id="pageTitle">Translators</div>
+</div>
+<div id="pageStats">
+<table border="0">
+<tbody><tr><td valign="top">Written by:</td><td>digitaliz</td></tr>
+<tr><td valign="top">Last Updated:</td><td>Apr 11, 2007</td></tr>
+</tbody></table>
+</div>
+
+ <div id="mainContent">
+<!-- <br />
+<center><h2>SUB IS BEING UPGRADED AT THE MOMENT.  BEHAVIOR MIGHT BE WONKY FOR THE NEXT HOUR OR SO.</h2></center>
+<br /> -->
+
+
+<p id="section">Introduction</p>
+<div id="sectiontext">
+
+<p>Here I will attempt to describe how a translator is created, using
+the IconTranslator as an example. The code for the IconTranslator is
+available <a href="http://wiki.isaksson.tk/cgi-bin/zwiki.pl?id=Documentation/Programming/Syllable_Translators/Code&amp;sid=">here</a>.</p>
+
+<p>A translator file is a shared library file that can be loaded at
+run-time by the Translator API functions in libsyllable. The library
+file exports two C functions:</p>
+
+<ul>
+<li> <code>get_translator_count()</code>
+</li><li> <code>get_translator_node()</code>
+</li></ul>
+
+<p><code>get_translator_count()</code> simply returns the number of translators available in the shared library file, while <code>get_translator_node()</code> returns a <em>Translator node</em> object for a given translator number (i.e., a number between 0 and <code>get_translator_count() - 1</code>).  Here's a sample implementation of these functions:</p>
+
+<div id="codelisting">
+<span id="codenumber"> 1</span> extern "C" <font color="#4444ff">{</font>
+<br><span id="codenumber"> 2</span> int get_translator_count<font color="#4444ff">(</font><font color="#4444ff">)</font>
+<br><span id="codenumber"> 3</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 4</span>    return<font color="#4444ff">(</font> 2 <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 5</span> <font color="#4444ff">}</font>
+<br><span id="codenumber"> 6</span> 
+<br><span id="codenumber"> 7</span> TranslatorNode* get_translator_node<font color="#4444ff">(</font> int nIndex <font color="#4444ff">)</font>
+<br><span id="codenumber"> 8</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 9</span>    static IconReaderNode sReadingNode;
+<br><span id="codenumber">10</span>    statis IconWriterNode sWritingNode;
+<br><span id="codenumber">11</span>    switch<font color="#4444ff">(</font> nIndex <font color="#4444ff">)</font>
+<br><span id="codenumber">12</span>    <font color="#4444ff">{</font>
+<br><span id="codenumber">13</span>       case 1:
+<br><span id="codenumber">14</span>          return<font color="#4444ff">(</font> &amp;sWritingNode <font color="#4444ff">)</font>;
+<br><span id="codenumber">15</span>       default:
+<br><span id="codenumber">16</span>          return<font color="#4444ff">(</font> &amp;sReadingNode <font color="#4444ff">)</font>;
+<br><span id="codenumber">17</span>    <font color="#4444ff">}</font>
+<br><span id="codenumber">18</span> <font color="#4444ff">}</font>
+<br><span id="codenumber">19</span> <font color="#4444ff">}</font>;
+<br></div>
+
+</div>
+
+<p id="section">TranslatorNode</p>
+<div id="sectiontext">
+
+<p>The translator node object returned by <code>get_translator_node()</code> holds information about a specific available translator.  It has three methods:</p>
+
+<ul>
+<li> <code>GetTranslatorInfo()</code> &#8212; Returns a TranslatorInfo struct, containing MIME-type strings for both source and target file formats.</li>
+<li> <code>CreateTranslator()</code> &#8212; Creates a Translator object for the data formats that are handled by this particular TranslatorNode.</li>
+<li> <code>Identify()</code> &#8212; Lets the TranslatorNode peek at (part
+of) the data to be translated, to decide whether it is a format that
+the node recognizes.</li>
+</ul>
+
+<p>Here's a sample implementation of a TranslatorNode:</p>
+
+<strong>Example TranslatorNode</strong><div id="codelisting">
+<span id="codenumber"> 1</span> class IconReaderNode : public TranslatorNode
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span> public:
+<br><span id="codenumber"> 4</span>    virtual int Identify<font color="#4444ff">(</font> const std::string&amp; cSrcType, const std::string&amp; cDstType, const void* pData, int nLen <font color="#4444ff">)</font>
+<br><span id="codenumber"> 5</span>    <font color="#4444ff">{</font>
+<br><span id="codenumber"> 6</span>       if <font color="#4444ff">(</font> nLen &lt; 4 <font color="#4444ff">)</font>
+<br><span id="codenumber"> 7</span>          return<font color="#4444ff">(</font> TranslatorFactory::ERR_NOT_ENOUGH_DATA <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 8</span>       if<font color="#4444ff">(</font> *<font color="#4444ff">(</font><font color="#4444ff">(</font>int *<font color="#4444ff">)</font>pData<font color="#4444ff">)</font> == ICON_MAGIC <font color="#4444ff">)</font>
+<br><span id="codenumber"> 9</span>          return<font color="#4444ff">(</font> 0 <font color="#4444ff">)</font>;
+<br><span id="codenumber">10</span>       return<font color="#4444ff">(</font> TranslatorFactory::ERR_UNKNOWN_FORMAT <font color="#4444ff">)</font>;
+<br><span id="codenumber">11</span>    <font color="#4444ff">}</font>
+<br><span id="codenumber">12</span> 
+<br><span id="codenumber">13</span>    virtual TranslatorInfo GetTranslatorInfo<font color="#4444ff">(</font><font color="#4444ff">)</font>
+<br><span id="codenumber">14</span>    <font color="#4444ff">{</font>
+<br><span id="codenumber">15</span>       static TranslatorInfo sInfo = <font color="#4444ff">{</font> "image/syllable-icon", TRANSLATOR_TYPE_IMAGE, 1.0f <font color="#4444ff">}</font>;
+<br><span id="codenumber">16</span>       return<font color="#4444ff">(</font> sInfo <font color="#4444ff">)</font>;
+<br><span id="codenumber">17</span>    <font color="#4444ff">}</font>
+<br><span id="codenumber">18</span> 
+<br><span id="codenumber">19</span>    virtual Translator* CreateTranslator<font color="#4444ff">(</font><font color="#4444ff">)</font>
+<br><span id="codenumber">20</span>    <font color="#4444ff">{</font>
+<br><span id="codenumber">21</span>       return<font color="#4444ff">(</font> new IconTrans <font color="#4444ff">)</font>;
+<br><span id="codenumber">22</span>    <font color="#4444ff">}</font>
+<br><span id="codenumber">23</span> <font color="#4444ff">}</font>;
+<br></div>
+
+<p>The <code>Identify()</code> method here looks at the first four
+bytes of the file (that's the first longword), and tries to match it
+against the icon file's magic number. If there is a match, we return 0
+indicating success; otherwise, we return an error.</p>
+
+<p><code>GetTranslatorInfo()</code> fills out a static (remember to
+declare it static!) TranslatorInfo struct with source format,
+destination format, and a number used to specify relative quality loss.
+As the Syllable icon format does not use any kind of lossy encoding, we
+set this number to 1.0.</p>
+
+</div>
+
+<p id="section">The Translator - Overview</p>
+<div id="sectiontext">
+
+<p>This is where the actual translating takes place.  Data in the source format is <em>added</em> to the translator, then data in the destination format can be <em>read</em>
+from the translator object. You can add the contents of a whole file to
+a translator and read the results afterwards, or you can add parts of a
+file (perhaps streamed from a remote location), and incrementally read
+the translated data as it is finished.</p>
+
+<p>The most important methods in the translator are <code>AddData()</code>, <code>AvailableDataSize()</code>, and <code>Read()</code>.  These are the only methods implemented in the Icon Translator, and it works fine.</p>
+
+</div>
+
+<p id="section">AddData()</p>
+<div id="sectiontext">
+
+<p><code>AddData()</code> is called repeatedly until all of the data
+that is to be translated has been added to the translator. Each time it
+is called, it adds data to an internal buffer. The Icon Translator
+works by first adding the data to an <em>in</em> buffer, then translating the data when there is enough data to work on, and finally adding the translated data to an <em>out</em> buffer.  Sometimes it may be possible to translate incoming data directly and place it in the out buffer.</p>
+
+<p>Here's an example of an <code>AddData()</code> method:</p>
+
+<strong>AddData()</strong><div id="codelisting">
+<span id="codenumber"> 1</span> status_t IconTrans::AddData<font color="#4444ff">(</font> const void* pData, size_t nLen, bool bFinal <font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    m_cInBuffer.Write<font color="#4444ff">(</font> pData, nLen <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 4</span> 
+<br><span id="codenumber"> 5</span>    if<font color="#4444ff">(</font> /* Check that enough data is available here. */ <font color="#4444ff">)</font> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 6</span>    <font color="#4444ff">{</font>
+<br><span id="codenumber"> 7</span>       // Do translation here
+<br><span id="codenumber"> 8</span>       m_cOutBuffer.Write<font color="#4444ff">(</font> pTranslatedData, nTranslatedLength <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 9</span>    <font color="#4444ff">}</font>
+<br><span id="codenumber">10</span>    return 0; // Success!
+<br><span id="codenumber">11</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p><code>m_cInBuffer</code> and <code>m_cOutBuffer</code> are both instances of <code>os::CircularBuffer</code>.</p>
+
+<p>The arguments <code>pData</code> and <code>nLen</code> are, respectively, a pointer to the data to be added, and the length of that data.  <code>bFinal</code> is true when the last block of data is added to the translator.</p>
+
+</div>
+
+<p id="section">AvailableDataSize() and Read()</p>
+<div id="sectiontext">
+
+<p><code>AvailableDataSize()</code> should simply return the size of the data that is available for reading with <code>Read()</code>.  In other words, it should return the size of the data in the <em>out</em> buffer.</p>
+
+<strong>AvailableDataSize()</strong><div id="codelisting">
+<span id="codenumber"> 1</span> ssize_t IconTrans::AvailableDataSize<font color="#4444ff">(</font><font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    return<font color="#4444ff">(</font> m_cOutBuffer.size<font color="#4444ff">(</font><font color="#4444ff">)</font> <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 4</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p><code>Read()</code> copies a number of translated bytes from the <em>out</em> buffer to a buffer supplied by the caller (pData).  <code>nLen</code> will hold the size of that buffer.  If you use a <code>CircularBuffer</code>, you can simply pass the arguments to its <code>Read()</code> method.</p>
+
+<strong>Read()</strong><div id="codelisting">
+<span id="codenumber"> 1</span> ssize_t IconTrans::Read<font color="#4444ff">(</font> void* pData, size_t nLen <font color="#4444ff">)</font>
+<br><span id="codenumber"> 2</span> <font color="#4444ff">{</font>
+<br><span id="codenumber"> 3</span>    int nCurLen = m_cOutBuffer.Read<font color="#4444ff">(</font> pData, nLen <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 4</span>    if <font color="#4444ff">(</font> nCurLen == 0  &amp;&amp;  m_bDone == false <font color="#4444ff">)</font>
+<br><span id="codenumber"> 5</span>       return<font color="#4444ff">(</font> ERR_SUSPENDED <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 6</span>    return<font color="#4444ff">(</font> nCurLen <font color="#4444ff">)</font>;
+<br><span id="codenumber"> 7</span> <font color="#4444ff">}</font>
+<br></div>
+
+<p>If there's no data available and the conversion still has not been
+completed, you should (apparently &#8212; I don't know what the Translator
+API functions need this for) return <code>ERR_SUSPENDED</code>.</p>
+
+</div>
+
+<div id="sectiontext">
+
+<p>As you've probably noticed, I have used a boolean named <code>m_bWriteMode</code> to give the IconTranslator class two-way translation capabilities.  In the <code>AddData()</code> method, this variable is used to decided whether the added data is to be translated <em>to</em> icon format, or <em>from</em> icon format.</p>
+
+<p>The TranslatorNodes, IconReaderNode, and IconWriteNode will set this
+variable when they create an IconTranslator. This saves the trouble of
+writing two translator classes; another solution would be to write two
+classes, such as IconTranslatorWrite and IconTranslatorRead.</p>
+
+<p>Also, there is nothing stopping you from having large numbers of
+translators in the same file. Well, except for the loss of
+modularity....</p>
+
+</div>
+
+<div style="border: 1px solid rgb(18, 74, 141); padding: 5px; margin-left: 20px; margin-right: 20px; background-color: rgb(238, 238, 238);"><strong>Comments:</strong><br>
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+<hr>
+
+
+</div>
+ </div>
+</div>
+
+<br><br>
+
+</body></html

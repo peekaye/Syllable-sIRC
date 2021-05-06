@@ -1,6 +1,39 @@
-Version 0.04 (April 6 2021)
-	- codetidy: move class declarations into header file (sIRC.h)
-	- codetidy: move namespace declaration into source file (sIRC32.cpp)
+Date: (May 5 2021) Looper
+	- bugfix: MainView::AddStringToTextView(), looper.zip method, to append the text buffer & set vertical scrollbar to bottom
+	- bugfix: CommThread::SendMessage(), looper.zip method, to send server stream to MainView::HandleMessage()
+	- bugfix: MSG_TOLOOPER_START, MSG_TOLOOPER_STOP, looper.zip method, connect/disconnect to server
+
+Date: (May 2 2021) SendReceiveLoop()
+	- bugfix: CommThread::SendReceiveLoop(), remove messagetosend, Mail() direct to MSG_TOLOOPER_SEND or MSG_TOLOOPER_RECEIVE
+	- bugfix: MainView::Update(), more reliable ping, test server data for leading colon (:)
+	- bugfix: COPYING, add legal file
+	- bugfix: MainView::ShowAbout(), add legal text
+
+Date: (Apr 24 2021) Bugfix
+	- bugfix: CommThread::ReceiveMessage(), catch recv() on error and server exit
+	- bugfix: CommThread::ReceiveMessage(), null terminate the recv() buffer (buf[numbytes] = '\0')
+	- bugfix: MainView::MainView(), fix the size of the button (LimitMaxSize( m_pcSend->GetPreferredSize(false) )
+	- bugfix: MainView::Update(), test for std::string out-of-range (pos != std::string::npos)
+	- codetidy: MainView::MainView(), construct MainView as os::View
+	- bugfix: CommThread::ReceiveMessage(), AddString() the message
+	- bugfix: MainView::MainView(), FindString() the message
+	- bugfix: MainView::MainView(), to target MainView, CommThread constructor here
+
+Date: (Apr 18 2021) Codetidy
+	- codetidy: move sockfd into class CommThread
+	- bugfix: CommThead::Connect(), replace exit(1) with a return, as a fallback to stop the program
+	- codetidy: change int erase variable to a more descriptive bool bInChannel
+	- codetidy: change int messagetosend variable to a more descriptive bool messagetosend
+	- codetidy: change Button m_pcStart to a more descriptive m_pcSend
+	- bugfix: MainView::Leave(), added
+	- bugfix: Makefile: add warnings (-Wall)
+	- codetidy: MainView::Connect(), remove buf1
+	- codetidy: move postoffice1 to original postoffice as used in Juggler IDE app
+	- codetidy: see origin of external functions, remove (using namespace)
+	
+Date: (Apr 6 2021) Clean
+	- codetidy: sIRC.h, move class declarations into header file
+	- codetidy: sIRC32.cpp, move using namespace declaration into source file
 	- codetidy: remove excess white space
 	- codetidy: remove excess rem comments
 	- codetidy: remove go & gowrite variables
@@ -14,5 +47,5 @@ Version 0.04 (April 6 2021)
 	- codetidy: remove excessive print messages to the terminal (aterm)
 	- codetidy: run sindent.sh over the source code
 
-Version 0.03 (Apr 12 2006)
-	- First Release. sIRC.tar
+Date: (Apr 12 2006) First Release
+	- sIRC 0.03 sIRC.tar
