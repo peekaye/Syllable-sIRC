@@ -4,12 +4,12 @@ m_pcVRoot->SetBorders( os::Rect( 0.000000, 0.000000, 0.000000, 0.000000 ) );
 m_pcRoot->AddChild( m_pcVRoot );
 m_pcMenu = new os::Menu( os::Rect(), "Menu", os::ITEMS_IN_ROW );
 os::Menu* pcMenuApplicationMenu = new os::Menu( os::Rect(), "Application", os::ITEMS_IN_COLUMN );
-pcMenuApplicationMenu->AddItem( "Quit", new Message( M_MENU_QUIT ) );
-pcMenuApplicationMenu->AddItem( new MenuSeparator() );
-pcMenuApplicationMenu->AddItem( "Help...", new Message( M_MENU_HELP ) );
-pcMenuApplicationMenu->AddItem( "Website...", new Message( M_MENU_WEB ) );
-pcMenuApplicationMenu->AddItem( new MenuSeparator() );
-pcMenuApplicationMenu->AddItem( "About...", new Message( M_MENU_ABOUT ) );
+pcMenuApplicationMenu->AddItem( "Quit", new os::Message( M_MENU_QUIT ) );
+pcMenuApplicationMenu->AddItem( new os::MenuSeparator() );
+pcMenuApplicationMenu->AddItem( "Help...", new os::Message( M_MENU_HELP ) );
+pcMenuApplicationMenu->AddItem( "Website...", new os::Message( M_MENU_WEB ) );
+pcMenuApplicationMenu->AddItem( new os::MenuSeparator() );
+pcMenuApplicationMenu->AddItem( "About...", new os::Message( M_MENU_ABOUT ) );
 m_pcMenu->AddItem( pcMenuApplicationMenu );
 m_pcMenu->SetTargetForItems(this);
 m_pcVRoot->AddChild( m_pcMenu, 1.000000 );
@@ -173,3 +173,4 @@ m_pcMessageSpacer = new os::VLayoutSpacer( "MessageSpacer", 10.000000, 10.000000
 m_pcMessageButtonsNode->AddChild( m_pcMessageSpacer );
 m_pcButtonTextClear = new os::Button( os::Rect(), "ButtonTextClear", "Clear", new os::Message( M_BUTTON_CLEAR ) );
 m_pcMessageButtonsNode->AddChild( m_pcButtonTextClear, 1.000000 );
+

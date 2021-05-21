@@ -1,0 +1,71 @@
+libnet Alpha 1
+--------------
+
+This is an Alpha of the libnet highlevel C++ network API for Syllable.  It
+includes the library itself (With inline-documentation), headers, a simple
+testsuite and a quickly hacked together demo of AView 0.4
+
+libnet Alpha 1 includes only a very limited subset of the final classes and
+is intended as a demonstration of the structure and class inheritence of
+libnet.  libnet Alpha 1 can only understand two protocols; file:// and http://
+
+file:// streams are handled by the libsyllable os::File class.  http://
+streams are handled by an extremly simple, non-RFC compliant Httpstream
+class which can be used to retrieve a stream of data from an HTTP server,
+but no does not support any HTTP features or errors.
+
+--------------
+
+To build libnet you will require Syllable 0.5.3 and GCC 3.3.  To install
+libnet Alpha 1 just run:
+
+$ make install
+
+This will copy the libnet headers to /ainc/libnet, build libnet.so.1 and
+install it into /system/libs
+
+You can build the test-suite with:
+
+$ make test
+
+and then:
+
+$ make test-run
+
+The testsuite will attempt to contact various websites, so if you are not on
+a network or the websites are unreachable the testsuite applications may appear
+to hang while they wait for a response.
+
+You can also build the Doxygen documentation with:
+
+$ make doc-install
+
+This will install the documentation into /atheos/Documentation/net  You can read
+it with ABrowse at file:///atheos/Documentation/net/index.html
+
+The AView demo can be built with:
+
+$ make demo
+
+This will create a libnet-enabled version of AView.  Only four lines were changed
+to make libnet network-capable.
+
+The AView demo can load an image specified by a URL, either a local file:// URL
+or a remote http:// URL  For example:
+
+aview "file://home/root/Documents/Pictures/Snow Trees.jpg"
+
+loads and displays the local file "Snow Trees.jpg" whilst:
+
+aview "http://www.syllable.org:80/modules/My_eGallery/gallery/syllable/MediaPlayer1.png"
+
+retrieves and displays the Media Player screenshot from the Syllable website
+directly via. HTTP
+
+Note that the port number must be explictly specified E.g. "http://www.syllable.org:80"
+is a valid http connection to www.syllable.org on port 80, while "http://www.syllable.org"
+will cause libnet to assume a default of port 0, which will not work.
+
+
+Thoughts and comments are welcome; contact me via. the Syllable-Developer mailing
+list or email me at vanders@liqwyd.com

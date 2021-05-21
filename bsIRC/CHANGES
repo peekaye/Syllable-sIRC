@@ -1,0 +1,26 @@
+6:	BUG,    NO need to display the PING messages
+	ADD:    MainWindow::PingPong()
+
+5:	BUG,    Vertical Scrollbar is NOT set to the bottom of the server text
+	ADD:    MainWindow::AddStringToTextView()
+
+4:	BUG,    CommThread class will call libnet methods
+	ADD:    www.jarvoll.se/syllable/files/looper.zip, CommThread class files ( commthread.cpp/commthread.h )
+	REMOVE: class CommThead : public os::Looper
+	ADD:    class CommThead : public os::Thread, a thread is better choice for polling recv()
+
+3:	BUG,    /*  libnet.so - the highlevel network API library for Syllable
+			 *  Copyright (C) 2004 Kristian Van Der Vliet */
+            libnet.so not found in Syllable 0.6.3/0.6.4/0.6.6/0.6.7
+	ADD:    libnet source files
+	ADD:    Makefile, static linked libnet to libnet.a
+
+2:	BUG,    Numeric sIRC bugs, libnet is more capable.
+	REMOVE: sIRC code from mainwindow.cpp/mainwindow.h
+
+1b:	BUG,    Bookmark Connect button -> app crash if no bookmark selected
+	ADD:    if(nSelected == -1) break;
+
+1a:	BUG,    Bookmark Remove button -> app crash if no bookmark selected
+	ADD:    if(nSelected == -1) break;
+

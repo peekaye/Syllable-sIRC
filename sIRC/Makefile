@@ -1,8 +1,9 @@
-#Makefile for sIRC
-COPTS = -c -Wall -fexceptions -ffast-math
+EXE = sIRC
+CFLAGS = -c -O2 -Wall -Wextra
+LFLAGS = -lstdc++ -lsyllable
 
 APPBIN = /system/bin
-OBJS = sIRC32.o postoffice.o
+OBJS = sIRC32.o commthread.o
 
 
 OBJDIR := objs
@@ -11,27 +12,27 @@ OBJS	:= $(addprefix $(OBJDIR)/,$(OBJS))
 # Rules
 $(OBJDIR)/%.o : %.c
 	@echo Compiling : $<
-	@$(CC) $(COPTS) $< -o $@
+	@$(CC) $(CFLAGS) $< -o $@
 
 $(OBJDIR)/%.o : %.cpp
 	@echo Compiling : $<
-	@$(CXX) $(COPTS) $< -o $@
+	@$(CXX) $(CFLAGS) $< -o $@
 
 $(OBJDIR)/%.o : %.s
 	@echo Assembling : $<
-	@$(CC) $(COPTS) -x assembler-with-cpp $< -o $@
+	@$(CC) $(CFLAGS) -x assembler-with-cpp $< -o $@
 
-all : objs sIRC
+all : objs $(EXE)
 
 objs:
 	@mkdir -p objs
 
-sIRC: $(OBJS)
+$(EXE): $(OBJS)
 	@echo Linking...
-	@$(CXX) $(OBJS) -o sIRC -lsyllable
+	@$(CXX) $(OBJS) -o $(EXE) $(LFLAGS)
 
 clean:
 	@echo Cleaning...
 	@rm -f $(OBJDIR)/*
-	@rm -f sIRC
+	@rm -f $(EXE)
 

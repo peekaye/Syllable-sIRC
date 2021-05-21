@@ -1,0 +1,21 @@
+main.cpp:
+	- error: 'string' was not declared in this scope
+	- bugfix: std::string
+
+imageitem.cpp:
+	- error: no match for 'operator!'
+	- bugfix: GetLabel().empty()
+
+	- error: cannot convert 'const os::String' to 'const char*' in initialization
+	- bugfix: GetLabel().c_str()
+
+	- error: 'Highlight' is not a member of 'os::MenuItem'
+	- bugfix: SetHighlighted
+
+loadbitmap.cpp:
+	- error: 'min' was not declared in this scope
+	- bugfix: std::min
+
+Makefile:
+	- cannot find -latheos
+	- bugfix -lsyllable

@@ -1,50 +1,65 @@
+Date: (May 20 2021) CommThread
+	- add:      commthread.cpp/commthread.h
+	- bugfix:   CommThread::SendReceiveLoop(), call CommThread::ReceiveMessage(), drop call to CommThread::Send()
+	- add:      MainView::AttachedToWindow() test commthread for NULL
+	- remove:   postoffice.cpp/postoffice.h
+	- bugfix:   test m_eState for connected status in CommThread::Connect() & CommThread::Send(), 
+	- bugfix:   test bInChannel state in MainView::SendMsg(), Update() & MainView::HandleMessage()
+	- move:     MainView::ShowAbout() to MainWindow::ShowAbout()
+	- add:      MyApplication::HandleMessage(), bounce MainView messages to MainWindow 
+	- change:   MainWindow::OkToQuit(), both menu quit & window close
+	- remove:   MainView::OkToQuit()
+	- remove:   CommThread::OkToQuit()
+	- add:      MainView::FrameSized(), fix menu tearing on window move
+	- add:      const variables
+	- bugfix:   Intermittent loss of ping, test for ping in commthread class
+
 Date: (May 5 2021) Looper
-	- bugfix: MainView::AddStringToTextView(), looper.zip method, to append the text buffer & set vertical scrollbar to bottom
-	- bugfix: CommThread::SendMessage(), looper.zip method, to send server stream to MainView::HandleMessage()
-	- bugfix: MSG_TOLOOPER_START, MSG_TOLOOPER_STOP, looper.zip method, connect/disconnect to server
+	- add:      MainView::AddStringToTextView(), append the text buffer, set vertical scrollbar to bottom
+	- add:      CommThread::SendMessage(), send server stream to MainView::HandleMessage()
+	- add:      CommThread::HandleMessage(), MSG_TOLOOPER_START, MSG_TOLOOPER_STOP, looper.zip method, connect/disconnect to server
 
 Date: (May 2 2021) SendReceiveLoop()
-	- bugfix: CommThread::SendReceiveLoop(), remove messagetosend, Mail() direct to MSG_TOLOOPER_SEND or MSG_TOLOOPER_RECEIVE
-	- bugfix: MainView::Update(), more reliable ping, test server data for leading colon (:)
-	- bugfix: COPYING, add legal file
-	- bugfix: MainView::ShowAbout(), add legal text
+	- remove:   messagetosend, CommThread::SendReceiveLoop(), Mail() direct to MSG_TOLOOPER_SEND/MSG_TOLOOPER_RECEIVE
+	- add:      test server data for leading colon (:) in MainView::Update(), more reliable ping
+	- add:      legal file COPYING
+	- add:      legal text to MainView::ShowAbout()
 
 Date: (Apr 24 2021) Bugfix
-	- bugfix: CommThread::ReceiveMessage(), catch recv() on error and server exit
-	- bugfix: CommThread::ReceiveMessage(), null terminate the recv() buffer (buf[numbytes] = '\0')
-	- bugfix: MainView::MainView(), fix the size of the button (LimitMaxSize( m_pcSend->GetPreferredSize(false) )
-	- bugfix: MainView::Update(), test for std::string out-of-range (pos != std::string::npos)
-	- codetidy: MainView::MainView(), construct MainView as os::View
-	- bugfix: CommThread::ReceiveMessage(), AddString() the message
-	- bugfix: MainView::MainView(), FindString() the message
-	- bugfix: MainView::MainView(), to target MainView, CommThread constructor here
+	- bugfix:   test state of recv() in CommThread::ReceiveMessage(), catch error and server exit
+	- bugfix:   null terminate the recv() buffer in CommThread::ReceiveMessage(), buf[numbytes] = '\0'
+	- bugfix:   button size in MainView::MainView(), LimitMaxSize( m_pcSend->GetPreferredSize(false)
+	- bugfix:   MainView::Update(), test for std::string out-of-range (pos != std::string::npos)
+	- move:     MainView::MainView() to os::View
+	- add:      AddString() in CommThread::ReceiveMessage()
+	- add:      FindString() in MainView::HandleMessage()
+	- move:     CommThread constructor to MainView::AttachedToWindow(), bugfix the target
 
 Date: (Apr 18 2021) Codetidy
-	- codetidy: move sockfd into class CommThread
-	- bugfix: CommThead::Connect(), replace exit(1) with a return, as a fallback to stop the program
-	- codetidy: change int erase variable to a more descriptive bool bInChannel
-	- codetidy: change int messagetosend variable to a more descriptive bool messagetosend
-	- codetidy: change Button m_pcStart to a more descriptive m_pcSend
-	- bugfix: MainView::Leave(), added
-	- bugfix: Makefile: add warnings (-Wall)
-	- codetidy: MainView::Connect(), remove buf1
-	- codetidy: move postoffice1 to original postoffice as used in Juggler IDE app
-	- codetidy: see origin of external functions, remove (using namespace)
+	- move:     sockfd into CommThread class
+	- replace:  exit(1) with return in CommThead::Connect(), NO need to exit the app on error
+	- move:     int erase variable to a more descriptive bool bInChannel
+	- move:     int messagetosend variable to a more descriptive bool messagetosend
+	- move:     Button to a more descriptive m_pcSend
+	- add:      MainView::Leave()
+	- add:      warnings (-Wall) to Makefile
+	- remove:   buf1 MainView::Connect()
+	- change:   postoffice1 to original postoffice as used in Juggler IDE app
+	- remove:   (using namespace), now can see origin of external functions
 	
 Date: (Apr 6 2021) Clean
-	- codetidy: sIRC.h, move class declarations into header file
-	- codetidy: sIRC32.cpp, move using namespace declaration into source file
-	- codetidy: remove excess white space
-	- codetidy: remove excess rem comments
-	- codetidy: remove go & gowrite variables
-	- codetidy: remove more unused variables
-	- codetidy: add missing HandleMessage() braces
-	- codetidy: group MainView functions together
-	- codetidy: group MainWindow functions together
-	- codetidy: group MyApplication functions together
+	- move:     class declarations into sIRC.h header file
+	- move:     using namespace declaration into sIRC32.cpp source file
+	- remove:   excess rem comments
+	- remove:   go & gowrite variables
+	- remove:   unused variables
+	- add:      missing HandleMessage() braces
+	- move:     MainView functions together
+	- move:     MainWindow functions together
+	- move:     MyApplication functions together
 	- codetidy: declare MAXDATASIZE = 50000
-	- codetidy: rename msg1 labels to msg
-	- codetidy: remove excessive print messages to the terminal (aterm)
+	- rename:   msg1 labels to msg
+	- remove:   excessive print messages to the terminal (aterm)
 	- codetidy: run sindent.sh over the source code
 
 Date: (Apr 12 2006) First Release
