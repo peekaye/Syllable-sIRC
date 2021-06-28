@@ -1,6 +1,6 @@
 #include "mimeTable.h"
 #include <stdio.h>
-#include <fstream.h>
+#include <fstream>
 
 
 mimeTable::mimeTable()
@@ -170,7 +170,7 @@ bool mimeTable::case_equal(char a, char b)
 	
 }
 
-bool mimeTable::addType(char *name, char *filter, char *action)
+void mimeTable::addType(char *name, char *filter, char *action)
 {
 	mimeType *temp;
 	temp = new mimeType;

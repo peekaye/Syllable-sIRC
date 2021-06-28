@@ -1,3 +1,41 @@
+17: BUG,    tab between input textviews, to speed up typing input settings, use set tab order
+	ADD:    m_pcTextUserName->SetTabOrder( iTabOrder++ ) ... m_pcTextServerChannel->SetTabOrder( iTabOrder++ )
+
+16b:BUG,    applications store their settings in Settings folder
+	REMOVE: genenv("HOME")/IRC-Bookmarks/
+	ADD:    genenv("HOME")/Settings/bsIRC/
+16a:BUG,    check bookmark is valid, else the app will crash
+	ADD:    SetBookmarkPath() to ensure the folders exist and/or create
+
+15: BUG,    on selected bookmark the delete button should also clear the textview fields
+	ADD:    MainWindow::RemoveBookmarkFromList(), m_pcTextUserName->Clear() ... m_pcTextBookmarkName->Clear()
+
+14:	BUG,    os::Variant is the return type for textview GetValue()
+	ADD:    GetValue().AsString() to return an os::String type
+
+13:	BUG,    remove reduntant variables from mainwindow header file
+	REMOVE: cMessage, cBookmarkPath, cBookmarkName, cName, cPassword, cRealName, cServerName, cServerPort, cServerChannel
+
+12: BUG,    need timestamp on textview lines
+	ADD:    os::DateTime::Now() in MainWindow::AddStringToTextView()
+
+11:	BUG,    remove libc file functions, and use libsyllable storage functions
+	ADD:    <storage/file.h> <storage/path.h> <storage/fsnode.h> <storage/directory.h> <storage/filereference.h>
+
+10:	BUG,    hard to read bookmark code
+	MOVE:   MainWindow::HandleMessage() bookmark code to descriptive methods
+	ADD:    SetBookmarkPath(), LoadBookmarkList(), AddBookmarkToList(), RemoveBookmarkFromList(), SelectBookmarkFromList()
+
+9:	BUG,    remove CR & LF chars everywhere, and only put once in commthread send method
+	REMOVE: "\r\n" in all the code
+	ADD:    "\r\n" in CommThread::Send()
+
+8:	BUG,    intermittent loss of ping command, no post these to mainwindow, test in commthread
+	MOVE:   MainWindow::PingPong() to CommThread::PingPong(), no postmessage to mainwindow gives more reliable ping command
+
+7:	BUG,    use libsyllable message labels
+	REMOVE: M_APP_QUIT, M_MENU_ABOUT, M_MENU_QUIT,
+
 6:	BUG,    NO need to display the PING messages
 	ADD:    MainWindow::PingPong()
 
@@ -23,4 +61,3 @@
 
 1a:	BUG,    Bookmark Remove button -> app crash if no bookmark selected
 	ADD:    if(nSelected == -1) break;
-

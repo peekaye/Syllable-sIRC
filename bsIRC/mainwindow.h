@@ -6,6 +6,9 @@
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
+#include <sys/stat.h>
+
+#include <iostream>
 
 #include <gui/window.h>
 #include <gui/layoutview.h>
@@ -21,12 +24,19 @@
 #include <gui/requesters.h>
 #include <gui/image.h>
 #include <gui/point.h>
+#include <gui/guidefines.h>
 #include <util/application.h>
 #include <util/message.h>
 #include <util/settings.h>
 #include <util/string.h>
 #include <util/invoker.h>
+#include <util/datetime.h>
+#include <util/exceptions.h>
 #include <storage/file.h>
+#include <storage/path.h>
+#include <storage/fsnode.h>
+#include <storage/directory.h>
+#include <storage/filereference.h>
 
 class CommThread;
 
@@ -38,22 +48,18 @@ public:
 	virtual bool OkToQuit();
 
 private:
-	void LoadBookmarkList();
+	void SetBookmarkPath();
+	void LoadBookmarkList( os::Directory *pcDirectory );
+	void AddBookmarkToList();
+	void RemoveBookmarkFromList();
+	void SelectBookmarkFromList();
 	os::BitmapImage *LoadImageFromResource( os::String zResource );
-	bool PingPong( const os::String &cName ) const;
-	void AddStringToTextView( const os::String &cName ) const;
+	void AddStringToTextView( const char* pzName ) const;
+	void AboutRequested();
 
 #include "mainwindowLayout.h"
 
-	os::String cMessage;
-	os::String cBookmarkPath;
-	os::String cBookmarkName;
-	os::String cName;
-	os::String cPassword;
-	os::String cRealName;
-	os::String cServerName;
-	os::String cServerPort;
-	os::String cServerChannel;
+	os::Directory *m_pcDirectory;
 	os::String stdName;
 	os::String stdPassword;
 	os::String stdRealName;

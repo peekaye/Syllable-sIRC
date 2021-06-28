@@ -41,12 +41,12 @@ ManagerApplication::ManagerApplication(void) : Application("application/x-vnd.Ar
  strcat(typesFile, "/config/Manager/types.conf");
  mainConfig->mainMimeTable = new mimeTable(typesFile);
 
-win = new folderWindow(Rect(20,100,500,400),"/home/root",mainConfig);
+win = new folderWindow("/home/root",mainConfig);
  win->Show();
 }
 
 
-void main(void)
+int main(void)
 {
 	ManagerApplication *theManager;
 

@@ -2,7 +2,7 @@
 #include "commthread.h"
 #include "messages.h"
 
-CommThread::CommThread( const os::Messenger &cTarget ):os::Thread( "comm_thread" )
+CommThread::CommThread( const os::Messenger &cTarget ):os::Thread( "CommThread" )
 {
 	m_cTarget = cTarget;
 }
@@ -27,9 +27,7 @@ int32 CommThread::Run()
 		while( ( nBytes = cSocket->ReadLine( (uint8 *)pzBuffer, 1024 ) ) > 0 )
 		{
 			pzBuffer[nBytes] = '\0';
-			const os::String cBuffer( pzBuffer );
-			if( !cBuffer.empty() )
-				SendMessage( os::String( pzBuffer ) );
+			SendMessage( os::String( pzBuffer ) );
 			memset( pzBuffer, '\0', 1025 ); //clear the buffer
 		}
 	}
@@ -72,9 +70,26 @@ void CommThread::Send( const os::String stdOutgoingMessage )
 	}
 }
 
-//www.jarvoll.se/syllable/files/looper.zip
-void CommThread::SendMessage( const os::String& cName ) const
+bool CommThread::PingPong( os::String cName )
 {
+	if ( cName.substr( 0, 1 ) != ":" )
+	{
+		if( cName.substr( 0, 4 ).Compare( "PING" ) == EOK )
+		{
+			Send( os::String().Format( "PONG%s", cName.substr( 4 ).c_str() ) );
+			return ( true );
+		}
+	}
+
+	return ( false );
+}
+
+//www.jarvoll.se/syllable/files/looper.zip
+void CommThread::SendMessage( const os::String& cName )
+{
+	if( PingPong( cName ) || cName.empty() )
+		return;
+
 	try
 	{
 		os::Message cMsg( MSG_FROMLOOPER_NEW_MESSAGE );
@@ -93,5 +108,4 @@ const uint32 CommThread::GetState()
 {
 	return m_eState;
 }
-
 

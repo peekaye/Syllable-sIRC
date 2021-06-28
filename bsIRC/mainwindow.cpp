@@ -9,19 +9,27 @@ MainWindow::MainWindow():os::Window( os::Rect( 0, 0, 750, 500 ), "main_wnd", "bs
 
 #include "mainwindowLayout.cpp"
 
+	// set tab order
+	uint iTabOrder = 0;
+	m_pcTextUserName->SetTabOrder( iTabOrder++ );
+	m_pcTextUserPassword->SetTabOrder( iTabOrder++ );
+	m_pcTextUserRealName->SetTabOrder( iTabOrder++ );
+	m_pcTextServerName->SetTabOrder( iTabOrder++ );
+	m_pcTextServerPort->SetTabOrder( iTabOrder++ );
+	m_pcTextServerChannel->SetTabOrder( iTabOrder++ );
+
 	pcView->SetRoot( m_pcRoot );
 	AddChild( pcView );
 
-	LoadBookmarkList();
+	SetBookmarkPath();
 
 	/* create a protected commthread instance */
 	CommThread *m_pCommThread;
 	m_pCommThread = new CommThread( this );
 	if( m_pCommThread == NULL )
 	{
-		char buf[1024];
-		snprintf( buf, 1024, "Failed to create a commthread instance\nReason: %s", strerror( errno ) );
-		(new os::Alert( "Error", buf, 0, "OK", NULL ))->Go();
+		os::Alert *sAlert = new os::Alert( "Error", os::String().Format( "Failed to create a commthread instance\nReason: %s", strerror( errno ) ), 0, "OK", NULL );
+		sAlert->Go();
 		os::Application::GetInstance()->PostMessage( os::M_QUIT );
 	}
 	m_CommThread = m_pCommThread;
@@ -33,122 +41,20 @@ void MainWindow::HandleMessage( os::Message * pcMessage )
 	{
 		case M_BUTTON_ADDBOOKMARK:
 		{
-			cName = m_pcTextUserName->GetValue();
-			cPassword = m_pcTextUserPassword->GetValue();
-			cRealName = m_pcTextUserRealName->GetValue();
-			cServerName = m_pcTextServerName->GetValue();
-			cServerPort = m_pcTextServerPort->GetValue();
-			cServerChannel = m_pcTextServerChannel->GetValue();
-			cBookmarkName = m_pcTextBookmarkName->GetValue();
-
-			if( cBookmarkName != "" )
-			{
-				os::String zPath = cBookmarkPath;
-
-				try
-				{
-					mkdir( zPath.c_str(), S_IRWXU | S_IRWXG | S_IRWXO );
-					zPath += os::String ( "/" ) + cBookmarkName;
-					os::File cFile( zPath, O_RDWR | O_CREAT );
-					os::Settings * pcSettings = new os::Settings( new os::File( zPath ) );
-
-					pcSettings->SetString( "Name", cName, 0 );
-					pcSettings->SetString( "Password", cPassword, 0 );
-					pcSettings->SetString( "RealName", cRealName, 0 );
-					pcSettings->SetString( "ServerName", cServerName, 0 );
-					pcSettings->SetString( "ServerPort", cServerPort, 0 );
-					pcSettings->SetString( "ServerChannel", cServerChannel, 0 );
-
-					/* Make sure there's only one bookmark with the same name, on the list */
-					int nCount = m_pcBookmarkList->GetRowCount();
-					bool bSameName = false;
-					int counter;
-
-					for( counter = 0; counter <= nCount - 1; counter = counter + 1 )
-					{
-						os::ListViewStringRow *pcRow = static_cast < os::ListViewStringRow * >( m_pcBookmarkList->GetRow( counter ) );
-						os::String cTempBookmarkName = pcRow->GetString( 0 );
-						if( cBookmarkName == cTempBookmarkName )
-							bSameName = true;
-					}
-
-					if( bSameName == false )
-					{
-						os::ListViewStringRow *row = new os::ListViewStringRow();
-						row->AppendString( cBookmarkName );
-						m_pcBookmarkList->InsertRow( row );
-					}
-
-					pcSettings->Save();
-					delete( pcSettings );
-				}
-				catch( ... )
-				{
-				}
-			}
+			AddBookmarkToList();
 			break;
 		}
 
 		case M_BUTTON_REMOVEBOOKMARK:
 		{
-			int nSelected = m_pcBookmarkList->GetLastSelected();
-			if( nSelected == -1 )
-				return;
-
-			os::ListViewStringRow *pcRow = static_cast < os::ListViewStringRow * >( m_pcBookmarkList->GetRow( nSelected ) );
-			os::String cBookmarkName = pcRow->GetString( 0 );
-
-			if( m_pcBookmarkList->GetRowCount() > 0 && nSelected != -1 )
-			{
-				m_pcBookmarkList->RemoveRow( nSelected );
-			}
-
-			os::String zExec = os::String ( "rm -f " ) + cBookmarkPath + os::String ( "/" ) + cBookmarkName;
-			system( zExec.c_str() );
-
+			RemoveBookmarkFromList();
 			break;
 		}
 
 		case M_BUTTON_BCONNECT:
 		{
-			int nSelected = m_pcBookmarkList->GetLastSelected();
-			if( nSelected == -1 )
-				return;
-
-			os::ListViewStringRow *pcRow = static_cast < os::ListViewStringRow * >( m_pcBookmarkList->GetRow( nSelected ) );
-			os::String cBookmarkName = pcRow->GetString( 0 );
-
-			if( cBookmarkName != "" )
-			{
-				os::String zPath = cBookmarkPath + os::String ( "/" ) + cBookmarkName;
-
-				try
-				{
-					os::Settings * pcSettings = new os::Settings( new os::File( zPath ) );
-					pcSettings->Load();
-
-					os::String cName = pcSettings->GetString( "Name", "", 0 );
-					os::String cPassword = pcSettings->GetString( "Password", "", 0 );
-					os::String cRealName = pcSettings->GetString( "RealName", "", 0 );
-					os::String cServerName = pcSettings->GetString( "ServerName", "", 0 );
-					os::String cServerPort = pcSettings->GetString( "ServerPort", "", 0 );
-					os::String cServerChannel = pcSettings->GetString( "ServerChannel", "", 0 );
-
-					m_pcTextUserName->Set( cName.c_str() );
-					m_pcTextUserPassword->Set( cPassword.c_str() );
-					m_pcTextUserRealName->Set( cRealName.c_str() );
-					m_pcTextServerName->Set( cServerName.c_str() );
-					m_pcTextServerPort->Set( cServerPort.c_str() );
-					m_pcTextServerChannel->Set( cServerChannel.c_str() );
-					m_pcTextBookmarkName->Set( cBookmarkName.c_str() );
-
-					delete( pcSettings );
-				}
-				catch( ... )
-				{
-				}
-			}
-			/* and fall to CCONNECT */
+			SelectBookmarkFromList();
+			break;
 		}
 
 		case M_BUTTON_CCONNECT:
@@ -200,7 +106,7 @@ void MainWindow::HandleMessage( os::Message * pcMessage )
 			if( m_CommThread->GetState() == CommThread::S_STOP )
 				break;
 
-			cMessage = m_pcMessageText->GetValue();
+			const os::String cMessage = m_pcMessageText->GetValue().AsString();
 			if( !cMessage.empty() )
 			{
 				m_CommThread->Send( m_pcMessageText->GetBuffer()[0].const_str() );
@@ -235,19 +141,9 @@ void MainWindow::HandleMessage( os::Message * pcMessage )
 			break;
 		}
 
-		case M_MENU_ABOUT:
+		case os::M_ABOUT_REQUESTED:
 		{
-			os::Alert *sAbout = new os::Alert( "About bsIRC...",
-				"bsIRC 0.02\n"
-				"Syllable Internet Relay Chat Client\n\n"
-				"bsIRC By BurningShadow - flemming@syllable.org\n"
-				"libnet by Kristian Van Der Vliet - vanders@liqwyd.com\n\n"
-				"bsIRC is released under the GNU General Public License.\n"
-				"Please see the file COPYING, distributed with bsIRC,\n"
-				"or http://www.gnu.org for more information.",
-				os::Alert::ALERT_INFO, 0x00, "Close", NULL );
-			sAbout->CenterInWindow( this );
-			sAbout->Go( new os::Invoker() );
+			AboutRequested();
 			break;
 		}
 
@@ -258,20 +154,15 @@ void MainWindow::HandleMessage( os::Message * pcMessage )
 
 			pcMessage->GetNameInfo( "name", NULL, &nCount );
 
-			for( int i = 0; i < nCount ; ++i )
+			for( int i = 0; i < nCount; ++i )
 			{
 				if( pcMessage->FindString( "name", &pzName, i ) == EOK )
-				{
-					if( PingPong( os::String( pzName ) ) )
-						break;
-					AddStringToTextView( os::String( pzName ) );
-				}
+					AddStringToTextView( pzName );
 			}
 			break;
 		}
 
-		case M_MENU_QUIT:
-		case M_APP_QUIT:
+		case os::M_QUIT_REQUESTED:
 		{
 			OkToQuit();
 			break;
@@ -285,67 +176,212 @@ void MainWindow::HandleMessage( os::Message * pcMessage )
 	}
 }
 
-void MainWindow::LoadBookmarkList()
+void MainWindow::SetBookmarkPath()
 {
-	/* Set Bookmark-dir. */
-	cBookmarkPath = getenv( "HOME" );
-	cBookmarkPath += os::String ( "/IRC-Bookmarks" );
+	os::Path cBookmarkPath;
+	os::FSNode cNode;
+	os::FileReference cRef;
 
-	/* Open up keymaps directory and check it actually contains something */
-	DIR *pDir = opendir( cBookmarkPath.c_str() );
-	if( pDir == NULL )
+	cBookmarkPath.SetTo( getenv( "HOME" ) );
+	cBookmarkPath.Append( "/Settings" );
+
+	if( cNode.SetTo( cBookmarkPath.GetPath() ) != EOK )
+		mkdir( cBookmarkPath.GetPath().c_str(), S_IRWXU | S_IRWXG | S_IRWXO );
+
+	cNode.Unset();
+	cBookmarkPath.Append( "/bsIRC" );
+	if( cNode.SetTo( cBookmarkPath.GetPath() ) != EOK )
+		mkdir( cBookmarkPath.GetPath().c_str(), S_IRWXU | S_IRWXG | S_IRWXO );
+
+	if( cRef.SetTo( cBookmarkPath ) == EOK )
 	{
+		m_pcDirectory = new os::Directory( cBookmarkPath );
+		LoadBookmarkList( m_pcDirectory );
+	}
+}
+
+void MainWindow::LoadBookmarkList( os::Directory *pcDirectory )
+{
+	/* Open up directory and check it actually contains something */
+	if( pcDirectory )
+	{
+		/* Clear listview */
+		m_pcBookmarkList->Clear();
+
+		/* Loop through directory and add each entry to the list */
+		os::String cEntry;
+		while( pcDirectory->GetNextEntry( &cEntry ) )
+		{
+			/* If special directory (i.e. dot(.) and dotdot(..) then ignore */
+			if( cEntry == "." || cEntry == ".." )
+			{
+				continue;
+			}
+
+			/* Its valid, add to the listview */
+			os::ListViewStringRow * pcRow = new os::ListViewStringRow();
+			pcRow->AppendString( cEntry );
+			m_pcBookmarkList->InsertRow( pcRow );
+		}
+	}
+}
+
+void MainWindow::AddBookmarkToList()
+{
+	os::Variant cVar( m_pcTextBookmarkName->GetValue().AsString() );
+	os::String cBookmarkName = cVar.AsString();
+
+	if( !cBookmarkName.empty() )
+	{
+		os::String zPath;
+		if( m_pcDirectory->GetPath( &zPath ) == -1 )
+			return;
+
+		try
+		{
+			zPath += os::String ( "/" ) + cBookmarkName;
+			os::File cFile( zPath, O_RDWR | O_CREAT );
+
+			os::Settings * pcSettings = new os::Settings( new os::File( cFile ) );
+			pcSettings->SetString( "Name", m_pcTextUserName->GetValue().AsString() );
+			pcSettings->SetString( "Password", m_pcTextUserPassword->GetValue().AsString() );
+			pcSettings->SetString( "RealName", m_pcTextUserRealName->GetValue().AsString() );
+			pcSettings->SetString( "ServerName", m_pcTextServerName->GetValue().AsString() );
+			pcSettings->SetString( "ServerPort", m_pcTextServerPort->GetValue().AsString() );
+			pcSettings->SetString( "ServerChannel", m_pcTextBookmarkName->GetValue().AsString() );
+			pcSettings->Save();
+			delete( pcSettings );
+
+			/* Make sure there's only one bookmark with the same name, on the list */
+			bool bSameName = false;
+
+			for( uint i = 0; i < m_pcBookmarkList->GetRowCount(); ++i )
+			{
+				os::ListViewStringRow *pcRow = static_cast < os::ListViewStringRow * >( m_pcBookmarkList->GetRow( i ) );
+				if( cBookmarkName == pcRow->GetString( 0 ) )
+					bSameName = true;
+			}
+
+			if( bSameName == false )
+			{
+				os::ListViewStringRow *row = new os::ListViewStringRow();
+				row->AppendString( cBookmarkName );
+				m_pcBookmarkList->InsertRow( row );
+			}
+		}
+		catch( std::exception &e )
+		{
+			std::cerr << zPath.str() << ": " << e.what() << std::endl;
+		}
+	}
+}
+
+void MainWindow::RemoveBookmarkFromList()
+{
+	int nSelected = m_pcBookmarkList->GetLastSelected();
+	os::ListViewStringRow *pcRow = static_cast < os::ListViewStringRow * >( m_pcBookmarkList->GetRow( nSelected ) );
+	if( pcRow )
+	{
+		os::String cBookmarkPath;
+		if( m_pcDirectory->GetPath( &cBookmarkPath ) == -1 )
+			return;
+		os::String cBookmarkName = pcRow->GetString( 0 );
+
+		if( m_pcBookmarkList->GetRowCount() > 0 && nSelected != -1 )
+		{
+			m_pcBookmarkList->RemoveRow( nSelected );
+
+			os::FileReference cRef( cBookmarkPath + "/" + cBookmarkName );
+			cRef.Delete();
+
+			m_pcTextUserName->Clear();
+			m_pcTextUserPassword->Clear();
+			m_pcTextUserRealName->Clear();
+			m_pcTextServerName->Clear();
+			m_pcTextServerPort->Clear();
+			m_pcTextServerChannel->Clear();
+			m_pcTextBookmarkName->Clear();
+		}
+	}
+}
+
+void MainWindow::SelectBookmarkFromList()
+{
+	int nSelected = m_pcBookmarkList->GetLastSelected();
+	if( nSelected == -1 )
 		return;
-	}
 
-	/* Clear listview */
-	m_pcBookmarkList->Clear();
-
-	/* Create a directory entry object */
-	dirent *psEntry;
-
-	/* Loop through directory and add each keymap to list */
-	int i = 0;
-	while( ( psEntry = readdir( pDir ) ) != NULL )
+	os::ListViewStringRow *pcRow = static_cast < os::ListViewStringRow * >( m_pcBookmarkList->GetRow( nSelected ) );
+	if( pcRow )
 	{
-		/* If special directory (i.e. dot(.) and dotdot(..) then ignore */
-		if( strcmp( psEntry->d_name, "." ) == 0 || strcmp( psEntry->d_name, ".." ) == 0 )
+		os::String cBookmarkName = pcRow->GetString( 0 );
+
+		if( !cBookmarkName.empty() )
 		{
-			continue;
-		}
+			os::String cBookmarkPath;
+			if( m_pcDirectory->GetPath( &cBookmarkPath ) == -1 )
+				return;
+			os::String zPath( cBookmarkPath + "/" + cBookmarkName );
 
-		/* Its valid, add to the listview */
-		os::ListViewStringRow * pcRow = new os::ListViewStringRow();
-		pcRow->AppendString( psEntry->d_name );
-		m_pcBookmarkList->InsertRow( pcRow );
-
-		++i;
-	}
-	closedir( pDir );
-}
-
-bool MainWindow::PingPong( const os::String &cName ) const
-{
-	if ( cName.substr( 0, 1 ) != ":" )
-	{
-		if( cName.substr( 0, 4 ).Compare( "PING" ) == EOK );
-		{
-			m_CommThread->Send( os::String().Format( "PONG%s", cName.substr( 4 ).c_str() ) );
-			return ( true );
+			try
+			{
+				/* Load settings */
+				os::Settings* pcSettings = new os::Settings( new os::File( zPath ) );
+				if( pcSettings->Load() == EOK )
+				{
+					m_pcTextUserName->Set( pcSettings->GetString( "Name" ).c_str() );
+					m_pcTextUserPassword->Set( pcSettings->GetString( "Password" ).c_str() );
+					m_pcTextUserRealName->Set( pcSettings->GetString( "RealName" ).c_str() );
+					m_pcTextServerName->Set( pcSettings->GetString( "ServerName" ).c_str() );
+					m_pcTextServerPort->Set( pcSettings->GetString( "ServerPort" ).c_str() );
+					m_pcTextServerChannel->Set( pcSettings->GetString( "ServerChannel" ).c_str() );
+					m_pcTextBookmarkName->Set( cBookmarkName.c_str() );
+				}
+				delete( pcSettings );
+			}
+			catch( ... )
+			{
+			}
 		}
 	}
-
-	return ( false );
 }
 
-/* add new text to the end of the text view buffer */
-void MainWindow::AddStringToTextView( const os::String &cName ) const
+void MainWindow::AddStringToTextView( const char* pzName ) const
 {
+	os::String cName;
+	os::DateTime pcTime = os::DateTime::Now();
+
+	if( pcTime.GetHour() < 10 && pcTime.GetMin() > 9 )
+		cName.Format( "[0%d:%d] %s", pcTime.GetHour(), pcTime.GetMin(), pzName );
+	else if( pcTime.GetHour() > 9 && pcTime.GetMin() < 10 )
+		cName.Format( "[%d:0%d] %s", pcTime.GetHour(), pcTime.GetMin(), pzName );
+	else if( pcTime.GetHour() < 10 && pcTime.GetMin() < 10 )
+		cName.Format( "[0%d:0%d] %s", pcTime.GetHour(), pcTime.GetMin(), pzName );
+	else
+		cName.Format( "[%d:%d] %s", pcTime.GetHour(), pcTime.GetMin(), pzName );
+
+	/* add new text to the end of the text view buffer */
 	const os::TextView::buffer_type cBuffer = m_pcTextView->GetBuffer();
 	const int posX = cBuffer[cBuffer.size()-1].size();
 	const int posY = cBuffer.size()-1;
 	const os::IPoint cPoint = os::IPoint( posX, posY );
 	m_pcTextView->Insert( cPoint, cName.c_str() );
+}
+
+void MainWindow::AboutRequested()
+{
+	os::String cText = "bsIRC 0.12\n";
+	cText += "Syllable Internet Relay Chat Client\n\n";
+	cText += "bsIRC: Copyright © 2006 Flemming H. Sørensen (BurningShadow)\n";
+	cText += "libnet: Copyright © 2004 Kristian van der Vliet (vanders)\n";
+	cText += "commits: Copyright © 2021 David Kent\n\n";
+	cText += "bsIRC is released under the GNU General Public License.\n";
+	cText += "Please see the file COPYING, distributed with bsIRC,\n";
+	cText += "or http://www.gnu.org for more information.";
+
+	os::Alert *sAbout = new os::Alert( "About bsIRC...", cText, os::Alert::ALERT_INFO, 0x00, "Close", NULL );
+	sAbout->CenterInWindow( this );
+	sAbout->Go( new os::Invoker() );
 }
 
 bool MainWindow::OkToQuit()

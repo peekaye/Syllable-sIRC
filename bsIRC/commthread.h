@@ -33,7 +33,8 @@ public:
 	const uint32 GetState();
 
 private:
-	void SendMessage( const os::String& cName ) const;
+	bool PingPong( os::String cName );
+	void SendMessage( const os::String& cName );
 
 	os::Messenger m_cTarget;
 	state_t m_eState;

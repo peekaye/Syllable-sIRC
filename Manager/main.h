@@ -9,7 +9,7 @@
 #include <gui/button.h>
 #include <gui/textview.h>
 #include <gui/stringview.h>
-#include <gui/directoryview.h>
+#include "directoryview.h"
 #include <gui/requesters.h>
 #include <util/application.h>
 #include <util/message.h>

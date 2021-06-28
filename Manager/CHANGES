@@ -1,3 +1,49 @@
+Makefile:
+	- error:  make: *** No rule to make target `clean'.  Stop
+	- bugfix: rm -f main.o folderWindow.o filesView.o mimeTable.o
+
+	- error:  /usr/indexes/bin/ld: cannot find -latheos
+	- bugfix: -lsyllable
+
+main.cpp:
+	- error:  '::main' must return 'int'
+	- bugfix: int main()
+
+mimeTable.cpp:
+	- warning: file includes at least one deprecated or antiquated header
+	- bugfix:  #include <fstream>
+
+folderWindow.cpp:
+	- error:  undefined reference to `os::DirectoryView::SetPath(os::String const&)'
+	- error:  undefined reference to `os::DirectoryView::ReRead()'
+	- error:  undefined reference to `os::DirectoryView::GetPath() const'
+	- error:  undefined reference to `os::DirectoryView::DirectoryView(os::Rect const&, os::String const&, unsigned int, uns
+	- error:  undefined reference to `os::DirectoryView::SetDirChangeMsg(os::Message*)'
+	- error:  undefined reference to `os::DirectoryView::DirectoryView(os::Rect const&, os::String const&, unsigned int, uns
+	- error:  undefined reference to `os::DirectoryView::SetDirChangeMsg(os::Message*)'
+	- bugfix: DO NOT USE <gui/directoryview.h> header, libsyllable directoryview class has compile errors
+
+directoryview.cpp:
+	- error:   cannot allocate an object of abstract type 'os::FileRow'
+	- note:    virtual float os::ListViewRow::GetWidth(os::View*, int) const
+	- error:   cannot allocate an object of abstract type 'os::FileRow'
+	- note:    virtual float os::ListViewRow::GetHeight(os::View*) const
+	- bugfix:  directoryview class has been neglected and bugs have creeped in
+	- bugfix:  ignore <gui/directoryview.h>, and use local directoryview.cpp/directoryview.h files
+	- bugfix:  edit source files to #include "directoryview.h"
+	- bugfix:  add directoryview.o to Makefile
+	- bugfix:  remove const from GetWidth(...) and GetHeight(...)
+
+	- warning: file includes at least one deprecated or antiquated header
+	- bugfix:  #include <sstream>
+
+	- error: 'strstream' is not a member of 'std'
+	- bugfix: stringstream
+
+	- error: 'struct std::stringstream' has no member named 'pcount'
+	- bugfix: cMsg.str().length()
+
 First Release: (Feb 11  2002)
 	http://arbogad.free.fr/atheos/manager-0.0.1.src.tgz
 	http://arbogad.free.fr/atheos/manager-0.0.1.bin.tgz
+

@@ -1,7 +1,7 @@
 class folderWindow : public Window
 {
  public:
- 	folderWindow(const Rect &r, char *path, appConfig *inputConfig); /* constructor */
+ 	folderWindow(char *path, appConfig *inputConfig);
  	void FrameSized(Point &cDelta);
  	bool OkToQuit();
  	virtual void HandleMessage(Message *pcMessage);

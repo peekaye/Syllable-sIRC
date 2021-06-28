@@ -1,0 +1,33 @@
+README for Chat in Syllable
+Richard Brazeau 2003
+
+If you are wondering how to get Chat under Syllable going these are steps to help in the general direction.  In order to get chat to work you first need to either have a jabber account or create a jabber account.  Here are the steps to create a jabber account if you do not have one.
+
+1.	Go to http://www.jabber.org
+2.	click "Download a client"
+3.	click on the OS you are currently running (I am using Windows 98 SE)
+4.	click on the client of your choice (I chose TipicIM)
+5.	If it is the one you would like to use (or try) click Download at the top
+6.	Then click Download in the middle of the page if you need to
+7.	(Since I am using Windows i chose to run from current location) Save or open whichever you 	choose.
+8.	(If you downloaded the file double click it to run)Choose where it goes and all that stuff
+9.	When you run it for the first time it should ask for a:
+	Server
+	Username
+	and password
+10.	at the bottom their may be a checkbox labeled "create new account" (you want to check it if its 	their)
+11.	It *Should* connect and may present you with a welcome message (depending on the server) and 	you can now add 	contacts, and configure transports
+
+OK. Now if all goes well you should be connected to a jabber server.  After you have succesfully connected to your jabber server make sure to either note or write down all the settings you had to input.  These will come in very handy when you are configuring Chat.  Now in case you are wondering what to write down you should write down the Server, Port, User, Password, and Resource (just in case you have to change it).  Assuming you have Syllable Installed and have Chat either installed or on a partition that Syllable can read and access you now want to boot into Syllable.  When you are in Syllable and have Chat installed and open these are the steps you want to take.
+
+1.	Click Menu
+2.	Click Options
+3.	Put your server in the server textbox
+	Put your port in the port textbox
+	Put your username in the User textbox
+	Put your password in the password textbox
+	(if needed) put the resource in the resource textbox
+4.	When you are done click OK
+5.	Click Connect
+
+If everything goes well Chat *should* connect (providing Syllable can go on the Internet) and load all the transports you activated and contacts that are online.

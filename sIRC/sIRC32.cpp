@@ -18,9 +18,10 @@
 #include "sIRC.h"
 #include "commthread.h"
 #include "messages.h"
+#include "chathelp.h"
 
 //User Variables
-const os::String HOST = "chat.freenode.net";
+const os::String HOST = "irc.libera.chat";
 const os::String PORT = "6667";
 const os::String CHAN = "#syllable";
 const os::String NICK = "sIRC_";
@@ -35,29 +36,29 @@ MainView::MainView( const os::Rect &r ):os::View( r, "MainView", os::CF_FOLLOW_A
 {
 	//create the vertical root structure
 	os::LayoutNode *pcRootNode = new os::VLayoutNode( "Root" );
-	os::LayoutView *pcView = new os::LayoutView( r, "Layout" );
+	os::LayoutView *pcView = new os::LayoutView( r, "Layout", pcRootNode );
 
 	//create main menu
 	mainMenuBar = new os::Menu( os::Rect( 0, 0, 0, 0 ), "mainMenuBar", os::ITEMS_IN_ROW );
 	mainMenuBar->SetFrame( os::Rect( 0, 0, GetBounds().Width() + 1, mainMenuBar->GetPreferredSize( false ).y + 1 ) );
 
-	// App menu
+	// Application menu
 	tempMenu = new os::Menu( os::Rect( 0, 0, 0, 0 ), "Application", os::ITEMS_IN_COLUMN );
 	tempMenu->AddItem( "Settings", new os::Message( M_MENU_SETTINGS ) );
 	tempMenu->AddItem( new os::MenuSeparator() );
 	tempMenu->AddItem( "About", new os::Message( os::M_ABOUT_REQUESTED ) );
 	tempMenu->AddItem( "Quit", new os::Message( os::M_QUIT_REQUESTED ) );
 	mainMenuBar->AddItem( tempMenu );
-	// File menu
+	// Server menu
 	tempMenu = new os::Menu( os::Rect( 0, 0, 0, 0 ), "Server", os::ITEMS_IN_COLUMN );
 	tempMenu->AddItem( "Connect", new os::Message( M_MENU_START ) );
 	tempMenu->AddItem( "Login", new os::Message( M_MENU_LOGIN ) );
 	tempMenu->AddItem( "Disconnect", new os::Message( M_MENU_STOP ) );
 	mainMenuBar->AddItem( tempMenu );
-	// Help menu
+	// Channel menu
 	tempMenu = new os::Menu( os::Rect( 0, 0, 0, 0 ), "Channel", os::ITEMS_IN_COLUMN );
-	tempMenu->AddItem( "Join Channel", new os::Message( M_MENU_JOINCHANNEL ) );
-	tempMenu->AddItem( "Leave Channel", new os::Message( M_MENU_LEAVECHANNEL ) );
+	tempMenu->AddItem( m_pcJoinMenuItem = new os::MenuItem( "Join Channel", new os::Message( M_MENU_JOINCHANNEL ) ) );
+	tempMenu->AddItem( m_pcLeaveMenuItem = new os::MenuItem( "Leave Channel", new os::Message( M_MENU_LEAVECHANNEL ) ) );
 	mainMenuBar->AddItem( tempMenu );
 	pcRootNode->AddChild( mainMenuBar );
 
@@ -68,7 +69,7 @@ MainView::MainView( const os::Rect &r ):os::View( r, "MainView", os::CF_FOLLOW_A
 	pcRootNode->AddChild( m_Text );
 	
 	//create input box
-	os::LayoutNode *pcButtonNode = new os::HLayoutNode( "Buttons", 0 );
+	os::LayoutNode *pcButtonNode = new os::HLayoutNode( "button_node", 0 );
 	pcButtonNode->SetBorders( os::Rect( 5, 5, 5, 5 ) );
 	m_Input = new os::TextView( os::Rect( 0, 0, 0, 0 ), "input_view", "Input", os::CF_FOLLOW_ALL );
 	pcButtonNode->AddChild( m_Input );
@@ -83,14 +84,21 @@ MainView::MainView( const os::Rect &r ):os::View( r, "MainView", os::CF_FOLLOW_A
 	AddChild( pcView );
 }
 
+void MainView::AllAttached()
+{
+	mainMenuBar->SetTargetForItems( this );
+	m_pcJoinMenuItem->SetEnable( true );
+	m_pcLeaveMenuItem->SetEnable( false );
+	m_pcSend->SetTarget( this );
+	bInChannel = false;
+
+	os::View::AllAttached();
+}
+
 void MainView::AttachedToWindow()
 {
 	//ensure messages are sent to the view and not the window
 	os::View::AttachedToWindow();
-
-	mainMenuBar->SetTargetForItems( this );
-	m_pcSend->SetTarget( this );
-	bInChannel = false;
 
 	/* create a protected commthread instance */
 	CommThread *m_pCommThread;
@@ -116,27 +124,38 @@ void MainView::HandleMessage( os::Message *pcMessage )
 	switch ( pcMessage->GetCode() )
 	{
 		case M_MENU_START:
-		{	
-			m_Text->Clear();
-			os::Message cMsg( MSG_TOLOOPER_START );
-			cMsg.AddString( "host", HOST );
-			cMsg.AddString( "port", PORT );
-			cMsg.AddString( "channel", CHAN );
-			cMsg.AddString( "nick", NICK );
-			cMsg.AddString( "user", USER );
-			cMsg.AddString( "password", PASS );
-			cMsg.AddString( "realname", NAME );
-			m_CommThread->PostMessage( &cMsg );
+		{
+			if( !m_CommThread->IsConnected() )
+			{
+				os::Message cMsg( MSG_TOLOOPER_START );
+				cMsg.AddString( "host", HOST );
+				cMsg.AddString( "port", PORT );
+				cMsg.AddString( "channel", CHAN );
+				cMsg.AddString( "nick", NICK );
+				cMsg.AddString( "user", USER );
+				cMsg.AddString( "password", PASS );
+				cMsg.AddString( "realname", NAME );
+				m_CommThread->PostMessage( &cMsg );
+				m_Text->Clear();
+			}
 			break;
 		}
 		case M_MENU_STOP:
 		{
-			m_CommThread->PostMessage( MSG_TOLOOPER_STOP, m_CommThread );
+			if( m_CommThread->IsConnected() )
+			{
+				m_CommThread->Send( os::String().Format( "QUIT %s\r\n", ":-)" ) );
+				sleep( 3 ); // wait for server exit message
+				m_CommThread->PostMessage( MSG_TOLOOPER_STOP, m_CommThread );
+			}
 			break;
 		}
 		case MSG_TOLOOPER_NEW_MESSAGE:
 		{
-			SendMsg( m_Input->GetBuffer()[0].const_str() );
+			if( bInChannel )
+				m_CommThread->Send( os::String().Format( "PRIVMSG %s :%s\r\n", CHAN.c_str(), m_Input->GetBuffer()[0].c_str() ) );
+			else
+				m_CommThread->Send( os::String().Format( "%s\r\n", m_Input->GetBuffer()[0].c_str() ) );
 			m_Input->Clear();
 			break;
 		}
@@ -157,24 +176,34 @@ void MainView::HandleMessage( os::Message *pcMessage )
 		}
 		case M_MENU_LOGIN:
 		{
-			Login();
+			m_CommThread->Send( os::String().Format( "PRIVMSG NickServ :IDENTIFY %s\r\n", PASS.c_str() ) );
 			break;
 		}
 		case M_MENU_JOINCHANNEL:
 		{
-			if( bInChannel == false )
+			if( m_CommThread->IsConnected() )
 			{
-				Join();
-				bInChannel = true;
+				if( !bInChannel )
+				{
+					m_CommThread->Send( os::String().Format( "JOIN %s\r\n", CHAN.c_str() ) );
+					m_pcJoinMenuItem->SetEnable( false );
+					m_pcLeaveMenuItem->SetEnable( true );
+					bInChannel = true;
+				}
 			}
 			break;
 		}
 		case M_MENU_LEAVECHANNEL:
 		{
-			if( bInChannel == true )
+			if( m_CommThread->IsConnected() )
 			{
-				bInChannel = false;
-				Leave();
+				if( bInChannel )
+				{
+					bInChannel = false;
+					m_pcJoinMenuItem->SetEnable( true );
+					m_pcLeaveMenuItem->SetEnable( false );
+					m_CommThread->Send( os::String().Format( "PART %s\r\n", CHAN.c_str() ) );
+				}
 			}
 			break;
 		}
@@ -197,63 +226,18 @@ void MainView::Update( const os::String cBufString )
 {
 	os::String cTempString( cBufString );
 
-	if( bInChannel == true )
+	if( bInChannel )
 	{
 		const os::String find1 = "!";
 		const std::string::size_type pos1 = cBufString.find( find1, 0 );
 		const os::String find2 = "#";
 		const std::string::size_type pos2 = cBufString.find( find2, 0 );
+
+		// cut between pos1 '!' and pos2 '#'
 		if( pos1 != std::string::npos && pos2 != std::string::npos )
 			cTempString = cTempString.erase( pos1, pos2 - pos1 - 1 );
 	}
 
-	AddStringToTextView( cTempString );
-	m_CommThread->SendReceiveLoop();
-}
-
-void MainView::Login( void ) const
-{
-	os::String cTempString = "PRIVMSG NickServ :IDENTIFY ";
-	cTempString += PASS;
-	cTempString += "\r\n";
-	m_CommThread->Send( cTempString );
-}
-
-void MainView::Join( void ) const
-{
-	os::String cTempString = "JOIN ";
-	cTempString += CHAN;
-	cTempString += "\r\n";
-	m_CommThread->Send( cTempString );
-}
-
-void MainView::Leave( void ) const
-{
-	os::String cTempString = "PART ";
-	cTempString += CHAN;
-	cTempString += "\r\n";
-	m_CommThread->Send( cTempString );
-}
-
-void MainView::SendMsg( const os::String cTextFromInput )
-{
-	os::String cTempString;
-
-	if( bInChannel == true )
-	{
-		cTempString = "PRIVMSG ";
-		cTempString += CHAN;
-		cTempString += " :";
-		cTempString += cTextFromInput;
-		cTempString += "\r\n";
-	}
-	else
-	{
-		cTempString = cTextFromInput;
-		cTempString += "\r\n";
-	}
-
-	m_CommThread->Send( cTempString );
 	AddStringToTextView( cTempString );
 }
 
@@ -307,19 +291,25 @@ void MainWindow::HandleMessage( os::Message *pcMessage )
 void MainWindow::ShowAbout( void )
 {
 	os::Alert *sAbout = new os::Alert( "About sIRC...",
-		"sIRC 0.13\n"
+		"sIRC 0.23\n"
 		"Syllable Internet Relay Chat Client\n\n"
-		"sIRC 0.03 by James Coxon 2006 jac208@cam.ac.uk\n"
-		"sIRC 0.13 by David Kent 2021\n\n"
-		"Basically sIRC can connect to a single channel \n"
-		"(which has to be changed in the source) \n"
-		"and can send and receive messages.  \n\n"
+		"sIRC 0.03 Copyright © James Coxon 2006 jac208@cam.ac.uk\n"
+		"sIRC 0.23 Copyright © David Kent 2021\n\n"
 		"sIRC is released under the GNU General Public License.\n"
 		"Please see the file COPYING, distributed with sIRC,\n"
 		"or http://www.gnu.org for more information.",
-		os::Alert::ALERT_INFO, 0x00, "Close", NULL );
+		os::Alert::ALERT_INFO, 0x00, "Help", "Close", NULL );
 	sAbout->CenterInWindow( this );
-	sAbout->Go( new os::Invoker() );
+
+	int32 reply = sAbout->Go();
+	switch ( reply )
+	{
+		// the first button 'Help'
+		case 0x00: ( new os::Alert( "Help", ChatHelp(), os::Alert::ALERT_TIP, 0x00, "Right", NULL ) )->Go(); break;
+
+		// the second button 'Close'
+		case 0x01: break;
+	}
 }
 
 bool MainWindow::OkToQuit( void )
@@ -355,4 +345,3 @@ int main( void )
 
 	return ( 0 );
 }
-

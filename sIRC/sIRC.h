@@ -53,19 +53,17 @@ class MainView:public os::View
 {
 public:
 	MainView( const os::Rect &r );
+	virtual void AllAttached();
 	virtual void AttachedToWindow();
 	virtual void FrameSized( const os::Point& cDelta );
 	virtual void HandleMessage( os::Message *pcMessage );
 
 private:
 	void Update( const os::String cBufString );
-	void Login( void ) const;
-	void Join( void ) const;
-	void Leave( void ) const;
-	void SendMsg( const os::String cTextFromInput );
 	void AddStringToTextView( const os::String &cName ) const;
 
-	os::Menu *mainMenuBar, *tempMenu;
+	os::Menu *mainMenuBar, *tempMenu;//os::Menu *m_pcMenuBar;
+	os::MenuItem *m_pcJoinMenuItem, *m_pcLeaveMenuItem;
 	os::TextView *m_Text, *m_Input;
 	os::Button *m_pcSend;
 
@@ -101,4 +99,3 @@ private:
 };
 
 #endif
-

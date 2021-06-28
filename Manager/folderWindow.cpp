@@ -64,7 +64,7 @@ void ltostr(long long source, char *dest)
 
 
 
-folderWindow::folderWindow(const Rect &r, char *path, appConfig *inputConfig) : Window(r,"folderWindow",path,0,CURRENT_DESKTOP)
+folderWindow::folderWindow(char *path, appConfig *inputConfig) : Window(Rect(20,100,500,400),"folderWindow",path,0,CURRENT_DESKTOP)
 {
 	Rect menuRect = GetBounds();
 	Rect r;
@@ -176,7 +176,7 @@ void folderWindow::HandleMessage(Message *pcMessage)
 	{
 	case ID_MENU_FILE_EXIT:
 	{
-		exit(0);
+		OkToQuit();
 	}
 	
 	break;

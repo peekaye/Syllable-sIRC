@@ -20,15 +20,16 @@
 
 //----------------------------------------------------------------------------------
 
-CommThread::CommThread( const os::Messenger &cTarget ):os::Looper( "comm_worker" )
+CommThread::CommThread( const os::Messenger &cTarget ):os::Looper( "CommThread" )
 {
 	m_cTarget = cTarget;
 	m_eState = S_STOP;
+	sockfd = -1;
 }
 
 bool CommThread::OkToQuit()
 {
-	return true;
+	return ( true );
 }
 
 void CommThread::HandleMessage( os::Message *pcMessage )
@@ -37,21 +38,27 @@ void CommThread::HandleMessage( os::Message *pcMessage )
 	{
 		case MSG_TOLOOPER_START:
 		{
-			if( pcMessage->FindString( "host", &m_cHost ) != EOK ) break;
-			if( pcMessage->FindString( "port", &m_cPort ) != EOK ) break;
-			if( pcMessage->FindString( "channel", &m_cChannel ) != EOK ) break;
-			if( pcMessage->FindString( "nick", &m_cNick ) != EOK ) break;
-			if( pcMessage->FindString( "user", &m_cUser ) != EOK ) break;
-			if( pcMessage->FindString( "password", &m_cPassword ) != EOK ) break;
-			if( pcMessage->FindString( "realname", &m_cRealname ) != EOK ) break;
+			os::String cHost, cPort, cChannel, cNick, cUser, cPassword, cRealname;
 
-			if( m_eState == S_STOP )
+			if( pcMessage->FindString( "host", &cHost ) != EOK ) break;
+			if( pcMessage->FindString( "port", &cPort ) != EOK ) break;
+			if( pcMessage->FindString( "channel", &cChannel ) != EOK ) break;
+			if( pcMessage->FindString( "nick", &cNick ) != EOK ) break;
+			if( pcMessage->FindString( "user", &cUser ) != EOK ) break;
+			if( pcMessage->FindString( "password", &cPassword ) != EOK ) break;
+			if( pcMessage->FindString( "realname", &cRealname ) != EOK ) break;
+
+			if( Connect( cHost.c_str(), atoi( cPort.c_str() ) ) == EOK )
 			{
-				if( Connect() == EOK )
-				{
-					m_eState = S_START;
-					SendReceiveLoop();
-				}
+				// authenticate to the server
+				os::String cTempString = os::String().Format( "NICK %s\r\n", cNick.c_str() );
+				Send( cTempString.c_str(), cTempString.Length() );
+				cTempString.Format( "USER %s 0 * :%s\r\n", cUser.c_str(), cRealname.c_str() );
+				Send( cTempString.c_str(), cTempString.Length() );
+
+				// start Receive() looper
+				m_eState = S_START;
+				SendReceiveLoop();
 			}
 			break;
 		}
@@ -59,8 +66,6 @@ void CommThread::HandleMessage( os::Message *pcMessage )
 		{
 			if( m_eState == S_START )
 			{
-				Send( "QUIT\r\n" );
-				sleep( 3 ); // wait for server exit message
 				Disconnect();
 				m_eState = S_STOP;
 			}
@@ -68,7 +73,7 @@ void CommThread::HandleMessage( os::Message *pcMessage )
 		}
 		case MSG_TOLOOPER_RECEIVE:
 		{
-			Receive();
+			SendReceiveLoop();
 			break;
 		}
 		default:
@@ -81,19 +86,48 @@ void CommThread::HandleMessage( os::Message *pcMessage )
 
 void CommThread::SendReceiveLoop( void )
 {
-	os::Message *msg = new os::Message( MSG_TOLOOPER_RECEIVE );
-	PostMessage( msg );
+	if( !SendReceiveLoop( m_eState ) )
+		sleep( 1 );
+	PostMessage( MSG_TOLOOPER_RECEIVE, this );
 }
 
-void CommThread::Send( const os::String cSendMessage )
+// return true if Receive::select() is ready for reading and
+// Receive::recv() has bytes actually read into the buffer
+bool CommThread::SendReceiveLoop( state_t eState )
 {
-	if( m_eState == S_STOP ) // must be connected
+	m_eState = eState;
+	static char buf[MAXDATASIZE];
+
+	switch ( m_eState )
+	{
+		case S_START:
+		{
+			if( Receive( buf, MAXDATASIZE ) > 0 )
+			{
+				PingPong( buf );
+				SendMessage( buf );
+				return ( true );
+			}
+			else
+				return ( false );
+		}
+		case S_STOP:
+			return ( false );
+	}
+
+	return ( false );
+}
+
+// skip Send::send() if not connected
+void CommThread::Send( const os::String cSend )
+{
+	if( m_eState == S_STOP )
 		return;
 
-	Send( cSendMessage.c_str(), cSendMessage.Length() );
+	Send( cSend.c_str(), cSend.Length() );
 }
 
-void CommThread::Send( const char* msg, const unsigned int len )
+void CommThread::Send( const char* cData, const unsigned int nLen )
 {
 	fd_set writefds;
 	struct timeval tv;
@@ -117,18 +151,17 @@ void CommThread::Send( const char* msg, const unsigned int len )
 	{
 		if( FD_ISSET( sockfd, &writefds ) )
 		{
-			if( send( sockfd, msg, len, MSG_DONTWAIT ) == -1 )
+			if( send( sockfd, cData, nLen, MSG_DONTWAIT ) == -1 )
 				perror( "send" );
 		}
 	}
 }
 
-void CommThread::Receive()
+int CommThread::Receive( char *cBuf, const unsigned int nLen )
 {
 	fd_set readfds;
 	struct timeval tv;
-	int numbytes;
-	char buf[MAXDATASIZE];
+	int nBytes = -1;
 
 	FD_ZERO( &readfds );
 	FD_SET( sockfd, &readfds );
@@ -140,36 +173,45 @@ void CommThread::Receive()
 	if( rv == -1 )
 	{
 		perror( "(Read) select" );
+		m_eState = S_STOP;
 	}
 	else if( rv == 0 )
 	{
 		printf( "(Read) Timeout occured! No data after 2.5 seconds. \n" );
-		SendReceiveLoop();
 	}
 	else
 	{
 		if( FD_ISSET( sockfd, &readfds ) )
 		{
-			bzero( buf, MAXDATASIZE );
-			if( ( numbytes = recv( sockfd, buf, MAXDATASIZE, 0 ) ) < 1 )
+			bzero( cBuf, nLen );
+			switch ( (nBytes = recv( sockfd, cBuf, nLen, 0 )) )
 			{
-				if( numbytes == -1 )
+				case -1:
 					perror( "recv" );
-				return;
+					// fall thru to next case label
+				case  0:
+					m_eState = S_STOP;
+					break;
+				default:
+					cBuf[nBytes] = '\0';
+					return ( nBytes );
 			}
-			buf[numbytes] = '\0';
-			PingPong( buf );
-			SendMessage( buf );
 		}
 	}
+
+	return ( 0 );
 }
 
-int CommThread::Connect( void )
+// skip connect() if already connected
+int CommThread::Connect( const char* cHost, const unsigned int nPort )
 {
+	if( m_eState == S_START )
+		return ( 1 );
+
 	struct hostent *he;
 	struct sockaddr_in their_addr;	// connector's address information 
 
-	if( ( he = gethostbyname( m_cHost ) ) == NULL )	// get the host info 
+	if( ( he = gethostbyname( cHost ) ) == NULL )	// get the host info 
 	{
 		herror( "gethostbyname" );
 		return ( 1 );
@@ -182,7 +224,7 @@ int CommThread::Connect( void )
 	}
 
 	their_addr.sin_family = AF_INET;	// host byte order 
-	their_addr.sin_port = htons( atoi( m_cPort ) );	// short, network byte order 
+	their_addr.sin_port = htons( nPort );	// short, network byte order 
 	their_addr.sin_addr = *( ( struct in_addr * )he->h_addr );
 	memset( &( their_addr.sin_zero ), '\0', 8 );	// zero the rest of the struct 
 
@@ -192,56 +234,52 @@ int CommThread::Connect( void )
 		return ( 1 );
 	}
 
-	//authenticate to the server
-	os::String cTempString = "NICK ";
-	cTempString += m_cNick;
-	cTempString += "\r\n";
-	Send( cTempString.c_str(), cTempString.Length() );
-
-	cTempString = "USER ";
-	cTempString += m_cUser;
-	cTempString += " 0 * :";
-	cTempString += m_cRealname;
-	cTempString += "\r\n";
-	Send( cTempString.c_str(), cTempString.Length() );
-
 	return ( 0 );
 }
 
+// block disconnect() if not connected
 void CommThread::Disconnect( void )
 {
-	if( m_eState == S_START ) // test for connected
+	if( m_eState == S_START )
 	{
 		m_eState = S_STOP;
 		close( sockfd );
 	}
 }
 
-void CommThread::PingPong( const os::String cBufString )
+// return true if ping command found
+bool CommThread::PingPong( const os::String cData )
 {
-	if( cBufString[0] != ':' )
+	std::string str( cData );
+
+	if( str.at( 0 ) != ':' )
 	{
-		const std::string::size_type pos = cBufString.find( "PING", 0 );
-		if( pos != std::string::npos )
+		if( str.find( "PING", 0 ) != std::string::npos )
 		{
 			std::cout << "Ping? Pong!" << std::endl;
-			os::String cTempString = "PONG :";
-			cTempString += m_cNick;
-			cTempString += "\r\n";
-			Send( cTempString );
+			Send( os::String().Format( "PONG%s", str.substr( 4 ).c_str() ) );
+			return ( true );
 		}
 	}
+
+	return ( false );
 }
 
+// send server data to the MainView textview
 void CommThread::SendMessage( const os::String& cName )
 {
 	try
 	{
 		os::Message cMsg( MSG_FROMLOOPER_NEW_MESSAGE );
 		cMsg.AddString( "name", cName );
-
 		m_cTarget.SendMessage( &cMsg );
 	}
 	catch( ... ) { }
+}
+
+// return true if connected to a server
+bool CommThread::IsConnected( void )
+{
+	return (m_eState == S_STOP) ? false:true;
 }
 

@@ -1,3 +1,15 @@
+Date: (June 25 2021) SendReceiveLoop()
+	- upgrade:  CommThread::PingPong() to std::string functions
+	- add:      MainView::AllAttached() initialize variables
+	- upgrade:  CommThread::SendReceiveLoop() to self contained Receive() loop
+	- add:      CommThread::Receive() int return for SendReceiveLoop()
+	- add:      CommThread::Receive() pass a pointer to recv() buf for SendReceiveLoop()
+	- add:      CommThread::Receive() switch case test recv() return state for SendReceiveLoop()
+	- add:      CommThread::Connect() int return
+	- add:      MainView::HandleMessage() enable/disable channel menu items
+	- remove:   MainView:: Login(), Join(), Leave(), SendMsg()
+	- add:      MainWindow::ShowAbout() Help button
+
 Date: (May 20 2021) CommThread
 	- add:      commthread.cpp/commthread.h
 	- bugfix:   CommThread::SendReceiveLoop(), call CommThread::ReceiveMessage(), drop call to CommThread::Send()

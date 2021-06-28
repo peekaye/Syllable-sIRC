@@ -19,7 +19,7 @@ class mimeTable
 	 bool loadFromFile(char *sourceFile);
 	  
 	 mimeType *getType(char *fileName);
-	 bool addType(char *name, char *filter, char *action);
+	 void addType(char *name, char *filter, char *action);
 	
 	private:
 	 mimeType *firstType;

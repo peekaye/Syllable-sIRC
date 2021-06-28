@@ -29,9 +29,9 @@ void TestView :: Init()
                              ListView::F_RENDER_BORDER, 
                              CF_FOLLOW_ALL ); 
   
-  myListView->InsertColumn( "First Name", GetBounds().Width() / 3 ); 
-  myListView->InsertColumn( "Last name", GetBounds().Width() / 3 ); 
-  myListView->InsertColumn( "Age", GetBounds().Width() / 3 ); 
+  myListView->InsertColumn( "First Name", static_cast<int>(GetBounds().Width() / 3) ); 
+  myListView->InsertColumn( "Last name", static_cast<int>(GetBounds().Width() / 3) ); 
+  myListView->InsertColumn( "Age", static_cast<int>(GetBounds().Width() / 3) ); 
 
   ListViewStringRow *row; 
   row = new ListViewStringRow(); 
@@ -104,5 +104,6 @@ int main( void )
   thisApp->Run();
   return( 0 );
 }
+
 
 

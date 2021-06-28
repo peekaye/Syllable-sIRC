@@ -47,32 +47,26 @@
 class CommThread:public os::Looper
 {
 public:
+	enum state_t { S_START, S_STOP };
+
+public:
 	CommThread( const os::Messenger &cTarget );
 	virtual void HandleMessage( os::Message *pcMessage );
 //	virtual bool Idle();
 	virtual bool OkToQuit();
 
 	void SendReceiveLoop( void );
-	void Send( const os::String cSendMessage );
-
-protected:
-	const char* m_cHost;
-	const char* m_cPort;
-	const char* m_cChannel;
-	const char* m_cNick;
-	const char* m_cUser;
-	const char* m_cPassword;
-	const char* m_cRealname;
+	void Send( const os::String cSend );
+	bool IsConnected( void );
 
 private:
-	void Send( const char* msg, const unsigned int len );
-	void Receive( void );
-	int Connect( void );
+	bool SendReceiveLoop( state_t eState );
+	void Send( const char* cData, const unsigned int nLen );
+	int Receive( char *cBuf, const unsigned int nLen );
+	int Connect( const char* cHost, const unsigned int nPort );
 	void Disconnect( void );
-	void PingPong( const os::String cBufString );
+	bool PingPong( const os::String cData );
 	void SendMessage( const os::String& cName );
-
-	enum state_t { S_START, S_STOP };
 
 	os::Messenger m_cTarget;
 	state_t m_eState;
